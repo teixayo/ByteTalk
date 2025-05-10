@@ -1,0 +1,81 @@
+# Gradle
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Gradle Wrapper
+gradle-app.setting
+gradlew
+gradlew.bat
+gradle/wrapper/gradle-wrapper.properties
+gradle/wrapper/gradle-wrapper.jar
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.swn
+*~
+
+# Android
+*.apk
+*.ap_
+*.dex
+*.class
+*.o
+*.so
+*.DS_Store
+
+# Keystore files (DO NOT commit these!)
+*.jks
+*.keystore
+
+# Signing configs
+signing.properties
+local.properties
+
+# Mac OS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Test reports
+/test-results/
+/reports/
+/coverage/
+
+# Docker
+*.pid
+*.env
+docker-compose.override.yml
+
+# Logs and temp data
+logs/
+*.log
+hs_err_pid*
+
+# Other
+node_modules/
