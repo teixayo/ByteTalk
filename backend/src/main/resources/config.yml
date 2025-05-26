@@ -1,0 +1,20 @@
+database:
+  redis:
+    toggle: false
+    address: ""
+    port: ""
+    user: ""
+    password: ""
+    ssl: true
+    prefix: ""
+  mongodb:
+    toggle: false
+    mongoUrl: ""
+  elastic:
+    toggle: false
+    address: ""
+    port: ""
+    user: ""
+    password: ""
+
+

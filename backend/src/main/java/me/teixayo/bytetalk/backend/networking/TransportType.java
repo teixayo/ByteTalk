@@ -45,12 +45,12 @@ public enum TransportType {
         this.name = this.name().toLowerCase();
     }
 
-    private static ThreadFactory createThreadFactory(final String name) {
-        return runnable -> new FastThreadLocalThread(runnable, "Netty " + name + " Worker");
+    private static ThreadFactory createThreadFactory() {
+        return runnable -> new FastThreadLocalThread(runnable, "Netty Worker");
     }
     public EventLoopGroup createEventLoopGroup() {
         return new MultiThreadIoEventLoopGroup(
-                0, createThreadFactory(getName()), this.ioHandlerFactorySupplier.get());
+                0, createThreadFactory(), this.ioHandlerFactorySupplier.get());
     }
 
     public static TransportType bestTransportType() {

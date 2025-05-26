@@ -9,6 +9,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
+import lombok.extern.slf4j.Slf4j;
+import me.teixayo.bytetalk.backend.Server;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacket;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacketType;
 import me.teixayo.bytetalk.backend.protocol.client.ClientStateType;
@@ -18,7 +20,8 @@ import me.teixayo.bytetalk.backend.user.UserConnection;
 import me.teixayo.bytetalk.backend.user.UserManager;
 import org.json.JSONObject;
 
-public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> {
+@Slf4j
+public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
     private static final String WEBSOCKET_PATH = "/websocket";
     private WebSocketServerHandshaker handshaker;
@@ -71,23 +74,25 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
         JSONObject jsonObject = new JSONObject(requestText);
         String type = jsonObject.getString("type");
 
-
-        if(ctx.channel().attr(ServerChannelInitializer.state).get()== ClientStateType.IN_LOGIN) {
+        if(ctx.channel().attr(ChannelInitializer.getState()).get()== ClientStateType.IN_LOGIN) {
             if(type.equals("Login")) {
                 String name = jsonObject.getString("name");
                 String token =  jsonObject.getString("token");
-                if(UserManager.getInstance().isUserExists(name)) {
+
+                User user = Server.getInstance().getUserService().getUserByUserName(name);
+
+                if(user==null) {
                     handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
                     return;
                 }
-                if(!token.equals(UserManager.getInstance().getToken(name))) {
-                    handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
-                    return;
-                }
+//                if(!user.getToken().equals(token)) {
+//                    handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
+//                    return;
+//                }
+                ctx.channel().attr(ChannelInitializer.getState()).set(ClientStateType.AFTER_LOGIN);
 
-                ctx.channel().attr(ServerChannelInitializer.state).set(ClientStateType.AFTER_LOGIN);
-
-                this.user = new User(name,token,new UserConnection(ctx));
+                user.setUserConnection(new UserConnection(ctx,user));
+                this.user = user;
                 UserManager.getInstance().addUser(user);
                 user.sendPacket(ServerPacketType.SuccessLogin.createPacket(
                         "description", "You successfully logged in"));
@@ -95,14 +100,15 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
             }
             if(type.equals("CreateUser")) {
                 String name = jsonObject.getString("name");
-                if (!UserManager.getInstance().isUserExists(name)) {
-                    String token = UserManager.getInstance().createToken(name);
+//                if (!Server.getInstance().getUserService().isUserExists(name)) {
+                    String token = Server.getInstance().getUserService().saveUser(name);
                     JSONObject output = new JSONObject();
                     output.put("type", "GetToken");
                     output.put("token", token);
+
                     ctx.channel().writeAndFlush(
                             new TextWebSocketFrame(output.toString()));
-                }
+//                }
             }
         } else {
             ClientPacketType packetType;

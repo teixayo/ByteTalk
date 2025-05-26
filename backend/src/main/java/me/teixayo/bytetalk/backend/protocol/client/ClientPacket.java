@@ -1,7 +1,9 @@
 package me.teixayo.bytetalk.backend.protocol.client;
 
+import lombok.Getter;
 import org.json.JSONObject;
 
+@Getter
 public class ClientPacket {
 
     private ClientPacketType packetType;

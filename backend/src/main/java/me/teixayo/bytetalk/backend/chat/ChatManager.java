@@ -1,15 +1,15 @@
 package me.teixayo.bytetalk.backend.chat;
 
+import lombok.Getter;
 import me.teixayo.bytetalk.backend.user.User;
 
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 
+@Getter
 public class ChatManager {
 
     private static ChatManager instance;
-
     public static ChatManager getInstance() {
         if(instance==null) {
             instance = new ChatManager();
@@ -17,24 +17,10 @@ public class ChatManager {
         return instance;
     }
 
+    public ChatManager() {
+    }
+
     public void sendMessage(User user, String message) {
-        Chat chat = new Chat(user,message, Date.from(Instant.now()));
-        saveMessage(chat);
-        publishMessage(chat);
-    }
-
-    public List<Chat> loadChats(int startIndex, int endIndex) {
-        return List.of();
-    }
-
-
-
-    private void saveMessage(Chat chat) {
-        //save it on mongodb
-    }
-
-    private void publishMessage(Chat chat) {
-        //Send to current node
-        //Send to other nodes using redis
+        Message chat = new Message(0,user.getId(),message, Date.from(Instant.now()));
     }
 }

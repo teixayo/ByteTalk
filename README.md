@@ -1,6 +1,6 @@
 # ByteTalk 🔌💬
 
-**ByteTalk** is a high-performance, cross-platform real-time chat system built using Java, designed for both scalability and reliability. It supports Android and Desktop clients, WebSocket-based communication, Redis message syncing, and database flexibility with MongoDB/PostgreSQL. The project is designed to handle high message throughput while maintaining efficient and secure communication.
+**ByteTalk** is a high-performance, cross-platform real-time message system built using Java, designed for both scalability and reliability. It supports Android and Desktop clients, WebSocket-based communication, Redis message syncing, and database flexibility with MongoDB/PostgreSQL. The project is designed to handle high message throughput while maintaining efficient and secure communication.
 
 ## ✨ Features
 

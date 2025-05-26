@@ -5,7 +5,8 @@ import org.json.JSONObject;
 public enum ServerPacketType {
     GetToken,
     SuccessLogin,
-    SendMessage;
+    BulkMessages;
+
 
     public ServerPacket createPacket(String... fields) {
         JSONObject jsonObject = new JSONObject();
@@ -17,4 +18,10 @@ public enum ServerPacketType {
         jsonObject.put("type",this);
         return new ServerPacket(this,jsonObject);
     }
+
+    public ServerPacket createPacket(JSONObject jsonObject) {
+        jsonObject.put("type",this);
+        return new ServerPacket(this,jsonObject);
+    }
+
 }

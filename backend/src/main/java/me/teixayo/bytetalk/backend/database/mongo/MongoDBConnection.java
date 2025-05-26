@@ -7,9 +7,11 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 import org.bson.Document;
 import org.bson.UuidRepresentation;
 
+@Log4j2
 public class MongoDBConnection {
 
 //    private static final String CONNECTION_STRING = String.format(
@@ -30,22 +32,35 @@ public class MongoDBConnection {
 
     private static MongoClient mongoClient;
 
-    private final MongoDatabase userDatabase;
+    private MongoDatabase userDatabase=null;
     @Getter
-    private final MongoCollection<Document> userCollection;
+    private MongoCollection<Document> userCollection=null;
+    private MongoDatabase messageDatabase=null;
+    @Getter
+    private MongoCollection<Document> messageCollection=null;
+    @Getter
+    private static boolean isConnected = false;
 
-    public MongoDBConnection()
-    {
+    public MongoDBConnection() {
 
-        instance=this;
+        instance = this;
         MongoClientSettings settings = MongoClientSettings.builder()
                 .uuidRepresentation(UuidRepresentation.STANDARD)
                 .applyConnectionString(new ConnectionString(CONNECTION_STRING))
                 .build();
+        try {
+            mongoClient = MongoClients.create(settings);
 
-        mongoClient = MongoClients.create(settings);
-        this.userDatabase = mongoClient.getDatabase("User");
-        this.userCollection = userDatabase.getCollection("User");
+            this.messageDatabase = mongoClient.getDatabase("Message");
+            this.messageCollection = userDatabase.getCollection("Message");
+
+            this.userDatabase = mongoClient.getDatabase("User");
+            this.userCollection = userDatabase.getCollection("User");
+            userDatabase.runCommand(new Document("ping", 1));
+            isConnected=true;
+        } catch (Exception exception) {
+            log.error("Failed to connect to MongoDB: ", exception);
+        }
     }
 
     public static void start()
@@ -56,11 +71,12 @@ public class MongoDBConnection {
         }
     }
 
-    public static void stopConnection()
+    public static void stop()
     {
         if(instance != null && mongoClient != null)
         {
             mongoClient.close();
+            isConnected=false;
         }
     }
 }

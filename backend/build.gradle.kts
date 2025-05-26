@@ -1,22 +1,20 @@
 plugins {
     id("java")
-    id("application")
 }
 
 group = "com.bytetalk"
 version = "1.0.0"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_21
 
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://repo.netty.io/snapshots/")
-    }
 }
 
 dependencies {
-//    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.26.Final:linux-x86_64")
+    implementation(project(":shared"))
+
+    implementation("org.yaml:snakeyaml:2.2")
     implementation("io.netty:netty-transport-native-epoll:4.2.1.Final")
     implementation("io.netty:netty-transport-native-epoll:4.2.1.Final:linux-x86_64")
     implementation("io.netty:netty-transport-native-epoll:4.2.1.Final:linux-aarch_64")
@@ -37,6 +35,7 @@ dependencies {
 
     implementation("org.mongodb:mongodb-driver-sync:4.11.0")
     implementation("co.elastic.clients:elasticsearch-java:8.17.0")
+
     implementation("org.json:json:20240303")
 
     implementation("org.slf4j:slf4j-api:2.0.9")

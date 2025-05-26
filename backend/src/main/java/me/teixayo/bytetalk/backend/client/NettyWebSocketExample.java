@@ -11,9 +11,11 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.netty.util.CharsetUtil;
+import me.teixayo.bytetalk.backend.protocol.client.ClientPacketType;
 import org.json.JSONObject;
 
 import java.net.URI;
+import java.util.Scanner;
 
 /**
  * Combined server and client example for Netty WebSocket
@@ -97,32 +99,44 @@ public class NettyWebSocketExample {
             EventLoopGroup group = new NioEventLoopGroup();
             try {
                 final WebSocketClientHandler handler = new WebSocketClientHandler(
-                    WebSocketClientHandshakerFactory.newHandshaker(
-                        uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()));
+                        WebSocketClientHandshakerFactory.newHandshaker(
+                                uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()));
 
                 Bootstrap b = new Bootstrap();
                 b.group(group)
-                 .channel(NioSocketChannel.class)
-                 .handler(new ChannelInitializer<SocketChannel>() {
-                     @Override
-                     protected void initChannel(SocketChannel ch) {
-                         ChannelPipeline p = ch.pipeline();
-                         p.addLast(new HttpClientCodec());
-                         p.addLast(new HttpObjectAggregator(8192));
-                         p.addLast(WebSocketClientCompressionHandler.INSTANCE);
-                         p.addLast(handler);
-                     }
-                 });
+                        .channel(NioSocketChannel.class)
+                        .handler(new ChannelInitializer<SocketChannel>() {
+                            @Override
+                            protected void initChannel(SocketChannel ch) {
+                                ChannelPipeline p = ch.pipeline();
+                                p.addLast(new HttpClientCodec());
+                                p.addLast(new HttpObjectAggregator(8192));
+                                p.addLast(WebSocketClientCompressionHandler.INSTANCE);
+                                p.addLast(handler);
+                            }
+                        });
 
                 Channel ch = b.connect(uri.getHost(), uri.getPort()).sync().channel();
                 handler.handshakeFuture().sync();
 
                 JSONObject jsonObject = new JSONObject();
 
-                jsonObject.put("type","CreateUser");
+                jsonObject.put("type", "CreateUser");
                 jsonObject.put("name", "test");
                 ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
 
+
+                Thread.sleep(1000);
+                Scanner scanner = new Scanner(System.in);
+
+                ch.writeAndFlush(new TextWebSocketFrame(
+                        ClientPacketType.RequestBulkMessage.createPacket(
+                        "time", String.valueOf(System.currentTimeMillis()))
+                                .getData().toString()));
+                while (scanner.hasNextLine()) {
+                    ch.writeAndFlush(new TextWebSocketFrame(ClientPacketType.SendMessage.createPacket(
+                            "content", scanner.nextLine()).getData().toString()));
+                }
                 // Wait to receive echo
                 ch.closeFuture().sync();
             } finally {
