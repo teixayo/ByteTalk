@@ -1,5 +1,6 @@
 package me.teixayo.bytetalk.backend.database.impl.user;
 
+import co.elastic.clients.util.Pair;
 import com.mongodb.client.MongoCollection;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import me.teixayo.bytetalk.backend.security.RandomGenerator;
@@ -20,7 +21,7 @@ public class MongoUserService implements UserService {
     }
 
     @Override
-    public String saveUser(String username) {
+    public Pair<String,Long> saveUser(String username) {
         String token = RandomGenerator.generateToken();
         long userId = RandomGenerator.generateId();
 
@@ -29,7 +30,7 @@ public class MongoUserService implements UserService {
                 .append("token", token);
 
         users.insertOne(doc);
-        return token;
+        return new Pair<>(token,userId);
     }
 
     @Override

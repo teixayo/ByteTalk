@@ -8,13 +8,21 @@ import me.teixayo.bytetalk.backend.database.impl.user.UserService;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
 import me.teixayo.bytetalk.backend.networking.NettyHandler;
+import me.teixayo.bytetalk.backend.user.User;
+import me.teixayo.bytetalk.backend.user.UserManager;
+import me.teixayo.jegl.loop.LoopApp;
+import me.teixayo.jegl.loop.LoopBuilder;
+import me.teixayo.jegl.loop.loops.Loop;
+import me.teixayo.jegl.loop.loops.LoopType;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.Map;
 
 @Slf4j
 @Getter
-public final class Server {
+public final class Server implements LoopApp {
 
     @Getter
     private static Server instance;
@@ -23,25 +31,27 @@ public final class Server {
     private SearchService searchService;
     private NettyHandler nettyHandler;
     private Config config;
-    private final Thread mainThread;
-
-    private boolean running = false;
-
+    private final Loop loop;
 
     public Server(){
-        mainThread = new Thread(this::start, "Server");
         instance=this;
+
+        loop = LoopBuilder.builder()
+                .loopType(LoopType.LOCK)
+                .updatePerSecond(10)
+                .loopApp(this)
+                .build();
     }
 
     public void start() {
-        running = true;
+
         log.info("Starting...");
 
         Yaml yaml = new Yaml();
         InputStream inputStream = Server.class.getClassLoader().getResourceAsStream("config.yml");
         config = yaml.loadAs(inputStream, Config.class);
 
-        nettyHandler = new NettyHandler("0.0.0.0",25565,"/chat");
+        nettyHandler = new NettyHandler("0.0.0.0",25565);
 
         if(config.getDatabase().getMongodb().isToggle()) {
             MongoDBConnection.start();
@@ -61,10 +71,28 @@ public final class Server {
 
     }
 
+    @Override
+    public void update() {
+        Iterator<Map.Entry<String, User>> iterator = UserManager.getInstance().getUsers().entrySet().iterator();
+        while (iterator.hasNext()) {
+            User user = iterator.next().getValue();
+            user.getUserConnection().checkTimeOut();
+            if (!user.getUserConnection().isOnline()) {
+                iterator.remove();
+                continue;
+            }
+            user.getUserConnection().processPackets();
+        }
+    }
+
     public void close() {
+        loop.cancel();
         MongoDBConnection.stop();
         RedisDBConnection.stop();
-        running=false;
+    }
+
+    public boolean isRunning() {
+        return loop.isRunning();
     }
 
 }

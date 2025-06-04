@@ -1,5 +1,6 @@
 package me.teixayo.bytetalk.backend.networking;
 
+import co.elastic.clients.util.Pair;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -8,6 +9,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.Server;
@@ -57,13 +60,25 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
             handshaker.handshake(ctx.channel(), req);
         }
     }
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof IdleStateEvent) {
+            IdleStateEvent event = (IdleStateEvent) evt;
+            if (event.state() == IdleState.WRITER_IDLE) {
+                ctx.writeAndFlush(new PingWebSocketFrame());
+            }
+        } else {
+            super.userEventTriggered(ctx, evt);
+        }
+    }
+
     public void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
         if (frame instanceof CloseWebSocketFrame) {
             handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
             return;
         }
-        if (frame instanceof PingWebSocketFrame) {
-            ctx.channel().write(new PongWebSocketFrame(frame.content().retain()));
+        if (frame instanceof PongWebSocketFrame) {
+            if(user!=null) user.getUserConnection().keepAlive();
             return;
         }
         if (!(frame instanceof TextWebSocketFrame)) {
@@ -101,10 +116,10 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
             if(type.equals("CreateUser")) {
                 String name = jsonObject.getString("name");
 //                if (!Server.getInstance().getUserService().isUserExists(name)) {
-                    String token = Server.getInstance().getUserService().saveUser(name);
+                    Pair<String, Long> userData = Server.getInstance().getUserService().saveUser(name);
                     JSONObject output = new JSONObject();
                     output.put("type", "GetToken");
-                    output.put("token", token);
+                    output.put("token", userData.key());
 
                     ctx.channel().writeAndFlush(
                             new TextWebSocketFrame(output.toString()));

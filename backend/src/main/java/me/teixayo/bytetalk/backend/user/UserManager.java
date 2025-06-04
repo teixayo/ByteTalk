@@ -1,7 +1,10 @@
 package me.teixayo.bytetalk.backend.user;
 
+import lombok.Getter;
+
 import java.util.HashMap;
 
+@Getter
 public class UserManager {
     private static UserManager instance;
 

@@ -41,18 +41,17 @@ public class MongoDBConnection {
     @Getter
     private static boolean isConnected = false;
 
-    public MongoDBConnection() {
-
+    public MongoDBConnection(String connectionString) {
         instance = this;
         MongoClientSettings settings = MongoClientSettings.builder()
                 .uuidRepresentation(UuidRepresentation.STANDARD)
-                .applyConnectionString(new ConnectionString(CONNECTION_STRING))
+                .applyConnectionString(new ConnectionString(connectionString))
                 .build();
         try {
             mongoClient = MongoClients.create(settings);
 
             this.messageDatabase = mongoClient.getDatabase("Message");
-            this.messageCollection = userDatabase.getCollection("Message");
+            this.messageCollection = messageDatabase.getCollection("Message");
 
             this.userDatabase = mongoClient.getDatabase("User");
             this.userCollection = userDatabase.getCollection("User");
@@ -61,6 +60,10 @@ public class MongoDBConnection {
         } catch (Exception exception) {
             log.error("Failed to connect to MongoDB: ", exception);
         }
+    }
+    public MongoDBConnection() {
+
+        this(CONNECTION_STRING);
     }
 
     public static void start()

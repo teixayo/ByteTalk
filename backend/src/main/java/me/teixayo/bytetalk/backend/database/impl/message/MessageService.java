@@ -12,7 +12,6 @@ public interface MessageService {
         if(MongoDBConnection.isConnected()) return new MongoMessageService();
         return new MemoryMessageService();
     }
-
     List<Message> loadMessagesBeforeDate(Date date, int batchSize);
     void saveMessage(Message message);
     Message getMessage(long message_id);

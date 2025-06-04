@@ -2,12 +2,14 @@ package me.teixayo.bytetalk.backend.database.redis;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import redis.clients.jedis.*;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import java.time.Duration;
 
 @Log4j2
-public class RedisDBConnection extends JedisPubSub
+public class RedisDBConnection
 {
 
     @Getter

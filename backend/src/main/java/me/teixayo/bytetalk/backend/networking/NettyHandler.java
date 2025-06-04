@@ -20,11 +20,11 @@ public class NettyHandler {
     private EventLoopGroup workerGroup;
     private ChannelInitializer channelInitializer;
 
-    public NettyHandler(String address, int port,String websocketPat) {
+    public NettyHandler(String address, int port) {
         Thread thread = new Thread(() -> {
 
             TransportType transportType = TransportType.bestTransportType();
-            channelInitializer = new ChannelInitializer(websocketPat);
+            channelInitializer = new ChannelInitializer();
             log.info("Using {} threads for Netty based {}", threads, transportType.name());
             try {
                 workerGroup = transportType.createEventLoopGroup();

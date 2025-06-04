@@ -1,5 +1,6 @@
 package me.teixayo.bytetalk.backend.database.impl.user;
 
+import co.elastic.clients.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.security.RandomGenerator;
 import me.teixayo.bytetalk.backend.user.User;
@@ -16,12 +17,12 @@ public class MemoryUserService implements UserService {
         users = new HashMap<>();
     }
     @Override
-    public String saveUser(String username) {
+    public Pair<String,Long> saveUser(String username) {
         String token = RandomGenerator.generateToken();
         long userId = RandomGenerator.generateId();
         User user = new User(userId,username,token,null);
         users.put(userId,user);
-        return token;
+        return new Pair<>(token,userId);
     }
 
     @Override

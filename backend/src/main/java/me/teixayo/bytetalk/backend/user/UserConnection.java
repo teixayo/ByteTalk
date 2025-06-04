@@ -23,18 +23,20 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Slf4j
+@Getter
 public class UserConnection {
 
 
-    @Getter
     private final ChannelHandlerContext channel;
     private final ConcurrentLinkedQueue<ServerPacket> serverPackets = new ConcurrentLinkedQueue<>();
     private boolean online = true;
     private User user;
+    private long lastPongTime;
 
     public UserConnection(ChannelHandlerContext channel,User user) {
         this.channel = channel;
         this.user = user;
+        lastPongTime = System.currentTimeMillis();
     }
 
 
@@ -45,6 +47,14 @@ public class UserConnection {
     @SneakyThrows
     public void disconnect() {
         channel.writeAndFlush(new CloseWebSocketFrame());
+        channel.channel().closeFuture().addListener((ChannelFutureListener) future -> {
+            online = false;
+        });
+
+    }
+    @SneakyThrows
+    public void disconnect(int exitCode,String reason) {
+        channel.writeAndFlush(new CloseWebSocketFrame(exitCode,reason));
         channel.channel().closeFuture().addListener((ChannelFutureListener) future -> {
             online = false;
         });
@@ -61,6 +71,17 @@ public class UserConnection {
             channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         }
         if (hasPacket) channel.flush();
+    }
+    public void keepAlive() {
+        lastPongTime = System.currentTimeMillis();
+    }
+
+    public void checkTimeOut() {
+        if(System.currentTimeMillis() - lastPongTime >= 10_000) {
+            disconnect(404,"Timed out");
+            online=false;
+            log.info("Disconnected the {} (Timed Out)", user.getName());
+        }
     }
 
     public void handleClientPacket(ClientPacket packet) {
@@ -90,8 +111,8 @@ public class UserConnection {
                 jsonObject.put("messages", bulkJson);
                 ServerPacket bulkMessagePacket = ServerPacketType.BulkMessages.createPacket(jsonObject);
                 sendPacket(bulkMessagePacket);
-                processPackets();
             }
         }
     }
+
 }

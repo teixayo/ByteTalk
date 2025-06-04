@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class MemoryMessageService implements MessageService {
 
     private final Map<Long, Message> messagesById = new ConcurrentHashMap<>();
+
     private final NavigableSet<Message> messagesByDate =
             new ConcurrentSkipListSet<>(Comparator
                     .comparing(Message::getDate)
@@ -44,4 +45,6 @@ public class MemoryMessageService implements MessageService {
     public Message getMessage(long message_id) {
         return messagesById.get(message_id);
     }
+
+
 }

@@ -1,10 +1,12 @@
 package me.teixayo.bytetalk.backend.chat;
 
 import lombok.Getter;
-import me.teixayo.bytetalk.backend.user.User;
+import me.teixayo.bytetalk.backend.Server;
+import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 public class ChatManager {
@@ -20,7 +22,16 @@ public class ChatManager {
     public ChatManager() {
     }
 
-    public void sendMessage(User user, String message) {
-        Message chat = new Message(0,user.getId(),message, Date.from(Instant.now()));
+    public List<Message> getLatestMessages(){
+//        if(RedisDBConnection.getJedisPool()!=null) {
+//            return RedisDBConnection.getInstance().toString().;
+//        }
+        return Server.getInstance().getMessageService().loadMessagesBeforeDate(Date.from(Instant.now()),10);
     }
+
+    public void sendMessage(Message message) {
+        if(RedisDBConnection.getJedisPool()==null) return;
+//        RedisKe
+    }
+
 }

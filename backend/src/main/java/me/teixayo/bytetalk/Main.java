@@ -19,6 +19,10 @@ public class Main {
                 server.close();
             }
         }));
-        server.getMainThread().start();
+        Thread serverThread = new Thread(() -> {
+            server.getLoop().start();
+        });
+        serverThread.setName("Server");
+        serverThread.start();
     }
 }
