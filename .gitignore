@@ -78,4 +78,5 @@ logs/
 hs_err_pid*
 
 # Other
-node_modules/
+/frontend/node_modules/
+
