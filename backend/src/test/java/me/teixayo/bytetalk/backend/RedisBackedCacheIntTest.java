@@ -22,7 +22,6 @@ public class RedisBackedCacheIntTest {
     @Container
     static GenericContainer<?> redisDBContainer = new GenericContainer<>(DockerImageName.parse("redis:7.2.4"))
             .withExposedPorts(6379);
-
     @BeforeEach
     public void setUp() {
         redisDBContainer.start();
