@@ -24,4 +24,8 @@ public class UserManager {
     public void addUser(User user) {
         users.put(user.getName(),user);
     }
+
+    public void removeUser(User user) {
+
+    }
 }

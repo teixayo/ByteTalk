@@ -1,56 +1,42 @@
 package me.teixayo.bytetalk.backend;
 
-import co.elastic.clients.util.Pair;
+
 import lombok.extern.slf4j.Slf4j;
-import me.teixayo.bytetalk.backend.database.impl.user.MongoUserService;
-import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
-import me.teixayo.bytetalk.backend.user.User;
+import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
+import me.teixayo.bytetalk.backend.message.Message;
+import me.teixayo.bytetalk.backend.service.cache.CacheService;
+import me.teixayo.bytetalk.backend.service.cache.RedisCacheService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
-import static org.junit.Assert.*;
+import java.time.Instant;
+import java.util.Date;
 
 @Slf4j
 @Testcontainers
 public class RedisBackedCacheIntTest {
-
     @Container
-    public MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:4.0.10");
+    static GenericContainer<?> redisDBContainer = new GenericContainer<>(DockerImageName.parse("redis:7.2.4"))
+            .withExposedPorts(6379);
 
     @BeforeEach
     public void setUp() {
-        mongoDBContainer.start();
-        String connectionString = mongoDBContainer.getConnectionString();
-        new MongoDBConnection(connectionString);
+        redisDBContainer.start();
+        new RedisDBConnection(redisDBContainer.getMappedPort(6379));
     }
+
     @Test
     public void testSaveAndRetrieveUser() {
-        MongoUserService mongoUserService = new MongoUserService();
-        String name = "Test";
-        Pair<String, Long> userData = mongoUserService.saveUser(name);
-
-        String token = userData.key();
-        long id = userData.value();
-
-        assertUserEquals(mongoUserService.getUserByUserName(name), name, token, id);
-        assertUserEquals(mongoUserService.getUserById(id), name, token, id);
-        assertUserEquals(mongoUserService.getUserByToken(token), name, token, id);
-
-        assertEquals(token, mongoUserService.getTokenByUser(name));
-        assertTrue(mongoUserService.isUserExists(id));
-        assertTrue(mongoUserService.isUserExists(name));
-        assertFalse(mongoUserService.isUserExists(-1));
-        assertFalse(mongoUserService.isUserExists("-"));
-
-        assertTrue(mongoUserService.isTokenExists(token));
-        assertFalse(mongoUserService.isTokenExists(""));
-    }
-    private void assertUserEquals(User user, String expectedName, String expectedToken, long expectedId) {
-        assertEquals(expectedName, user.getName());
-        assertEquals(expectedToken, user.getToken());
-        assertEquals(expectedId, user.getId());
+        CacheService cacheService = new RedisCacheService();
+        for(int i = 0; i < 11; i++) {
+            cacheService.addMessageToCache(new Message(1, 2, "Hello!", Date.from(Instant.now())));
+        }
+        for (Message loadLastestMessage : cacheService.loadLastestMessages()) {
+            System.out.println(loadLastestMessage.getId() + " | " + loadLastestMessage.getUserID() + " | " + loadLastestMessage.getContent() + " | " + loadLastestMessage.getDate().toString());
+        }
     }
 }

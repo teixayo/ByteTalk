@@ -1,10 +1,10 @@
-package me.teixayo.bytetalk.backend.database.impl.message;
+package me.teixayo.bytetalk.backend.service.message;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
-import me.teixayo.bytetalk.backend.chat.Message;
+import me.teixayo.bytetalk.backend.message.Message;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import org.bson.Document;
 import org.bson.conversions.Bson;

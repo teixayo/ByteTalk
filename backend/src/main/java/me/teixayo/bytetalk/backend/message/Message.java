@@ -1,9 +1,8 @@
-package me.teixayo.bytetalk.backend.chat;
+package me.teixayo.bytetalk.backend.message;
 
 import lombok.Getter;
 
 import java.util.Date;
-
 @Getter
 public class Message {
 

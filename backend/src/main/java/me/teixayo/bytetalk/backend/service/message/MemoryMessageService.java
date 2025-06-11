@@ -1,6 +1,6 @@
-package me.teixayo.bytetalk.backend.database.impl.message;
+package me.teixayo.bytetalk.backend.service.message;
 
-import me.teixayo.bytetalk.backend.chat.Message;
+import me.teixayo.bytetalk.backend.message.Message;
 import me.teixayo.bytetalk.backend.security.RandomGenerator;
 
 import java.util.*;

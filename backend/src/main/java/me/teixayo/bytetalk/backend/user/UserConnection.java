@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.Server;
-import me.teixayo.bytetalk.backend.chat.Message;
+import me.teixayo.bytetalk.backend.message.Message;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;

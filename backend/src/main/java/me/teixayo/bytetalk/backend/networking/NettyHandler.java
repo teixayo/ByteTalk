@@ -14,8 +14,8 @@ import java.net.InetSocketAddress;
 public class NettyHandler {
 
     public int threads = Runtime.getRuntime().availableProcessors();
-    private static final WriteBufferWaterMark SERVER_WRITE_MARK = new WriteBufferWaterMark(1 << 20,
-            1 << 21);
+    private static final WriteBufferWaterMark SERVER_WRITE_MARK = new WriteBufferWaterMark(1048576,
+            2097152);
 
     private EventLoopGroup workerGroup;
     private ChannelInitializer channelInitializer;
@@ -39,7 +39,6 @@ public class NettyHandler {
                         .childOption(ChannelOption.IP_TOS, 0x18)
                         .childOption(ChannelOption.TCP_NODELAY, true)
                         .option(ChannelOption.TCP_FASTOPEN, 3)
-                        .option(ChannelOption.SO_BACKLOG, 1024)
                         .localAddress(new InetSocketAddress(address, port));
                 if (transportType != TransportType.NIO) {
                     bootstrap.option(UnixChannelOption.SO_REUSEPORT, true);

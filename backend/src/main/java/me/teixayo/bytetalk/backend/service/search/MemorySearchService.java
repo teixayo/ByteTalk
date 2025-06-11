@@ -1,4 +1,4 @@
-package me.teixayo.bytetalk.backend.database.impl.search;
+package me.teixayo.bytetalk.backend.service.search;
 
 import java.util.*;
 

@@ -2,9 +2,9 @@ package me.teixayo.bytetalk.backend;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import me.teixayo.bytetalk.backend.database.impl.message.MessageService;
-import me.teixayo.bytetalk.backend.database.impl.search.SearchService;
-import me.teixayo.bytetalk.backend.database.impl.user.UserService;
+import me.teixayo.bytetalk.backend.service.message.MessageService;
+import me.teixayo.bytetalk.backend.service.search.SearchService;
+import me.teixayo.bytetalk.backend.service.user.UserService;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
 import me.teixayo.bytetalk.backend.networking.NettyHandler;

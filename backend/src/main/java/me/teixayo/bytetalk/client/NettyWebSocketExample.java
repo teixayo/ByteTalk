@@ -1,4 +1,4 @@
-package me.teixayo.bytetalk.backend.client;
+package me.teixayo.bytetalk.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;

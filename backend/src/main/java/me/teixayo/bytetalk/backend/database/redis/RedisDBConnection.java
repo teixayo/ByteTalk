@@ -21,9 +21,9 @@ public class RedisDBConnection
 //    private static String REDIS_ADDRESS = System.getenv("REDIS_ADDRESS");
 //    private static final String REDIS_PORT = System.getenv("REDIS_PORT");
 //    private static final String REDIS_PASSWORD = System.getenv("REDIS_PASSWORD");
-    public RedisDBConnection() {
+    public RedisDBConnection(int port) {
         String REDIS_ADDRESS = "localhost";
-        String REDIS_PORT="6379";
+        String REDIS_PORT= String.valueOf(port);
         String REDIS_PASSWORD = "";
         String REDIS_USER="root";
 
@@ -54,7 +54,7 @@ public class RedisDBConnection
 
     public static void start() {
         if (instance == null) {
-            new RedisDBConnection();
+            new RedisDBConnection(6379);
         }
     }
 

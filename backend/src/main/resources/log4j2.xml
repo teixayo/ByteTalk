@@ -2,7 +2,6 @@
 <Configuration status="WARN">
 
     <Appenders>
-        <!-- Console with color and cleaner pattern -->
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout disableAnsi="false" charset="UTF-8">
                 <Pattern>
@@ -13,7 +12,6 @@
 
         </Console>
 
-        <!-- Rolling file output (keeps original format, no color) -->
         <RollingFile name="File"
                      fileName="logs/app.log"
                      filePattern="logs/app-%d{yyyy-MM-dd}.log.gz">
@@ -35,12 +33,6 @@
             <AppenderRef ref="Console"/>
             <AppenderRef ref="File"/>
         </Root>
-
-        <!-- For your own classes -->
-        <Logger name="com.example" level="INFO" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="File"/>
-        </Logger>
     </Loggers>
 
 </Configuration>

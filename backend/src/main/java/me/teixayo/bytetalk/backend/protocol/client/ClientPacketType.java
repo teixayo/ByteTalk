@@ -6,7 +6,8 @@ public enum ClientPacketType {
     CreateUser,
     Login,
     SendMessage,
-    RequestBulkMessage;
+    RequestBulkMessage,
+    WritingMessage;
 
     public ClientPacket createPacket(String... fields) {
         JSONObject jsonObject = new JSONObject();

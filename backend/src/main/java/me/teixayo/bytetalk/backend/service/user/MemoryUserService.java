@@ -1,4 +1,4 @@
-package me.teixayo.bytetalk.backend.database.impl.user;
+package me.teixayo.bytetalk.backend.service.user;
 
 import co.elastic.clients.util.Pair;
 import lombok.extern.slf4j.Slf4j;

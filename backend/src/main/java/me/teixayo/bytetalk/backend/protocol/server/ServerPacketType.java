@@ -5,7 +5,8 @@ import org.json.JSONObject;
 public enum ServerPacketType {
     GetToken,
     SuccessLogin,
-    BulkMessages;
+    BulkMessages
+    ;
 
 
     public ServerPacket createPacket(String... fields) {
