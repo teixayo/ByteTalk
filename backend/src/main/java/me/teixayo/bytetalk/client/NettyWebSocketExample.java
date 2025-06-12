@@ -62,12 +62,10 @@ public class NettyWebSocketExample {
                                 .getData().toString()));
 
                 Thread.sleep(5000);
-//                while (true) {
-//                    ch.writeAndFlush(new TextWebSocketFrame(ClientPacketType.SendMessage.createPacket(
-//                            "content", scanner.nextLine()).getData().toString()));
-//                    Thread.sleep(50);
-//                }
-//                 Wait to receive echo
+                while (scanner.hasNextLine()) {
+                    ch.writeAndFlush(new TextWebSocketFrame(ClientPacketType.SendMessage.createPacket(
+                            "content", scanner.nextLine()).getData().toString()));
+                }
                 ch.closeFuture().sync();
             } finally {
                 group.shutdownGracefully();

@@ -1,19 +1,19 @@
 database:
   redis:
     toggle: false
-    address: ""
-    port: ""
-    user: ""
+    address: 0.0.0.0
+    port: 6379
+    user: root
     password: ""
-    ssl: true
+    ssl: false
     prefix: ""
-  mongodb:
+  mongo:
     toggle: false
-    mongoUrl: ""
+    connectionURL: "mongodb://root:@localhost:27017/?retryWrites=true&w=majority"
   elastic:
     toggle: false
     address: ""
-    port: ""
+    port: 9200
     user: ""
     password: ""
 networking:
@@ -26,11 +26,9 @@ networking:
   # EPOLL
   # KQUEUE
   # NIO
-  transport: auto
-  #max uses all the runtime processors
-  threads: max
+  transport: AUTO
   write-buffer-watermark:
     low: 1048576
     high: 2097152
 cache:
-  message-cache-size: 10
+  message-size: 10

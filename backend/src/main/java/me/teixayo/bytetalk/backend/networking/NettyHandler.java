@@ -6,26 +6,27 @@ import io.netty.channel.*;
 import io.netty.channel.unix.UnixChannelOption;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.util.NettyRuntime;
 import lombok.extern.slf4j.Slf4j;
+import me.teixayo.bytetalk.backend.Server;
 
 import java.net.InetSocketAddress;
 
 @Slf4j
 public class NettyHandler {
-
-    public int threads = Runtime.getRuntime().availableProcessors();
-    private static final WriteBufferWaterMark SERVER_WRITE_MARK = new WriteBufferWaterMark(1048576,
-            2097152);
+    private static final WriteBufferWaterMark SERVER_WRITE_MARK = new WriteBufferWaterMark(
+            Server.getInstance().getConfig().getNetworkingWriteBufferWaterMarkLow(),
+            Server.getInstance().getConfig().getNetworkingWriteBufferWaterMarkHigh());
 
     private EventLoopGroup workerGroup;
     private ChannelInitializer channelInitializer;
 
-    public NettyHandler(String address, int port) {
+    public NettyHandler() {
         Thread thread = new Thread(() -> {
 
-            TransportType transportType = TransportType.bestTransportType();
+            TransportType transportType = Server.getInstance().getConfig().getNetworkingTransportType();
             channelInitializer = new ChannelInitializer();
-            log.info("Using {} threads for Netty based {}", threads, transportType.name());
+            log.info("Using {} threads for Netty based {}", NettyRuntime.availableProcessors()*2, transportType.name());
             try {
                 workerGroup = transportType.createEventLoopGroup();
 
@@ -37,9 +38,16 @@ public class NettyHandler {
                         .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                         .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, SERVER_WRITE_MARK)
                         .childOption(ChannelOption.IP_TOS, 0x18)
-                        .childOption(ChannelOption.TCP_NODELAY, true)
-                        .option(ChannelOption.TCP_FASTOPEN, 3)
-                        .localAddress(new InetSocketAddress(address, port));
+                        .localAddress(new InetSocketAddress(Server.getInstance().getConfig().getNetworkingIp(), Server.getInstance().getConfig().getNetworkingPort()));
+                if(Server.getInstance().getConfig().isNetworkingTcpFastOpen()) {
+                    bootstrap.option(ChannelOption.TCP_FASTOPEN,3);
+                }
+
+                if(Server.getInstance().getConfig().isNetworkingTcpNoDelay()) {
+                    bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
+                }
+
+
                 if (transportType != TransportType.NIO) {
                     bootstrap.option(UnixChannelOption.SO_REUSEPORT, true);
 
@@ -52,7 +60,7 @@ public class NettyHandler {
                                 log.info("Listening on {}", channel.localAddress());
                                 return;
                             }
-                            log.error("Can't bind to {}", address, future.cause());
+                            log.error("Can't bind to {}", Server.getInstance().getConfig().getNetworkingIp(), future.cause());
                         }).sync().channel().closeFuture().sync();
 
             } catch (InterruptedException e) {

@@ -103,7 +103,7 @@ public class UserConnection {
                     jsonObject.put("id",message.getId());
                     jsonObject.put("username", messageUsername);
                     jsonObject.put("content",message.getContent());
-                    jsonObject.put("date",date.toInstant().toEpochMilli());
+                    jsonObject.put("date",message.getDate().toInstant().toEpochMilli());
 
                     bulkJson.put(jsonObject);
                 }

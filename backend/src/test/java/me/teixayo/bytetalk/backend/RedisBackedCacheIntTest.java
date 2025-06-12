@@ -14,6 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Date;
 
 @Slf4j
@@ -25,16 +26,24 @@ public class RedisBackedCacheIntTest {
     @BeforeEach
     public void setUp() {
         redisDBContainer.start();
-        new RedisDBConnection(redisDBContainer.getMappedPort(6379));
+        new RedisDBConnection("0.0.0.0",redisDBContainer.getMappedPort(6379),"",false);
     }
 
     @Test
     public void testSaveAndRetrieveUser() {
         CacheService cacheService = new RedisCacheService();
-        for(int i = 0; i < 11; i++) {
-            cacheService.addMessageToCache(new Message(1, 2, "Hello!", Date.from(Instant.now())));
+        for(int i = 0; i < 5; i++) {
+            long now = System.nanoTime();
+            cacheService.addMessageToCache(new Message(i, i*3, "Hello!", Date.from(Instant.now())));
+            long last = System.nanoTime();
+            log.info("{} ns", last - now);
         }
-        for (Message loadLastestMessage : cacheService.loadLastestMessages()) {
+        long now = System.nanoTime();
+        Collection<Message> messages = cacheService.loadLastestMessages();
+        long last = System.nanoTime();
+        log.info("{} ns", last - now);
+
+        for (Message loadLastestMessage : messages) {
             System.out.println(loadLastestMessage.getId() + " | " + loadLastestMessage.getUserID() + " | " + loadLastestMessage.getContent() + " | " + loadLastestMessage.getDate().toString());
         }
     }

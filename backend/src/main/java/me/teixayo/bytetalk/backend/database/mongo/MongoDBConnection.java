@@ -14,19 +14,6 @@ import org.bson.UuidRepresentation;
 @Log4j2
 public class MongoDBConnection {
 
-//    private static final String CONNECTION_STRING = String.format(
-//            "mongodb://%s:%s@%s/?retryWrites=true&w=majority",
-//            System.getenv("MONGO_INITDB_ROOT_USERNAME"),
-//            System.getenv("MONGO_INITDB_ROOT_PASSWORD"),
-//            System.getenv("MongoDB")
-//    );
-    private static final String CONNECTION_STRING = String.format(
-            "mongodb://%s:%s@%s/?retryWrites=true&w=majority",
-            "root",
-            "",
-            "localhost:27017"
-    );
-
     @Getter
     private static MongoDBConnection instance;
 
@@ -56,21 +43,17 @@ public class MongoDBConnection {
             this.userDatabase = mongoClient.getDatabase("User");
             this.userCollection = userDatabase.getCollection("User");
             userDatabase.runCommand(new Document("ping", 1));
-            isConnected=true;
+            isConnected = true;
         } catch (Exception exception) {
             log.error("Failed to connect to MongoDB: ", exception);
         }
     }
-    public MongoDBConnection() {
 
-        this(CONNECTION_STRING);
-    }
-
-    public static void start()
+    public static void start(String url)
     {
         if(instance == null)
         {
-            new MongoDBConnection();
+            new MongoDBConnection(url);
         }
     }
 

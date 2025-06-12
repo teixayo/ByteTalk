@@ -49,15 +49,15 @@ public final class Server implements LoopApp {
 
         Yaml yaml = new Yaml();
         InputStream inputStream = Server.class.getClassLoader().getResourceAsStream("config.yml");
-        config = yaml.loadAs(inputStream, Config.class);
+        config = new Config(yaml.load(inputStream));
 
-        nettyHandler = new NettyHandler("0.0.0.0",25565);
+        nettyHandler = new NettyHandler();
 
-        if(config.getDatabase().getMongodb().isToggle()) {
-            MongoDBConnection.start();
+        if(config.isMongoToggle()) {
+            MongoDBConnection.start(config.getMongoConnectionUrl());
         }
-        if(config.getDatabase().getRedis().isToggle()) {
-            RedisDBConnection.start();
+        if(config.isRedisToggle()) {
+            RedisDBConnection.start(config.getRedisAddress(),config.getRedisPort(),config.getRedisPassword(),config.isRedisSSL());
         }
 
         userService = UserService.findBestService();

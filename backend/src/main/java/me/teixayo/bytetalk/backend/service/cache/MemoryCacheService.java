@@ -8,11 +8,15 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class MemoryCacheService implements CacheService {
 
-    private static final int MAX_SIZE = 10;
+    private final int maxSize;
     private final ConcurrentLinkedDeque<Message> messageCache;
 
-    public MemoryCacheService() {
+    public MemoryCacheService(int maxSize) {
         messageCache = new ConcurrentLinkedDeque<>();
+        this.maxSize = maxSize;
+    }
+    public MemoryCacheService() {
+        this(10);
     }
     @Override
     public Collection<Message> loadLastestMessages() {
@@ -21,7 +25,7 @@ public class MemoryCacheService implements CacheService {
 
     @Override
     public void addMessageToCache(Message message) {
-        while (messageCache.size() >= MAX_SIZE) {
+        while (messageCache.size() >= maxSize) {
             messageCache.removeFirst();
         }
         messageCache.addLast(message);

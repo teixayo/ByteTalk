@@ -18,17 +18,11 @@ public class RedisDBConnection
     @Getter
     private static JedisPool jedisPool;
 
-//    private static String REDIS_ADDRESS = System.getenv("REDIS_ADDRESS");
-//    private static final String REDIS_PORT = System.getenv("REDIS_PORT");
-//    private static final String REDIS_PASSWORD = System.getenv("REDIS_PASSWORD");
-    public RedisDBConnection(int port) {
-        String REDIS_ADDRESS = "localhost";
-        String REDIS_PORT= String.valueOf(port);
-        String REDIS_PASSWORD = "";
-        String REDIS_USER="root";
+    @Getter
+    private static boolean isConnected = false;
+    public RedisDBConnection(String address, int port, String password, boolean useSSL) {
 
         instance = this;
-
         JedisPoolConfig config = new JedisPoolConfig();
         config.setMaxTotal(10);
         config.setMaxIdle(5);
@@ -38,10 +32,11 @@ public class RedisDBConnection
         config.setTestOnBorrow(true);
         config.setTestOnReturn(true);
         config.setTestWhileIdle(true);
-        jedisPool = new JedisPool(config, REDIS_ADDRESS, Integer.parseInt(REDIS_PORT), 2000);
+        jedisPool = new JedisPool(config, address, port, 2000,password,useSSL);
 
         try (Jedis jedis = jedisPool.getResource()) {
             String response = jedis.ping();
+            isConnected=true;
             if ("PONG".equals(response)) {
                 log.info("Redis is connected successfully");
             } else {
@@ -52,15 +47,16 @@ public class RedisDBConnection
         }
     }
 
-    public static void start() {
+    public static void start(String address, int port, String password, boolean useSSL) {
         if (instance == null) {
-            new RedisDBConnection(6379);
+            new RedisDBConnection(address,port,password,useSSL);
         }
     }
 
     public static void stop() {
         if (instance != null) {
             jedisPool.close();
+            isConnected=false;
         }
     }
 }

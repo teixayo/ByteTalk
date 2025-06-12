@@ -11,15 +11,19 @@ import java.util.*;
 
 public class RedisCacheService implements CacheService {
 
-    private static final int MAX_SIZE = 10;
+    private final int maxSize;
     private final String listKey;
     private final String hashKeyPrefix;
     private final JedisPool jedisPool;
 
-    public RedisCacheService() {
+    public RedisCacheService(int maxSize) {
         this.jedisPool = RedisDBConnection.getJedisPool();
         this.listKey = "list.";
         this.hashKeyPrefix = "key.";
+        this.maxSize = maxSize;
+    }
+    public RedisCacheService() {
+        this(10);
     }
 
     @Override
@@ -62,9 +66,9 @@ public class RedisCacheService implements CacheService {
             pipeline.sync();
 
             long listLen = jedis.llen(listKey);
-            if (!(listLen > MAX_SIZE)) return;
+            if (!(listLen > maxSize)) return;
 
-            long removeCount = listLen - MAX_SIZE;
+            long removeCount = listLen - maxSize;
             List<String> removedIds = jedis.lrange(listKey, 0, removeCount - 1);
             jedis.ltrim(listKey, removeCount, -1);
 
