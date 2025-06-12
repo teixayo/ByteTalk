@@ -5,18 +5,18 @@
 ## ✨ Features
 
 - **Real-Time Messaging**: Uses WebSocket for low-latency communication.
-- **Cross-Platform**: Desktop client (Java ImGui) and Android client (Java).
+- **Cross-Platform**: Website (React) and Desktop client (Tauri) and Android client (React Native).
 - **Scalable Architecture**: Redis synchronization for message syncing across multiple instances.
-- **Flexible Database Support**: Choose between MongoDB and PostgreSQL for user data storage.
-- **Authentication**: Basic token-based authentication for secure messaging.
+- **Flexible Database Support**: Uses MongoDB for user data storage.
+- **Authentication**: Basic token-based authentication for user security.
 - **CI/CD Pipeline**: Automated testing and deployment with Docker and GitHub Actions.
 - **Full Test Coverage**: Unit and integration tests for key components.
 
 ## 📦 Tech Stack
 
 - **Backend**: Java, Netty, WebSocket, Redis, MongoDB/PostgreSQL
-- **Client**: Android (Java), Desktop (Java with ImGui)
-- **Database**: MongoDB, PostgreSQL (configurable)
-- **Testing**: JUnit, Mockito
+- **Client**: Website (React), Android (ReactNative), Desktop (Tauri)
+- **Database**: MongoDB, Redis, ElasticSearch
+- **Testing**: JUnit, TestContainer
 - **CI/CD**: GitHub Actions, Docker
 - **Authentication**: Token-based (JWT-like mechanism, custom implementation)
