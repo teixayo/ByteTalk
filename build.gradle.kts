@@ -1,5 +1,5 @@
 plugins {
-    id("java")
+    id("application")
 }
 
 group = "com.bytetalk"

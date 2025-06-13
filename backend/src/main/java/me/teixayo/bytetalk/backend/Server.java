@@ -64,10 +64,10 @@ public final class Server implements LoopApp {
         log.info("Using {} as UserService", userService.getClass().getSimpleName());
 
         messageService = MessageService.findBestService();
-        log.info("Using {} as MessageService", userService.getClass().getSimpleName());
+        log.info("Using {} as MessageService", messageService.getClass().getSimpleName());
 
         searchService = SearchService.findBestService();
-        log.info("Using {} as SearchService", userService.getClass().getSimpleName());
+        log.info("Using {} as SearchService", searchService.getClass().getSimpleName());
 
     }
 
