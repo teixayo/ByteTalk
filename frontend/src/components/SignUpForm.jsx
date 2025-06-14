@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import useAuth from "../hooks/useAuth";
 
-const WebSocketComponent = () => {
+const SignUpForm = () => {
   const [messages, setMessages] = useState([]);
   const [username, setUsername] = useState("");
   const socketRef = useRef(null);
+  const { getToken } = useAuth();
 
   useEffect(() => {
     socketRef.current = new WebSocket("ws://localhost:25565");
@@ -17,14 +19,13 @@ const WebSocketComponent = () => {
     socketRef.current.onmessage = (event) => {
       const msg = event.data;
       console.log(event);
-      
+
       try {
         const parsed = JSON.parse(msg);
         setMessages((prev) => [...prev, `Server: ${msg}`]);
 
-          localStorage.setItem("token", parsed.token);
-          console.log("✅ Token saved:", parsed.token);
-
+        localStorage.setItem("token", parsed.token);
+        console.log("✅ Token saved:", parsed.token);
       } catch (error) {
         console.error("❌ Failed to parse WebSocket message:", error);
       }
@@ -47,26 +48,28 @@ const WebSocketComponent = () => {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
       const name = event.username;
 
-      // const signupPayload = {
-      //   type: "CreateUser",
-      //   name: name,
-      // };
-      // socketRef.current.send(JSON.stringify(signupPayload));
-
-      const loginPayload = {
-        type: "Login",
-        name: "ADEL",
-        token: "RM6qwupPrRJ5qsVOuELouaWnLc5NbpsFvXOSY3glUttwV7EAg-CQWeHTsE62vBY59KfO0MAj9pQ9WLoWcc3czg"
+      const signupPayload = {
+        type: "CreateUser",
+        name: name,
       };
-      socketRef.current.send(JSON.stringify(loginPayload));
+      socketRef.current.send(JSON.stringify(signupPayload));
 
-
+      login();
       setUsername(name);
       setMessages(() => [`You: Sent CreateUser for "${event.username}"`]);
-
     }
   };
 
+  const login = () => {
+    const token = getToken();
+    const loginPayload = {
+      type: "Login",
+      name: "AdelNouri",
+      token: token,
+    };
+
+    socketRef.current.send(JSON.stringify(loginPayload));
+  };
   const validationSchema = Yup.object({
     username: Yup.string().required("Username is required"),
   });
@@ -118,4 +121,4 @@ const WebSocketComponent = () => {
   );
 };
 
-export default WebSocketComponent;
+export default SignUpForm;

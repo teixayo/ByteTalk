@@ -2,12 +2,12 @@ import { useCallback } from "react";
 
 const useAuth = () => {
   // Token
-  const getToket = useCallback(() => {
+  const getToken = useCallback(() => {
     return localStorage.getItem("token");
   }, []);
 
 
-  return { getToket, };
+  return { getToken };
 };
 
 export default useAuth;
