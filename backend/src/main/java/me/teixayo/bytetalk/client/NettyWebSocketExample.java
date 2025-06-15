@@ -11,12 +11,14 @@ import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
+import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacketType;
 import org.json.JSONObject;
 
 import java.net.URI;
 import java.util.Scanner;
 
+@Slf4j
 public class NettyWebSocketExample {
     // Client-side implementation
     public static class NettyWebSocketClient {
@@ -44,27 +46,52 @@ public class NettyWebSocketExample {
 
                 Channel ch = b.connect(uri.getHost(), uri.getPort()).sync().channel();
                 handler.handshakeFuture().sync();
-                                                                                        
-                JSONObject jsonObject = new JSONObject();
 
-                jsonObject.put("type", "CreateUser");
-
-                jsonObject.put("name", "test");
-                ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
-
-
-                Thread.sleep(1000);
                 Scanner scanner = new Scanner(System.in);
+                if(scanner.hasNextLine()){
+                    if (scanner.nextLine().equals("1")) {
+                        JSONObject jsonObject = new JSONObject();
 
-                ch.writeAndFlush(new TextWebSocketFrame(
-                        ClientPacketType.RequestBulkMessage.createPacket(
-                        "time", String.valueOf(System.currentTimeMillis()))
-                                .getData().toString()));
+                        jsonObject.put("type", "CreateUser");
 
-                Thread.sleep(5000);
-                while (scanner.hasNextLine()) {
-                    ch.writeAndFlush(new TextWebSocketFrame(ClientPacketType.SendMessage.createPacket(
-                            "content", scanner.nextLine()).getData().toString()));
+                        jsonObject.put("name", "test");
+                        ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
+
+
+                        Thread.sleep(1000);
+
+                        ch.writeAndFlush(new TextWebSocketFrame(
+                                ClientPacketType.RequestBulkMessage.createPacket(
+                                                "time", String.valueOf(System.currentTimeMillis()))
+                                        .getData().toString()));
+
+                        Thread.sleep(5000);
+                        while (scanner.hasNextLine()) {
+                            ch.writeAndFlush(new TextWebSocketFrame(ClientPacketType.SendMessage.createPacket(
+                                    "content", scanner.nextLine()).getData().toString()));
+                        }
+                    } else {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("type", "Login");
+                        jsonObject.put("name", "test");
+                        jsonObject.put("token", scanner.nextLine());
+                        ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
+
+                        log.info("Token", jsonObject.get("token"));
+
+                        Thread.sleep(1000);
+                        ch.writeAndFlush(new TextWebSocketFrame(
+                                ClientPacketType.RequestBulkMessage.createPacket(
+                                                "time", String.valueOf(System.currentTimeMillis()))
+                                        .getData().toString()));
+
+                        Thread.sleep(5000);
+                        while (scanner.hasNextLine()) {
+                            ch.writeAndFlush(new TextWebSocketFrame(ClientPacketType.SendMessage.createPacket(
+                                    "content", scanner.nextLine()).getData().toString()));
+                        }
+
+                    }
                 }
                 ch.closeFuture().sync();
             } finally {
