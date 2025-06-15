@@ -31,6 +31,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
     private User user;
     @Override
+
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof FullHttpRequest) {
             handleHttpRequest(ctx, (FullHttpRequest) msg);
