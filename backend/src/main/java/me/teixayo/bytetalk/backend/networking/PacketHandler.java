@@ -97,14 +97,14 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
                 User user = Server.getInstance().getUserService().getUserByUserName(name);
 
-                if(user==null) {
-                    handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
-                    return;
-                }
-                if(!user.getToken().equals(token)) {
-                    handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
-                    return;
-                }
+                //if(user==null) {
+                //    handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
+                //    return;
+               // }
+                //if(!user.getToken().equals(token)) {
+                //    handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
+                //    return;
+                //}
                 ctx.channel().attr(ChannelInitializer.getState()).set(ClientStateType.AFTER_LOGIN);
 
                 user.setUserConnection(new UserConnection(ctx,user));
