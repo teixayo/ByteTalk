@@ -100,10 +100,10 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                     handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
                     return;
                 }
-//                if(!user.getToken().equals(token)) {
-//                    handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
-//                    return;
-//                }
+                if(!user.getToken().equals(token)) {
+                    handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
+                    return;
+                }
                 ctx.channel().attr(ChannelInitializer.getState()).set(ClientStateType.AFTER_LOGIN);
 
                 user.setUserConnection(new UserConnection(ctx,user));
@@ -115,7 +115,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
             }
             if(type.equals("CreateUser")) {
                 String name = jsonObject.getString("name");
-//                if (!Server.getInstance().getUserService().isUserExists(name)) {
+                if (!Server.getInstance().getUserService().isUserExists(name)) {
                     Pair<String, Long> userData = Server.getInstance().getUserService().saveUser(name);
                     JSONObject output = new JSONObject();
                     output.put("type", "GetToken");
@@ -123,7 +123,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
                     ctx.channel().writeAndFlush(
                             new TextWebSocketFrame(output.toString()));
-//                }
+                }
             }
         } else {
             ClientPacketType packetType;
