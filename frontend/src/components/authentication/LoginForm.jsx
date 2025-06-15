@@ -21,7 +21,9 @@ const LoginForm = () => {
 
     socketRef.current.onmessage = (event) => {
       const msg = event.data;
-      console.log(msg);
+      const parsed = JSON.parse(msg);
+
+      console.log(parsed.SuccessLogin);
 
       setMessages((prev) => [...prev, `Server: ${msg}`]);
     };
@@ -34,23 +36,28 @@ const LoginForm = () => {
       console.log("❌ WebSocket disconnected");
     };
 
-    return () => {
-      socketRef.current.close();
-    };
+    // return () => {
+    //   socketRef.current.close();
+    // };
   }, []);
 
   const handleSubmit = (event) => {
     const token = getToken();
+    console.log(token)
     localUserName = event.fildname;
-
-    const loginPayload = {
-      type: "Login",
-      name: localUserName,
-      token: token,
-    };
-
-    console.log(loginPayload);
-    socketRef.current.send(JSON.stringify(loginPayload));
+    
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      const loginPayload = {
+        type: "Login",
+        name: localUserName,
+        token: token,
+      };
+      
+      console.log(loginPayload);
+      socketRef.current.send(JSON.stringify(loginPayload));
+    } else {
+      console.log("⚠️ WebSocket هنوز وصل نشده. منتظر اتصال باش.");
+    }
 
     // setTimeout(() => {
     //   navigate("/chat");
@@ -95,7 +102,13 @@ const LoginForm = () => {
           </div>
         </Form>
       </Formik>
-      <p>{messages}</p>
+      <ul className="mt-6 list-disc pl-5">
+        {messages.map((msg, i) => (
+          <li key={i} className="text-sm">
+            {msg}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

@@ -21,13 +21,17 @@ const SignUpForm = () => {
 
     socketRef.current.onmessage = (event) => {
       const msg = event.data;
-      console.log('im here')
       try {
         const parsed = JSON.parse(msg);
         setMessages((prev) => [...prev, `Server: ${msg}`]);
 
-        localStorage.setItem("token", parsed.token);
-        console.log("✅ Token saved:", parsed.token);
+        if (parsed.type == "SuccessLogin") {
+          console.log("login", parsed.description);
+        } else {
+          console.log(parsed.token);
+          localStorage.setItem("token", parsed.token);
+          console.log("✅ Token saved:", parsed.token);
+        }
       } catch (error) {
         console.error("❌ Failed to parse WebSocket message:", error);
       }
@@ -56,15 +60,16 @@ const SignUpForm = () => {
         name: localUserName,
       };
 
-      console.log(localUserName)
+      console.log(localUserName);
       socketRef.current.send(JSON.stringify(signupPayload));
 
-      
-      login();
+      setTimeout(() => {
+        login();
+      }, 1000);
       setMessages(() => [`You: Sent CreateUser for "${event.fildname}"`]);
     }
   };
-  
+
   const login = () => {
     const token = getToken();
     const loginPayload = {
@@ -72,13 +77,13 @@ const SignUpForm = () => {
       name: localUserName,
       token: token,
     };
-  
-    console.log(loginPayload)
-    socketRef.current.send(JSON.stringify(loginPayload));
-    // setTimeout(() => {
 
-    //   navigate("/chat");
-    // } , 3000)
+    console.log(loginPayload);
+    socketRef.current.send(JSON.stringify(loginPayload));
+    setTimeout(() => {
+
+      navigate("/chat");
+    } , 3000)
   };
 
   const validationSchema = Yup.object({
