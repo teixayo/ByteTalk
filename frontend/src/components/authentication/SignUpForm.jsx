@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import useAuth from "../hooks/useAuth";
+import useAuth from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+
+let localUserName = "";
 
 const SignUpForm = () => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
-  const [username, setUsername] = useState("");
   const socketRef = useRef(null);
   const { getToken } = useAuth();
 
@@ -18,8 +21,7 @@ const SignUpForm = () => {
 
     socketRef.current.onmessage = (event) => {
       const msg = event.data;
-      console.log(event);
-
+      console.log('im here')
       try {
         const parsed = JSON.parse(msg);
         setMessages((prev) => [...prev, `Server: ${msg}`]);
@@ -39,60 +41,69 @@ const SignUpForm = () => {
       console.log("❌ WebSocket disconnected");
     };
 
-    return () => {
-      socketRef.current.close();
-    };
+    // return () => {
+    //   socketRef.current.close();
+    // };
   }, []);
 
   const handleSubmit = (event) => {
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      const name = event.username;
+    console.log("we are here in handlel");
+    localUserName = event.fildname;
 
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
       const signupPayload = {
         type: "CreateUser",
-        name: name,
+        name: localUserName,
       };
+
+      console.log(localUserName)
       socketRef.current.send(JSON.stringify(signupPayload));
 
+      
       login();
-      setUsername(name);
-      setMessages(() => [`You: Sent CreateUser for "${event.username}"`]);
+      setMessages(() => [`You: Sent CreateUser for "${event.fildname}"`]);
     }
   };
-
+  
   const login = () => {
     const token = getToken();
     const loginPayload = {
       type: "Login",
-      name: "AdelNouri",
+      name: localUserName,
       token: token,
     };
-
+  
+    console.log(loginPayload)
     socketRef.current.send(JSON.stringify(loginPayload));
+    // setTimeout(() => {
+
+    //   navigate("/chat");
+    // } , 3000)
   };
+
   const validationSchema = Yup.object({
-    username: Yup.string().required("Username is required"),
+    fildname: Yup.string().required("Username is required"),
   });
 
   return (
     <div className="flex justify-center itmes-center w-full">
       <Formik
-        initialValues={{ username: "" }}
+        initialValues={{ fildname: "" }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        <Form className="bg-white rounded-2xl w-6/12 h-45 flex justify-center items-center mt-10 pb-2">
+        <Form className="bg-white rounded-2xl w-6/12 h-50 flex justify-center items-center mt-10 pb-2">
           <div className="w-full">
             <div className="flex justify-center mt-4 ">
               <div className="w-10/12">
                 <Field
-                  name="username"
+                  name="fildname"
                   type="text"
-                  placeholder="User Name"
+                  placeholder="UserName"
                   className="w-full h-10 border border-gray-400 px-3 rounded-md"
                 />
                 <ErrorMessage
-                  name="username"
+                  name="fildname"
                   component="div"
                   className="text-red-500 text-sm ml-0.5"
                 />
@@ -106,6 +117,12 @@ const SignUpForm = () => {
                 Sign in
               </button>
             </div>
+            <p className="flex justify-center mt-1">
+              Do you have an account?
+              <a href="/login" className="ml-1 text-blue-600">
+                Register
+              </a>
+            </p>
           </div>
         </Form>
       </Formik>
