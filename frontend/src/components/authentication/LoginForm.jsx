@@ -23,7 +23,7 @@ const LoginForm = () => {
       const msg = event.data;
       const parsed = JSON.parse(msg);
 
-      console.log(parsed.SuccessLogin);
+      console.log(parsed.description);
 
       setMessages((prev) => [...prev, `Server: ${msg}`]);
     };
@@ -36,35 +36,35 @@ const LoginForm = () => {
       console.log("❌ WebSocket disconnected");
     };
 
-    // return () => {
-    //   socketRef.current.close();
-    // };
+    return () => {
+      socketRef.current.close();
+    };
   }, []);
 
   const handleSubmit = (event) => {
     const token = getToken();
-    console.log(token)
     localUserName = event.fildname;
     
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      const loginPayload = {
-        type: "Login",
-        name: localUserName,
-        token: token,
-      };
-      
-      console.log(loginPayload);
-      socketRef.current.send(JSON.stringify(loginPayload));
+    
+        const loginPayload = {
+          type: "Login",
+          name: localUserName,
+          token: token,
+        };
+    
+        console.log(loginPayload);
+        socketRef.current.send(JSON.stringify(loginPayload));
     } else {
       console.log("⚠️ WebSocket هنوز وصل نشده. منتظر اتصال باش.");
     }
 
-    // setTimeout(() => {
-    //   navigate("/chat");
-    // }, 5000);
+    setTimeout(() => {
+      navigate("/chat");
+    }, 3000);
   };
 
-  const validationSchema = Yup.object({
+   const validationSchema = Yup.object({
     fildname: Yup.string().required("Username is required"),
   });
   return (
