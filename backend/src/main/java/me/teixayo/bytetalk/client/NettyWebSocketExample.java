@@ -71,6 +71,7 @@ public class NettyWebSocketExample {
                                     "content", scanner.nextLine()).getData().toString()));
                         }
                     } else {
+
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("type", "Login");
                         jsonObject.put("name", "test");
