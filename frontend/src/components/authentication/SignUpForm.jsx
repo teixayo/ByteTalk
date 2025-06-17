@@ -1,74 +1,60 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import useAuth from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useSocket } from "../../context/SocketContext";
 
 let localUserName = "";
 
 const SignUpForm = () => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
-  const socketRef = useRef(null);
   const { getToken } = useAuth();
 
-  useEffect(() => {
-    socketRef.current = new WebSocket("ws://localhost:25565");
+  const  {socket}  = useSocket(); // 👈 از context
 
-    socketRef.current.onopen = () => {
-      console.log("✅ WebSocket connected");
-    };
+useEffect(() => {
+  if (!socket) {
+    console.log("🚧 socket not ready yet");
+    return;
+  }
+  console.log(socket)
+  
+  console.log("✅ socket is available in SignUpForm");
+}, [socket]);
 
-    socketRef.current.onmessage = (event) => {
-      const msg = event.data;
-      try {
-        const parsed = JSON.parse(msg);
-        setMessages((prev) => [...prev, `Server: ${msg}`]);
 
-        if (parsed.type == "SuccessLogin") {
-          console.log("login", parsed.description);
-        } else {
-          console.log(parsed.token);
-          localStorage.setItem("token", parsed.token);
-          console.log("✅ Token saved:", parsed.token);
-        }
-      } catch (error) {
-        console.error("❌ Failed to parse WebSocket message:", error);
-      }
-    };
+  const handleSubmit = (values) => {
+  console.log("🚀 Form submitted", values);
+  localUserName = values.fildname;
 
-    socketRef.current.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
+  if (!socket) {
+    console.error("❌ WebSocket instance is null");
+    return;
+  }
 
-    socketRef.current.onclose = () => {
-      console.log("❌ WebSocket disconnected");
-    };
+  if (socket.readyState !== WebSocket.OPEN) {
+    console.warn("⏳ WebSocket not ready yet:", socket.readyState);
+    return;
+  }
 
-    // return () => {
-    //   socketRef.current.close();
-    // };
-  }, []);
-
-  const handleSubmit = (event) => {
-    console.log("we are here in handlel");
-    localUserName = event.fildname;
-
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      const signupPayload = {
-        type: "CreateUser",
-        name: localUserName,
-      };
-
-      console.log(localUserName);
-      socketRef.current.send(JSON.stringify(signupPayload));
-
-      setTimeout(() => {
-        login();
-      }, 1000);
-      setMessages(() => [`You: Sent CreateUser for "${event.fildname}"`]);
-    }
+  const signupPayload = {
+    type: "CreateUser",
+    name: localUserName,
   };
+
+  console.log("📨 Sending CreateUser", signupPayload);
+  socket.send(JSON.stringify(signupPayload));
+
+  setMessages([`You: Sent CreateUser for "${localUserName}"`]);
+
+  setTimeout(() => {
+    login();
+  }, 1000);
+};
+
+
 
   const login = () => {
     const token = getToken();
@@ -78,12 +64,12 @@ const SignUpForm = () => {
       token: token,
     };
 
-    console.log(loginPayload);
-    socketRef.current.send(JSON.stringify(loginPayload));
-    setTimeout(() => {
+    console.log("📨 Sending login:", loginPayload);
+    socket.send(JSON.stringify(loginPayload));
 
+    setTimeout(() => {
       navigate("/chat");
-    } , 3000)
+    }, 2000);
   };
 
   const validationSchema = Yup.object({
@@ -91,7 +77,7 @@ const SignUpForm = () => {
   });
 
   return (
-    <div className="flex justify-center itmes-center w-full">
+    <div className="flex justify-center items-center w-full">
       <Formik
         initialValues={{ fildname: "" }}
         validationSchema={validationSchema}
@@ -99,7 +85,7 @@ const SignUpForm = () => {
       >
         <Form className="bg-white rounded-2xl w-6/12 h-50 flex justify-center items-center mt-10 pb-2">
           <div className="w-full">
-            <div className="flex justify-center mt-4 ">
+            <div className="flex justify-center mt-4">
               <div className="w-10/12">
                 <Field
                   name="fildname"
@@ -110,7 +96,7 @@ const SignUpForm = () => {
                 <ErrorMessage
                   name="fildname"
                   component="div"
-                  className="text-red-500 text-sm ml-0.5"
+                  className="text-red-500 text-sm"
                 />
               </div>
             </div>

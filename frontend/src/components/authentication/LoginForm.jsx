@@ -1,25 +1,31 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import useAuth from "../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+
+import useAuth from "../../hooks/useAuth.jsx";
+import { useSocket } from "../../context/SocketContext.jsx";
 
 let localUserName;
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
-  const socketRef = useRef(null);
   const { getToken } = useAuth();
+  const { socket } = useSocket();
 
   useEffect(() => {
-    socketRef.current = new WebSocket("ws://localhost:25565");
+    if(!socket) {
+      console.log('socket isnt ready')
+      return
+    }
 
-    socketRef.current.onopen = () => {
+    socket.onopen = () => {
       console.log("✅ WebSocket connected");
     };
 
-    socketRef.current.onmessage = (event) => {
+    socket.onmessage = (event) => {
       const msg = event.data;
       const parsed = JSON.parse(msg);
 
@@ -28,33 +34,22 @@ const LoginForm = () => {
       setMessages((prev) => [...prev, `Server: ${msg}`]);
     };
 
-    socketRef.current.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    socketRef.current.onclose = () => {
-      console.log("❌ WebSocket disconnected");
-    };
-
-    return () => {
-      socketRef.current.close();
-    };
-  }, []);
+  }, [socket]);
 
   const handleSubmit = (event) => {
     const token = getToken();
     localUserName = event.fildname;
-    
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-    
-        const loginPayload = {
-          type: "Login",
-          name: localUserName,
-          token: token,
-        };
-    
-        console.log(loginPayload);
-        socketRef.current.send(JSON.stringify(loginPayload));
+
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const loginPayload = {
+        type: "Login",
+        name: localUserName,
+        token: token,
+      };
+
+      console.log(loginPayload);
+      socket.send(JSON.stringify(loginPayload));
+
     } else {
       console.log("⚠️ WebSocket هنوز وصل نشده. منتظر اتصال باش.");
     }
@@ -64,7 +59,7 @@ const LoginForm = () => {
     }, 3000);
   };
 
-   const validationSchema = Yup.object({
+  const validationSchema = Yup.object({
     fildname: Yup.string().required("Username is required"),
   });
   return (
