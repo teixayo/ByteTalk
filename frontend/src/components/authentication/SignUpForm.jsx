@@ -10,18 +10,38 @@ let localUserName = "";
 const SignUpForm = () => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
+  const { socket } = useSocket();
   const { getToken } = useAuth();
 
-  const  {socket}  = useSocket(); // 👈 از context
+  useEffect(() => {
+  if (!socket) return;
 
-useEffect(() => {
-  if (!socket) {
-    console.log("🚧 socket not ready yet");
-    return;
-  }
-  console.log(socket)
-  
-  console.log("✅ socket is available in SignUpForm");
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    console.log("📨 Message received:", data);
+
+    if (data.type === "GetToken") {
+      localStorage.setItem("token", data.token);
+      console.log("✅ Token saved:", data.token);
+
+      const loginPayload = {
+        type: "Login",
+        name: localUserName,
+        token: data.token,
+      };
+
+      console.log("📨 Sending login:", loginPayload);
+      socket.send(JSON.stringify(loginPayload));
+    }
+
+    if (data.type === "SuccessLogin") {
+      console.log("✅ Login successful");
+    }
+
+    if (data.type === "Error") {
+      console.error("❌ Server Error:", data.description);
+    }
+  };
 }, [socket]);
 
 
@@ -29,13 +49,8 @@ useEffect(() => {
   console.log("🚀 Form submitted", values);
   localUserName = values.fildname;
 
-  if (!socket) {
-    console.error("❌ WebSocket instance is null");
-    return;
-  }
-
-  if (socket.readyState !== WebSocket.OPEN) {
-    console.warn("⏳ WebSocket not ready yet:", socket.readyState);
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    console.warn("❌ WebSocket not ready");
     return;
   }
 
@@ -46,14 +61,11 @@ useEffect(() => {
 
   console.log("📨 Sending CreateUser", signupPayload);
   socket.send(JSON.stringify(signupPayload));
-
   setMessages([`You: Sent CreateUser for "${localUserName}"`]);
-
   setTimeout(() => {
-    login();
-  }, 1000);
+    login()
+  }, 1000)
 };
-
 
 
   const login = () => {
