@@ -1,6 +1,5 @@
 package me.teixayo.bytetalk.backend.service.user;
 
-import co.elastic.clients.util.Pair;
 import com.mongodb.client.MongoCollection;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import me.teixayo.bytetalk.backend.security.RandomGenerator;
@@ -21,16 +20,14 @@ public class MongoUserService implements UserService {
     }
 
     @Override
-    public Pair<String,Long> saveUser(String username) {
-        String token = RandomGenerator.generateToken();
+    public long saveUser(String username, String password) {
         long userId = RandomGenerator.generateId();
-
         Document doc = new Document("_id", userId)
                 .append("username", username)
-                .append("token", token);
+                .append("password", password);
 
         users.insertOne(doc);
-        return new Pair<>(token,userId);
+        return userId;
     }
 
     @Override
@@ -39,33 +36,22 @@ public class MongoUserService implements UserService {
     }
 
     @Override
-    public boolean isTokenExists(String token) {
-        return exists(eq("token", token));
-    }
-
-    @Override
     public boolean isUserExists(long userId) {
         return exists(eq("_id", userId));
     }
 
     @Override
-    public String getTokenByUser(String username) {
+    public String getPasswordByUser(String username) {
         Document document = users
                 .find(eq("username", username))
-                .projection(include("token"))
+                .projection(include("password"))
                 .first();
-        return document != null ? document.getString("token") : null;
+        return document != null ? document.getString("password") : null;
     }
 
     @Override
     public User getUserByUserName(String username) {
         Document doc = users.find(eq("username", username)).first();
-        return doc == null ? null : toUser(doc);
-    }
-
-    @Override
-    public User getUserByToken(String token) {
-        Document doc = users.find(eq("token", token)).first();
         return doc == null ? null : toUser(doc);
     }
 
@@ -79,7 +65,7 @@ public class MongoUserService implements UserService {
         return new User(
                 document.getLong("_id"),
                 document.getString("username"),
-                document.getString("token"),
+                document.getString("password"),
                 null
         );
     }

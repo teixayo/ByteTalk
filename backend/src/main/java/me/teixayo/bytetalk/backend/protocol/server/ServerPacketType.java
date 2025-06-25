@@ -3,8 +3,8 @@ package me.teixayo.bytetalk.backend.protocol.server;
 import org.json.JSONObject;
 
 public enum ServerPacketType {
+    Status,
     GetToken,
-    SuccessLogin,
     BulkMessages
     ;
 

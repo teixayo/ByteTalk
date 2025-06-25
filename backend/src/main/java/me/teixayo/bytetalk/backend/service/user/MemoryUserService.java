@@ -1,6 +1,5 @@
 package me.teixayo.bytetalk.backend.service.user;
 
-import co.elastic.clients.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.security.RandomGenerator;
 import me.teixayo.bytetalk.backend.user.User;
@@ -17,12 +16,11 @@ public class MemoryUserService implements UserService {
         users = new HashMap<>();
     }
     @Override
-    public Pair<String,Long> saveUser(String username) {
-        String token = RandomGenerator.generateToken();
+    public long saveUser(String username, String password) {
         long userId = RandomGenerator.generateId();
-        User user = new User(userId,username,token,null);
+        User user = new User(userId,username,password,null);
         users.put(userId,user);
-        return new Pair<>(token,userId);
+        return userId;
     }
 
     @Override
@@ -31,35 +29,21 @@ public class MemoryUserService implements UserService {
     }
 
     @Override
-    public boolean isTokenExists(String token) {
-        return getUserByToken(token)!=null;
-    }
-
-    @Override
     public boolean isUserExists(long userId) {
         return users.containsKey(userId);
     }
 
     @Override
-    public String getTokenByUser(String username) {
+    public String getPasswordByUser(String username) {
         User user = getUserByUserName(username);
         if (user == null) return null;
-        return user.getToken();
+        return user.getPassword();
     }
 
     @Override
     public User getUserByUserName(String username) {
         for (User user : users.values()) {
             if (!user.getName().equals(username)) continue;
-            return user;
-        }
-        return null;
-    }
-
-    @Override
-    public User getUserByToken(String token) {
-        for (User user : users.values()) {
-            if (!user.getToken().equals(token)) continue;
             return user;
         }
         return null;

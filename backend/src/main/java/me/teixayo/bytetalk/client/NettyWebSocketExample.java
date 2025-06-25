@@ -13,6 +13,7 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacketType;
+import me.teixayo.bytetalk.backend.protocol.server.StatusCodes;
 import org.json.JSONObject;
 
 import java.net.URI;
@@ -21,6 +22,8 @@ import java.util.Scanner;
 @Slf4j
 public class NettyWebSocketExample {
     // Client-side implementation
+
+    public static String password;
     public static class NettyWebSocketClient {
         public static void main(String[] args) throws Exception {
             URI uri = new URI("ws://0.0.0.0:25565/websocket");
@@ -55,6 +58,8 @@ public class NettyWebSocketExample {
                         jsonObject.put("type", "CreateUser");
 
                         jsonObject.put("name", "test");
+                        jsonObject.put("password", scanner.nextLine());
+                        password = jsonObject.getString("password");
                         ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
 
 
@@ -76,10 +81,8 @@ public class NettyWebSocketExample {
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("type", "Login");
                         jsonObject.put("name", "test");
-                        jsonObject.put("token", scanner.nextLine());
+                        jsonObject.put("password", scanner.nextLine());
                         ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
-
-                        log.info("Token", jsonObject.get("token"));
 
                         Thread.sleep(1000);
                         ch.writeAndFlush(new TextWebSocketFrame(
@@ -153,12 +156,10 @@ public class NettyWebSocketExample {
                 System.out.println("Client received: " + ((TextWebSocketFrame) frame).text());
                 JSONObject jsonObject = new JSONObject(((TextWebSocketFrame) frame).text());
                 String type = jsonObject.getString("type");
-                if(type.equals("GetToken")) {
-                    String token = jsonObject.getString("token");
-
+                if(type.equals("Status") && jsonObject.getInt("code")== StatusCodes.SUCCESS.getStatusCode()) {
                     jsonObject.put("type","Login");
                     jsonObject.put("name", "test");
-                    jsonObject.put("token",token);
+                    jsonObject.put("password",password);
                     ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
                 } else {
                     System.out.println(jsonObject.toString());

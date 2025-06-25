@@ -1,6 +1,5 @@
 package me.teixayo.bytetalk.backend.networking;
 
-import co.elastic.clients.util.Pair;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -17,7 +16,9 @@ import me.teixayo.bytetalk.backend.Server;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacket;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacketType;
 import me.teixayo.bytetalk.backend.protocol.client.ClientStateType;
-import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
+import me.teixayo.bytetalk.backend.protocol.server.StatusCodes;
+import me.teixayo.bytetalk.backend.security.EncryptionUtils;
+import me.teixayo.bytetalk.backend.security.StringUtils;
 import me.teixayo.bytetalk.backend.user.User;
 import me.teixayo.bytetalk.backend.user.UserConnection;
 import me.teixayo.bytetalk.backend.user.UserManager;
@@ -93,38 +94,49 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
         if(ctx.channel().attr(ChannelInitializer.getState()).get()== ClientStateType.IN_LOGIN) {
             if(type.equals("Login")) {
                 String name = jsonObject.getString("name");
-                String token =  jsonObject.getString("token");
-
+                String password = EncryptionUtils.encrypt(jsonObject.getString("password"));
                 User user = Server.getInstance().getUserService().getUserByUserName(name);
 
-                //if(user==null) {
-                //    handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
-                //    return;
-               // }
-                //if(!user.getToken().equals(token)) {
-                //    handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
-                //    return;
-                //}
+                if(user==null) {
+                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
+                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    return;
+                }
+                if(!user.getPassword().equals(password)) {
+                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
+                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    return;
+                }
                 ctx.channel().attr(ChannelInitializer.getState()).set(ClientStateType.AFTER_LOGIN);
 
                 user.setUserConnection(new UserConnection(ctx,user));
                 this.user = user;
                 UserManager.getInstance().addUser(user);
-                user.sendPacket(ServerPacketType.SuccessLogin.createPacket(
-                        "description", "You successfully logged in"));
+                user.sendPacket(StatusCodes.SUCCESS.createPacket());
                 return;
             }
             if(type.equals("CreateUser")) {
                 String name = jsonObject.getString("name");
-                if (!Server.getInstance().getUserService().isUserExists(name)) {
-                    Pair<String, Long> userData = Server.getInstance().getUserService().saveUser(name);
-                    JSONObject output = new JSONObject();
-                    output.put("type", "GetToken");
-                    output.put("token", userData.key());
-
-                    ctx.channel().writeAndFlush(
-                            new TextWebSocketFrame(output.toString()));
+                String password = jsonObject.getString("password");
+                if (!StringUtils.isValidName(name)) {
+                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_USER.createPacket().getData().toString()));
+                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    return;
                 }
+                if (!StringUtils.isValidPassword(password)) {
+                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_PASSWORD.createPacket().getData().toString()));
+                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    return;
+                }
+                if (Server.getInstance().getUserService().isUserExists(name)) {
+                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.USER_EXISTS.createPacket().getData().toString()));
+                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    return;
+                }
+                log.info("User {} Created", name);
+                password = EncryptionUtils.encrypt(password);
+                Server.getInstance().getUserService().saveUser(name,password);
+                ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.SUCCESS.createPacket().getData().toString()));
             }
         } else {
             ClientPacketType packetType;
