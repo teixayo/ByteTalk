@@ -4,7 +4,6 @@ import org.json.JSONObject;
 
 public enum ServerPacketType {
     Status,
-    GetToken,
     BulkMessages
     ;
 
