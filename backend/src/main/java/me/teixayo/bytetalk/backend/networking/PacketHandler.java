@@ -26,10 +26,8 @@ import org.json.JSONObject;
 
 @Slf4j
 public class PacketHandler extends SimpleChannelInboundHandler<Object> {
-
     private static final String WEBSOCKET_PATH = "/websocket";
     private WebSocketServerHandshaker handshaker;
-
     private User user;
     @Override
 

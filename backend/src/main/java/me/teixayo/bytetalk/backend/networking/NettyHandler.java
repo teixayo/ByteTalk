@@ -17,10 +17,8 @@ public class NettyHandler {
     private static final WriteBufferWaterMark SERVER_WRITE_MARK = new WriteBufferWaterMark(
             Server.getInstance().getConfig().getNetworkingWriteBufferWaterMarkLow(),
             Server.getInstance().getConfig().getNetworkingWriteBufferWaterMarkHigh());
-
     private EventLoopGroup workerGroup;
     private ChannelInitializer channelInitializer;
-
     public NettyHandler() {
         Thread thread = new Thread(() -> {
 
@@ -46,13 +44,9 @@ public class NettyHandler {
                 if(Server.getInstance().getConfig().isNetworkingTcpNoDelay()) {
                     bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
                 }
-
-
                 if (transportType != TransportType.NIO) {
                     bootstrap.option(UnixChannelOption.SO_REUSEPORT, true);
-
                 }
-
                 bootstrap.bind()
                         .addListener((ChannelFutureListener) future -> {
                             Channel channel = future.channel();
