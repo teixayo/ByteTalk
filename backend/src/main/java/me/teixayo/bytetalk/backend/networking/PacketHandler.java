@@ -18,7 +18,6 @@ import me.teixayo.bytetalk.backend.protocol.client.ClientPacketType;
 import me.teixayo.bytetalk.backend.protocol.client.ClientStateType;
 import me.teixayo.bytetalk.backend.protocol.server.StatusCodes;
 import me.teixayo.bytetalk.backend.security.EncryptionUtils;
-import me.teixayo.bytetalk.backend.security.StringUtils;
 import me.teixayo.bytetalk.backend.user.User;
 import me.teixayo.bytetalk.backend.user.UserConnection;
 import me.teixayo.bytetalk.backend.user.UserManager;
@@ -111,17 +110,18 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 this.user = user;
                 UserManager.getInstance().addUser(user);
                 user.sendPacket(StatusCodes.SUCCESS.createPacket());
+                user.sendMessages(Server.getInstance().getCacheService().loadLastestMessages());
                 return;
             }
             if(type.equals("CreateUser")) {
                 String name = jsonObject.getString("name");
                 String password = jsonObject.getString("password");
-                if (!StringUtils.isValidName(name)) {
+                if (!EncryptionUtils.isValidName(name)) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_USER.createPacket().getData().toString()));
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
                     return;
                 }
-                if (!StringUtils.isValidPassword(password)) {
+                if (!EncryptionUtils.isValidPassword(password)) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_PASSWORD.createPacket().getData().toString()));
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
                     return;

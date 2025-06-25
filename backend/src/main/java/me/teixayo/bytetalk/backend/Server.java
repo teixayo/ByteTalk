@@ -2,6 +2,7 @@ package me.teixayo.bytetalk.backend;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import me.teixayo.bytetalk.backend.service.cache.CacheService;
 import me.teixayo.bytetalk.backend.service.message.MessageService;
 import me.teixayo.bytetalk.backend.service.search.SearchService;
 import me.teixayo.bytetalk.backend.service.user.UserService;
@@ -29,6 +30,7 @@ public final class Server implements LoopApp {
     private UserService userService;
     private MessageService messageService;
     private SearchService searchService;
+    private CacheService cacheService;
     private NettyHandler nettyHandler;
     private Config config;
     private final Loop loop;
@@ -68,6 +70,9 @@ public final class Server implements LoopApp {
 
         searchService = SearchService.findBestService();
         log.info("Using {} as SearchService", searchService.getClass().getSimpleName());
+
+        cacheService = CacheService.findBestService();
+        log.info("Using {} as CacheService", cacheService.getClass().getSimpleName());
 
     }
 

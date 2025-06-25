@@ -3,7 +3,6 @@ package me.teixayo.bytetalk.backend.user;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -88,31 +87,35 @@ public class UserConnection {
         log.info(packet.getData().toString());
         switch (packet.getPacketType()) {
             case SendMessage -> {
-                Server.getInstance().getMessageService().saveMessage(new Message(RandomGenerator.generateId(), user.getId(), packet.getData().getString("content"), Date.from(Instant.now())));
+                Message message = new Message(RandomGenerator.generateId(), user.getId(), packet.getData().getString("content"), Date.from(Instant.now()));
+                Server.getInstance().getMessageService().saveMessage(message);
+                Server.getInstance().getCacheService().addMessageToCache(message);
             }
             case RequestBulkMessage -> {
                 long time = packet.getData().getLong("time");
                 Date date = Date.from(Instant.ofEpochMilli(time));
 
                 List<Message> loadedMessages = Server.getInstance().getMessageService().loadMessagesBeforeDate(date,100);
-
-                JSONArray bulkJson = new JSONArray();
-                for (Message message : loadedMessages) {
-                    JSONObject jsonObject = new JSONObject();
-                    String messageUsername = Server.getInstance().getUserService().getUserById(message.getUserID()).getName();
-                    jsonObject.put("id",message.getId());
-                    jsonObject.put("username", messageUsername);
-                    jsonObject.put("content",message.getContent());
-                    jsonObject.put("date",message.getDate().toInstant().toEpochMilli());
-
-                    bulkJson.put(jsonObject);
-                }
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("messages", bulkJson);
-                ServerPacket bulkMessagePacket = ServerPacketType.BulkMessages.createPacket(jsonObject);
-                sendPacket(bulkMessagePacket);
+                sendMessages(loadedMessages);
             }
         }
+    }
+
+    public void sendMessages(List<Message> messages) {
+        JSONArray bulkJson = new JSONArray();
+        for (Message message : messages) {
+            JSONObject jsonObject = new JSONObject();
+            String messageUsername = Server.getInstance().getUserService().getUserById(message.getUserID()).getName();
+            jsonObject.put("id",message.getId());
+            jsonObject.put("username", messageUsername);
+            jsonObject.put("content",message.getContent());
+            jsonObject.put("date",message.getDate().toInstant().toEpochMilli());
+            bulkJson.put(jsonObject);
+        }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("messages", bulkJson);
+        ServerPacket bulkMessagePacket = ServerPacketType.BulkMessages.createPacket(jsonObject);
+        sendPacket(bulkMessagePacket);
     }
 
 }
