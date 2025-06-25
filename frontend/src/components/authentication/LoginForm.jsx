@@ -4,21 +4,19 @@ import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
-import useAuth from "../../hooks/useAuth.jsx";
 import { useSocket } from "../../context/SocketContext.jsx";
 
 let localUserName;
+let localUserPassword;
 
 const LoginForm = () => {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState([]);
-  const { getToken } = useAuth();
   const { socket } = useSocket();
 
   useEffect(() => {
-    if(!socket) {
-      console.log('socket isnt ready')
-      return
+    if (!socket) {
+      console.log("socket isnt ready");
+      return;
     }
 
     socket.onopen = () => {
@@ -26,50 +24,47 @@ const LoginForm = () => {
     };
 
     socket.onmessage = (event) => {
-      const msg = event.data;
-      const parsed = JSON.parse(msg);
+      const data = JSON.parse(event.data);
 
-      console.log(parsed.description);
+      if (data.type == "Status" && data.code == "1000") {
+        alert("Login successful");
+        navigate("/chat");
+      }
 
-      setMessages((prev) => [...prev, `Server: ${msg}`]);
     };
-
   }, [socket]);
 
   const handleSubmit = (event) => {
-    const token = getToken();
     localUserName = event.fildname;
+    localUserPassword = event.password;
 
     if (socket && socket.readyState === WebSocket.OPEN) {
       const loginPayload = {
         type: "Login",
         name: localUserName,
-        token: token,
+        password: localUserPassword,
       };
 
-      console.log(loginPayload);
+      console.log("📨 Sending login:", loginPayload);
       socket.send(JSON.stringify(loginPayload));
-
     } else {
       console.log("⚠️ WebSocket هنوز وصل نشده. منتظر اتصال باش.");
     }
-
-    setTimeout(() => {
-      navigate("/chat");
-    }, 3000);
   };
 
   const validationSchema = Yup.object({
     fildname: Yup.string().required("Username is required"),
+    password: Yup.string().required("Username is required"),
   });
+
   return (
     <div className="flex justify-center itmes-center w-full">
       <Formik
-        initialValues={{ fildname: "" }}
+        initialValues={{ fildname: "", password: "" }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        <Form className="bg-white rounded-2xl w-6/12 h-45 flex justify-center items-center mt-10 pb-2">
+        <Form className="bg-white rounded-2xl w-6/12 h-65 flex justify-center items-center mt-10 pb-2">
           <div className="w-full">
             <div className="flex justify-center mt-4 ">
               <div className="w-10/12">
@@ -84,8 +79,20 @@ const LoginForm = () => {
                   component="div"
                   className="text-red-500 text-sm ml-0.5"
                 />
+                <Field
+                  name="password"
+                  type="text"
+                  placeholder="Password"
+                  className="w-full h-10 border mt-4 border-gray-400 px-3 rounded-md"
+                />
+                <ErrorMessage
+                  name="password"
+                  component="div"
+                  className="text-red-500 text-sm ml-0.5"
+                />
               </div>
             </div>
+
             <div className="flex justify-center mt-4">
               <button
                 type="submit"
@@ -97,15 +104,9 @@ const LoginForm = () => {
           </div>
         </Form>
       </Formik>
-      <ul className="mt-6 list-disc pl-5">
-        {messages.map((msg, i) => (
-          <li key={i} className="text-sm">
-            {msg}
-          </li>
-        ))}
-      </ul>
     </div>
   );
 };
 
 export default LoginForm;
+
