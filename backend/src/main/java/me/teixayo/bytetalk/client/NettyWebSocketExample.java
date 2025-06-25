@@ -60,6 +60,7 @@ public class NettyWebSocketExample {
 
                         Thread.sleep(1000);
 
+
                         ch.writeAndFlush(new TextWebSocketFrame(
                                 ClientPacketType.RequestBulkMessage.createPacket(
                                                 "time", String.valueOf(System.currentTimeMillis()))
