@@ -53,7 +53,7 @@ const LoginForm = () => {
 
   const validationSchema = Yup.object({
     fildname: Yup.string()
-      .min(3, "Username must be at least 3 characters")
+      .min(4, "Username must be at least 4 characters")
       .matches(
         /^[a-zA-Z]+$/,
         "Username must only contain lowercase letters (a-z)"
