@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -30,7 +30,6 @@ const LoginForm = () => {
         alert("Login successful");
         navigate("/chat");
       }
-
     };
   }, [socket]);
 
@@ -53,8 +52,22 @@ const LoginForm = () => {
   };
 
   const validationSchema = Yup.object({
-    fildname: Yup.string().required("Username is required"),
-    password: Yup.string().required("Username is required"),
+    fildname: Yup.string()
+      .min(3, "Username must be at least 3 characters")
+      .matches(
+        /^[a-zA-Z]+$/,
+        "Username must only contain lowercase letters (a-z)"
+      )
+      .max(19, "Username must be a maximum of 19 characters")
+      .required("Username is required"),
+    password: Yup.string()
+      .min(8, "Password must be at least 8 characters")
+      .max(19, "Password must be at most 19 characters")
+      .matches(
+        /^[\x20-\x7E]+$/,
+        "Password can only include English letters, numbers, and symbols"
+      )
+      .required("Password is required"),
   });
 
   return (
@@ -64,7 +77,7 @@ const LoginForm = () => {
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        <Form className="bg-white rounded-2xl w-6/12 h-65 flex justify-center items-center mt-10 pb-2">
+        <Form className="bg-white rounded-2xl w-6/12 h-70 flex justify-center items-center mt-10 pb-2">
           <div className="w-full">
             <div className="flex justify-center mt-4 ">
               <div className="w-10/12">
@@ -101,6 +114,12 @@ const LoginForm = () => {
                 Login
               </button>
             </div>
+            <p className="flex justify-center mt-1">
+              Already have an account?
+              <Link to="/" className="text-blue-600 underline ml-1">
+                Sing up
+              </Link>
+            </p>
           </div>
         </Form>
       </Formik>
@@ -109,4 +128,3 @@ const LoginForm = () => {
 };
 
 export default LoginForm;
-

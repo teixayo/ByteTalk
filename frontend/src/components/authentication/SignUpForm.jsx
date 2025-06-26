@@ -1,8 +1,7 @@
-
 import { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useSocket } from "../../context/SocketContext";
 
 let localUserName = "";
@@ -65,9 +64,24 @@ const SignUpForm = () => {
   };
 
   const validationSchema = Yup.object({
-    fildname: Yup.string().required("Username is required"),
-    password: Yup.string().required("Username is required"),
-  });
+      fildname: Yup.string()
+        .min(3, "Username must be at least 3 characters")
+        .matches(
+          /^[a-zA-Z]+$/,
+          "Username must only contain lowercase letters (a-z)"
+        )
+        .max(19, "Username must be a maximum of 19 characters")
+        .required("Username is required"),
+      password: Yup.string()
+        .min(8, "Password must be at least 8 characters")
+        .max(19, "Password must be at most 19 characters")
+        .matches(
+          /^[\x20-\x7E]+$/,
+          "Password can only include English letters, numbers, and symbols"
+        )
+        .required("Password is required"),
+    });
+
   return (
     <div className="flex justify-center itmes-center w-full">
       <Formik
@@ -113,10 +127,10 @@ const SignUpForm = () => {
               </button>
             </div>
             <p className="flex justify-center mt-1">
-              Do you have an account?
-              <a href="/login" className="ml-1 text-blue-600">
-                Register
-              </a>
+              Already have an account?
+              <Link to="/login" className="text-blue-600 underline ml-1">
+                Login
+              </Link>
             </p>
           </div>
         </Form>
