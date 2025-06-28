@@ -20,17 +20,19 @@ const SignUpForm = () => {
       console.log("📨 Message received:", data);
 
       if (data.type == "Status" && data.code == "1000") {
-        const loginPayload = {
-          type: "Login",
-          name: localUserName,
-          password: localUserPassword,
-        };
+        setTimeout(() => {
+          const loginPayload = {
+            type: "Login",
+            name: localUserName,
+            password: localUserPassword,
+          };
+          console.log("📨 Sending login:", loginPayload);
+          console.log("WS readyState:", socket.readyState);
+          socket.send(JSON.stringify(loginPayload));
+        }, 1000);
 
-        console.log("📨 Sending login:", loginPayload);
-        socket.send(JSON.stringify(loginPayload));
-
-        alert("Sing up successful");
-        navigate("/chat");
+        // alert("Sing up successful");
+        // navigate("/chat");
       }
 
       if (data.type === "SuccessLogin") {
@@ -64,23 +66,23 @@ const SignUpForm = () => {
   };
 
   const validationSchema = Yup.object({
-      fildname: Yup.string()
-        .min(4, "Username must be at least 4 characters")
-        .matches(
-          /^[a-zA-Z]+$/,
-          "Username must only contain lowercase letters (a-z)"
-        )
-        .max(19, "Username must be a maximum of 19 characters")
-        .required("Username is required"),
-      password: Yup.string()
-        .min(8, "Password must be at least 8 characters")
-        .max(19, "Password must be at most 19 characters")
-        .matches(
-          /^[\x20-\x7E]+$/,
-          "Password can only include English letters, numbers, and symbols"
-        )
-        .required("Password is required"),
-    });
+    fildname: Yup.string()
+      .min(4, "Username must be at least 4 characters")
+      .matches(
+        /^[a-zA-Z]+$/,
+        "Username must only contain lowercase letters (a-z)"
+      )
+      .max(19, "Username must be a maximum of 19 characters")
+      .required("Username is required"),
+    password: Yup.string()
+      .min(8, "Password must be at least 8 characters")
+      .max(19, "Password must be at most 19 characters")
+      .matches(
+        /^[\x20-\x7E]+$/,
+        "Password can only include English letters, numbers, and symbols"
+      )
+      .required("Password is required"),
+  });
 
   return (
     <div className="flex justify-center itmes-center w-full">

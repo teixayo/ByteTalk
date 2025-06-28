@@ -16,7 +16,7 @@ export const SocketProvider = ({ children }) => {
 
     setSocket(ws);
 
-    // return () => ws.close();
+    return () => ws.close();
   }, []);
 
   return (
