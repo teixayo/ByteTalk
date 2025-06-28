@@ -15,8 +15,7 @@ public class ChannelInitializer extends io.netty.channel.ChannelInitializer<Chan
 
     @Getter
     private static AttributeKey<ClientStateType> state = AttributeKey.newInstance("State");
-    public ChannelInitializer() {
-    }
+
     @Override
     protected void initChannel(Channel channel) {
         channel.pipeline()

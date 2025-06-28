@@ -45,6 +45,5 @@ public class User {
         ServerPacket bulkMessagePacket = ServerPacketType.BulkMessages.createPacket(jsonObject);
         sendPacket(bulkMessagePacket);
     }
-
 }
 

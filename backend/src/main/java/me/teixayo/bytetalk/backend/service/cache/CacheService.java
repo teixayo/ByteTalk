@@ -18,5 +18,4 @@ public interface CacheService {
     Collection<Message> loadLastestMessages();
     void addMessageToCache(Message message);
     void addMessagesToCache(List<Message> messageList);
-
 }
