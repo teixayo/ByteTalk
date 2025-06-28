@@ -90,18 +90,19 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
         if(ctx.channel().attr(ChannelInitializer.getState()).get()== ClientStateType.IN_LOGIN) {
             if(type.equals("Login")) {
+                log.info("Login Bemola!");
                 String name = jsonObject.getString("name");
                 String password = EncryptionUtils.encrypt(jsonObject.getString("password"));
                 User user = Server.getInstance().getUserService().getUserByUserName(name);
 
                 if(user==null) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
-                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    //handshaker.close(ctx.channel(), new CloseWebSocketFrame());
                     return;
                 }
                 if(!user.getPassword().equals(password)) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
-                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    //handshaker.close(ctx.channel(), new CloseWebSocketFrame());
                     return;
                 }
                 ctx.channel().attr(ChannelInitializer.getState()).set(ClientStateType.AFTER_LOGIN);
