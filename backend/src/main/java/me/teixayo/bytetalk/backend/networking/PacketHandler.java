@@ -111,7 +111,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 this.user = user;
                 UserManager.getInstance().addUser(user);
                 user.sendPacket(StatusCodes.SUCCESS.createPacket());
-                user.sendMessages(Server.getInstance().getCacheService().loadLastestMessages());
+//                user.sendMessages(Server.getInstance().getCacheService().loadLastestMessages());
                 return;
             }
             if(type.equals("CreateUser")) {
