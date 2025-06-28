@@ -96,12 +96,12 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
                 if(user==null) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
-                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    //handshaker.close(ctx.channel(), new CloseWebSocketFrame());
                     return;
                 }
                 if(!user.getPassword().equals(password)) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
-                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    //handshaker.close(ctx.channel(), new CloseWebSocketFrame());
                     return;
                 }
                 ctx.channel().attr(ChannelInitializer.getState()).set(ClientStateType.AFTER_LOGIN);
