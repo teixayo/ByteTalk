@@ -8,6 +8,13 @@ import { useSocket } from "../../context/SocketContext.jsx";
 
 let localUserName;
 let localUserPassword;
+const statusMessages = {
+  1000: "✅ Success",
+  1001: "❌ Incorrect username or password",
+  1002: "❌ This username is already taken",
+  1003: "❌ Invalid username format",
+  1004: "❌ Invalid password format",
+};
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -25,9 +32,12 @@ const LoginForm = () => {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      const alertmessage = statusMessages[data.code];
 
+      console.log("📨 Message received:", data);
+
+      alert(alertmessage);
       if (data.type == "Status" && data.code == "1000") {
-        alert("Login successful");
         navigate("/chat");
       }
     };
