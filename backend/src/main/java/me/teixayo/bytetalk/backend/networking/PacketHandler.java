@@ -151,15 +151,12 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
-        // Generate error page if response status code is not OK
         if (res.status().code() != 200) {
             ByteBuf buf = Unpooled.copiedBuffer(res.status().toString(), CharsetUtil.UTF_8);
             res.content().writeBytes(buf);
             buf.release();
             HttpUtil.setContentLength(res, res.content().readableBytes());
         }
-
-        // Send the response and close connection if necessary
         ChannelFuture f = ctx.channel().writeAndFlush(res);
         if (!HttpUtil.isKeepAlive(req) || res.status().code() != 200) {
             f.addListener(ChannelFutureListener.CLOSE);
