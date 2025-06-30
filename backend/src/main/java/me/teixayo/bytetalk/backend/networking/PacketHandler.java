@@ -90,7 +90,6 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
         if(ctx.channel().attr(ChannelInitializer.getState()).get()== ClientStateType.IN_LOGIN) {
             if(type.equals("Login")) {
-                log.info("Login Bemola!");
                 String name = jsonObject.getString("name");
                 String password = EncryptionUtils.encrypt(jsonObject.getString("password"));
                 User user = Server.getInstance().getUserService().getUserByUserName(name);

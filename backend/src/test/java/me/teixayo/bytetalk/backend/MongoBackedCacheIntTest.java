@@ -6,7 +6,6 @@ import me.teixayo.bytetalk.backend.security.EncryptionUtils;
 import me.teixayo.bytetalk.backend.service.user.MongoUserService;
 import me.teixayo.bytetalk.backend.user.User;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -25,23 +24,19 @@ public class MongoBackedCacheIntTest {
         mongoDBContainer.start();
         String connectionString = mongoDBContainer.getConnectionString();
         new MongoDBConnection(connectionString);
-    }
-    @Test
-    public void testSaveAndRetrieveUser() {
         MongoUserService mongoUserService = new MongoUserService();
         String name = "Test";
         String password = EncryptionUtils.encrypt("MyPassword");
-        long id = mongoUserService.saveUser(name,password);
+        long id = mongoUserService.saveUser(name, password);
 
         assertUserEquals(mongoUserService.getUserByUserName(name), name, password, id);
-        assertUserEquals(mongoUserService.getUserById(id), name,password, id);
+        assertUserEquals(mongoUserService.getUserById(id), name, password, id);
 
         assertEquals(password, mongoUserService.getPasswordByUser(name));
         assertTrue(mongoUserService.isUserExists(id));
         assertTrue(mongoUserService.isUserExists(name));
         assertFalse(mongoUserService.isUserExists(-1));
         assertFalse(mongoUserService.isUserExists("-"));
-
     }
     private void assertUserEquals(User user, String expectedName, String expectedPassword, long expectedId) {
         assertEquals(expectedName, user.getName());

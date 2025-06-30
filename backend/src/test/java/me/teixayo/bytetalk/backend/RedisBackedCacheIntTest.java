@@ -6,7 +6,6 @@ import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
 import me.teixayo.bytetalk.backend.message.Message;
 import me.teixayo.bytetalk.backend.service.cache.CacheService;
 import me.teixayo.bytetalk.backend.service.cache.RedisCacheService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -23,14 +22,10 @@ public class RedisBackedCacheIntTest {
     @Container
     static GenericContainer<?> redisDBContainer = new GenericContainer<>(DockerImageName.parse("redis:7.2.4"))
             .withExposedPorts(6379);
-    @BeforeEach
-    public void setUp() {
-        redisDBContainer.start();
-        new RedisDBConnection("0.0.0.0",redisDBContainer.getMappedPort(6379),"",false);
-    }
-
     @Test
     public void testSaveAndRetrieveUser() {
+        redisDBContainer.start();
+        new RedisDBConnection("0.0.0.0",redisDBContainer.getMappedPort(6379),"",false);
         CacheService cacheService = new RedisCacheService();
         for(int i = 0; i < 5; i++) {
             long now = System.nanoTime();

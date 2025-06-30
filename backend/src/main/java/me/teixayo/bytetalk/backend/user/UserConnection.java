@@ -61,7 +61,6 @@ public class UserConnection {
     }
     public void keepAlive() {
         lastPongTime = System.currentTimeMillis();
-        log.info("KeepAlive");
     }
 
     public void checkTimeOut() {
