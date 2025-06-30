@@ -66,7 +66,7 @@ public class UserConnection {
 
     public void checkTimeOut() {
         if(System.currentTimeMillis() - lastPongTime >= 10_000) {
-            disconnect(404,"Timed out");
+            disconnect();
             online=false;
             log.info("Disconnected the {} (Timed Out)", user.getName());
         }
