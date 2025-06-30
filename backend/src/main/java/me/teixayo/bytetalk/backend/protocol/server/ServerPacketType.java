@@ -16,12 +16,12 @@ public enum ServerPacketType {
             jsonObject.put(fields[2*i],fields[2*i+1]);
         }
 
-        jsonObject.put("type",this);
+        jsonObject.put("type",name());
         return new ServerPacket(this,jsonObject);
     }
 
     public ServerPacket createPacket(JSONObject jsonObject) {
-        jsonObject.put("type",this);
+        jsonObject.put("type",name());
         return new ServerPacket(this,jsonObject);
     }
 

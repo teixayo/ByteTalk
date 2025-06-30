@@ -1,4 +1,4 @@
-package me.teixayo.bytetalk.backend;
+package integration;
 
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class RedisBackedCacheIntTest {
     @Test
     public void testSaveAndRetrieveUser() {
         redisDBContainer.start();
-        new RedisDBConnection("0.0.0.0",redisDBContainer.getMappedPort(6379),"",false);
+        new RedisDBConnection("0.0.0.0",redisDBContainer.getMappedPort(6379),null,false);
         CacheService cacheService = new RedisCacheService();
         for(int i = 0; i < 5; i++) {
             long now = System.nanoTime();

@@ -15,6 +15,9 @@ public enum RedisKeys {
     }
 
     public String getKey(Object... replacements) {
+        if(Server.getInstance() == null) {
+            return String.format(this.template, replacements);
+        }
         return Server.getInstance().getConfig().getRedisPrefix() + ':' + String.format(this.template, replacements);
     }
 

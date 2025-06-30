@@ -17,7 +17,7 @@ public enum ClientPacketType {
             jsonObject.put(fields[2*i],fields[2*i+1]);
         }
 
-        jsonObject.put("type",this);
+        jsonObject.put("type",name());
         return new ClientPacket(this,jsonObject);
     }
     public ClientPacket createPacket(JSONObject jsonObject) {

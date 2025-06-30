@@ -1,4 +1,4 @@
-package me.teixayo.bytetalk.backend;
+package integration;
 
 
 import lombok.extern.slf4j.Slf4j;
