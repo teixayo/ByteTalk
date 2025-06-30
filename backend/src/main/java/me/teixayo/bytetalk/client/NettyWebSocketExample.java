@@ -32,7 +32,6 @@ public class NettyWebSocketExample {
                 final WebSocketClientHandler handler = new WebSocketClientHandler(
                         WebSocketClientHandshakerFactory.newHandshaker(
                                 uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()));
-
                 Bootstrap b = new Bootstrap();
                 b.group(group)
                         .channel(NioSocketChannel.class)
