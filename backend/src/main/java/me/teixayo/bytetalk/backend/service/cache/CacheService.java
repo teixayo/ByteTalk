@@ -10,7 +10,7 @@ import java.util.List;
 public interface CacheService {
 
     static CacheService findBestService() {
-        if(!RedisDBConnection.isConnected()) return new RedisCacheService(Server.getInstance().getConfig().getCacheMessageSize());
+        if(RedisDBConnection.isConnected()) return new RedisCacheService(Server.getInstance().getConfig().getCacheMessageSize());
         return new MemoryCacheService(Server.getInstance().getConfig().getCacheMessageSize());
     }
 
