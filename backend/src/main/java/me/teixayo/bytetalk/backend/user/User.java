@@ -10,6 +10,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 
 @Getter
 public class User {
@@ -31,11 +33,17 @@ public class User {
     }
     public void sendMessages(Collection<Message> messages) {
         JSONArray bulkJson = new JSONArray();
+
+        HashSet<Long> userIds = new HashSet<>();
+        for (Message message : messages) {
+            userIds.add(message.getUserID());
+        }
+        HashMap<Long, String> usernameByIds = Server.getInstance().getUserService().getUsernameByIds(userIds);
+
         for (Message message : messages) {
             JSONObject jsonObject = new JSONObject();
-            String messageUsername = Server.getInstance().getUserService().getUserById(message.getUserID()).getName();
             jsonObject.put("id",message.getId());
-            jsonObject.put("username", messageUsername);
+            jsonObject.put("username", usernameByIds.get(message.getUserID()));
             jsonObject.put("content",message.getContent());
             jsonObject.put("date",message.getDate().toInstant().toEpochMilli());
             bulkJson.put(jsonObject);

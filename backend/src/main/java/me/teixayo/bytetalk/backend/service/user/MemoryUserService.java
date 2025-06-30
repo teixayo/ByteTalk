@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.security.RandomGenerator;
 import me.teixayo.bytetalk.backend.user.User;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,5 +53,15 @@ public class MemoryUserService implements UserService {
     @Override
     public User getUserById(long userId) {
         return users.get(userId);
+    }
+
+    @Override
+    public HashMap<Long, String> getUsernameByIds(Collection<Long> usersId) {
+        HashMap<Long,String> usernames = new HashMap<>(users.size());
+        for (long userId : usersId) {
+            usernames.put(userId,getUserById(userId).getName());
+        }
+
+        return usernames;
     }
 }

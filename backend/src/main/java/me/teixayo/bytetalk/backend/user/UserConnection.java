@@ -88,6 +88,8 @@ public class UserConnection {
                 Message message = new Message(RandomGenerator.generateId(), user.getId(), packet.getData().getString("content"), Date.from(Instant.now()));
                 Server.getInstance().getMessageService().saveMessage(message);
                 Server.getInstance().getCacheService().addMessageToCache(message);
+
+
             }
             case RequestBulkMessage -> {
                 long time = packet.getData().getLong("time");

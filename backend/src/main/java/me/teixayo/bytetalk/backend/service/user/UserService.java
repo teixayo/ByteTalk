@@ -3,6 +3,9 @@ package me.teixayo.bytetalk.backend.service.user;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import me.teixayo.bytetalk.backend.user.User;
 
+import java.util.Collection;
+import java.util.HashMap;
+
 public interface UserService {
 
     static UserService findBestService() {
@@ -16,5 +19,7 @@ public interface UserService {
 
     User getUserByUserName(String username);
     User getUserById(long userId);
+
+    HashMap<Long,String> getUsernameByIds(Collection<Long> usersId);
 
 }

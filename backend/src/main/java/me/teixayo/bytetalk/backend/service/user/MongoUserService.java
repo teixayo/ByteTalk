@@ -1,11 +1,16 @@
 package me.teixayo.bytetalk.backend.service.user;
 
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import me.teixayo.bytetalk.backend.security.RandomGenerator;
 import me.teixayo.bytetalk.backend.user.User;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+
+import java.util.Collection;
+import java.util.HashMap;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
@@ -59,6 +64,27 @@ public class MongoUserService implements UserService {
     public User getUserById(long userId) {
         Document doc = users.find(eq("_id", userId)).first();
         return doc != null ? toUser(doc) : null;
+    }
+
+
+    @Override
+    public HashMap<Long, String> getUsernameByIds(Collection<Long> userIds) {
+        HashMap<Long, String> result = new HashMap<>();
+        if (userIds == null || userIds.isEmpty()) {
+            return result;
+        }
+        Bson filter = Filters.in("_id", userIds);
+        try (MongoCursor<Document> cursor = users.find(filter)
+                .projection(include("_id", "username"))
+                .iterator()) {
+            while (cursor.hasNext()) {
+                Document doc = cursor.next();
+                Long id = doc.getLong("_id");
+                String username = doc.getString("username");
+                result.put(id, username);
+            }
+        }
+        return result;
     }
 
     private User toUser(Document document) {
