@@ -63,7 +63,7 @@ public class NettyHandler {
                 workerGroup.shutdownGracefully();
             }
         });
-        thread.setName("NettyHandler");
+        thread.setName("Netty");
         thread.start();
     }
 }

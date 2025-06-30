@@ -43,7 +43,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
         ctx.close();
     }
     public void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req) {
-        // Handle bad request
+
         if (!req.decoderResult().isSuccess() || (!"websocket".equals(req.headers().get("Upgrade")))) {
             sendHttpResponse(ctx, req, new DefaultFullHttpResponse(
                     HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST));

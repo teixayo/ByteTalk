@@ -1,6 +1,7 @@
 package me.teixayo.bytetalk.backend.service.cache;
 
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
+import me.teixayo.bytetalk.backend.database.redis.RedisKeys;
 import me.teixayo.bytetalk.backend.message.Message;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -12,14 +13,10 @@ import java.util.*;
 public class RedisCacheService implements CacheService {
 
     private final int maxSize;
-    private final String listKey;
-    private final String hashKeyPrefix;
     private final JedisPool jedisPool;
 
     public RedisCacheService(int maxSize) {
         this.jedisPool = RedisDBConnection.getJedisPool();
-        this.listKey = "list.";
-        this.hashKeyPrefix = "key.";
         this.maxSize = maxSize;
     }
     public RedisCacheService() {
@@ -30,9 +27,9 @@ public class RedisCacheService implements CacheService {
     public Collection<Message> loadLastestMessages() {
         List<Message> result = new ArrayList<>();
         try (Jedis jedis = jedisPool.getResource()) {
-            List<String> ids = jedis.lrange(listKey, 0, -1);
+            List<String> ids = jedis.lrange(RedisKeys.MESSAGES_LIST.getKey(), 0, -1);
             for (String idStr : ids) {
-                Map<String, String> fields = jedis.hgetAll(hashKeyPrefix + idStr);
+                Map<String, String> fields = jedis.hgetAll(RedisKeys.MESSAGES.getKey(idStr));
                 if (fields == null || fields.isEmpty()) continue;
                 long id = Long.parseLong(fields.get("id"));
                 long userID = Long.parseLong(fields.get("userID"));
@@ -60,22 +57,22 @@ public class RedisCacheService implements CacheService {
                 map.put("userID", String.valueOf(msg.getUserID()));
                 map.put("content", msg.getContent());
                 map.put("date", msg.getDate().toInstant().toString());
-                pipeline.hset(hashKeyPrefix + idStr, map);
-                pipeline.rpush(listKey, idStr);
+                pipeline.hset(RedisKeys.MESSAGES.getKey(idStr), map);
+                pipeline.rpush(RedisKeys.MESSAGES_LIST.getKey(), idStr);
             }
             pipeline.sync();
 
-            long listLen = jedis.llen(listKey);
+            long listLen = jedis.llen(RedisKeys.MESSAGES_LIST.getKey());
             if (!(listLen > maxSize)) return;
 
             long removeCount = listLen - maxSize;
-            List<String> removedIds = jedis.lrange(listKey, 0, removeCount - 1);
-            jedis.ltrim(listKey, removeCount, -1);
+            List<String> removedIds = jedis.lrange(RedisKeys.MESSAGES_LIST.getKey(), 0, removeCount - 1);
+            jedis.ltrim(RedisKeys.MESSAGES_LIST.getKey(), removeCount, -1);
 
             if (removedIds.isEmpty()) return;
             Pipeline delPipeline = jedis.pipelined();
             for (String remId : removedIds) {
-                delPipeline.del(hashKeyPrefix + remId);
+                delPipeline.del(RedisKeys.MESSAGES.getKey(remId));
             }
             delPipeline.sync();
         }

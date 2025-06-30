@@ -27,6 +27,7 @@ networking:
   # KQUEUE
   # NIO
   transport: AUTO
+  max-time-out: 10 #s
   write-buffer-watermark:
     low: 1048576
     high: 2097152

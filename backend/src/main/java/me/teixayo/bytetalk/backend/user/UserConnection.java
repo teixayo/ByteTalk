@@ -44,6 +44,7 @@ public class UserConnection {
     public void disconnect() {
         channel.channel().closeFuture().addListener((ChannelFutureListener) future -> {
             online = false;
+            UserManager.getInstance().removeUser(user);
         });
 
     }
@@ -64,7 +65,7 @@ public class UserConnection {
     }
 
     public void checkTimeOut() {
-        if(System.currentTimeMillis() - lastPongTime >= 10_000) {
+        if(System.currentTimeMillis() - lastPongTime >= Server.getInstance().getConfig().getMaxTimeOut() * 1000L) {
             disconnect();
             online=false;
             log.info("Disconnected the {} (Timed Out)", user.getName());
@@ -78,8 +79,6 @@ public class UserConnection {
                 Message message = new Message(RandomGenerator.generateId(), user.getId(), packet.getData().getString("content"), Date.from(Instant.now()));
                 Server.getInstance().getMessageService().saveMessage(message);
                 Server.getInstance().getCacheService().addMessageToCache(message);
-
-
             }
             case RequestBulkMessage -> {
                 long time = packet.getData().getLong("time");

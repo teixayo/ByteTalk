@@ -10,39 +10,41 @@ import java.util.Map;
 @Getter
 public class Config {
 
-    private Map<String,Object> data;
+    private final Map<String,Object> data;
 
-    private boolean redisToggle;
-    private String redisAddress;
-    private int redisPort;
-    private String redisUser;
-    private String redisPassword;
-    private boolean redisSSL;
-    private String redisPrefix;
+    private final boolean redisToggle;
+    private final String redisAddress;
+    private final int redisPort;
+    private final String redisUser;
+    private final String redisPassword;
+    private final boolean redisSSL;
+    private final String redisPrefix;
 
-    private boolean mongoToggle;
-    private String mongoConnectionUrl;
+    private final boolean mongoToggle;
+    private final String mongoConnectionUrl;
 
-    private boolean elasticToggle;
-    private String elasticAddress;
-    private int elasticPort;
-    private String elasticUser;
-    private String elasticPassword;
+    private final boolean elasticToggle;
+    private final String elasticAddress;
+    private final int elasticPort;
+    private final String elasticUser;
+    private final String elasticPassword;
 
-    private String networkingIp;
-    private int networkingPort;
-    private boolean networkingTcpFastOpen;
-    private boolean networkingTcpNoDelay;
-    private TransportType networkingTransportType;
-    private int networkingWriteBufferWaterMarkLow;
-    private int networkingWriteBufferWaterMarkHigh;
+    private final String networkingIp;
+    private final int networkingPort;
+    private final boolean networkingTcpFastOpen;
+    private final boolean networkingTcpNoDelay;
+    private final TransportType networkingTransportType;
+    private final int networkingWriteBufferWaterMarkLow;
+    private final int networkingWriteBufferWaterMarkHigh;
 
-    private int cacheMessageSize;
+    private final int cacheMessageSize;
+
+    private final int maxTimeOut;
 
     public Config(Map<String, Object> data) {
         this.data = data;
         redisToggle = (boolean) get("database.redis.toggle");
-        redisAddress = (String) get("database.redis.adddress");
+        redisAddress = (String) get("database.redis.address");
         redisPort = (int) get("database.redis.port");
         redisUser = (String) get("database.redis.user");
         redisPassword = (String) get("database.redis.password");
@@ -66,10 +68,14 @@ public class Config {
 
         networkingTransportType = transport.equals("AUTO") ? TransportType.bestTransportType() : TransportType.valueOf(transport);
 
+        maxTimeOut = (int) get("networking.max-time-out");
+
         networkingWriteBufferWaterMarkLow = (int) get("networking.write-buffer-watermark.low");
         networkingWriteBufferWaterMarkHigh = (int) get("networking.write-buffer-watermark.high");
 
+
         cacheMessageSize = (int) get("cache.message-size");
+
 
         log.info("Config Loaded");
     }
