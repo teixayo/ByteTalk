@@ -21,7 +21,6 @@ import java.util.Scanner;
 
 @Slf4j
 public class NettyWebSocketExample {
-    // Client-side implementation
 
     public static String password;
     public static class NettyWebSocketClient {
