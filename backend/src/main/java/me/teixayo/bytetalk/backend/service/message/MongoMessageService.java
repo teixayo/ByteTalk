@@ -56,14 +56,14 @@ public class MongoMessageService implements MessageService {
     }
 
     private Document toDocument(Message msg) {
-        return new Document("id", msg.getId())
+        return new Document("_id", msg.getId())
                 .append("userID", msg.getUserID())
                 .append("content", msg.getContent())
                 .append("date", msg.getDate());
     }
 
     private Message fromDocument(Document doc) {
-        long id = doc.getLong("id");
+        long id = doc.getLong("_id");
         long userID = doc.getLong("userID");
         String content = doc.getString("content");
         Date date = doc.getDate("date");

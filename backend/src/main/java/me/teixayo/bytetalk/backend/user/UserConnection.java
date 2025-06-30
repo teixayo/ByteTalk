@@ -42,15 +42,6 @@ public class UserConnection {
 
     @SneakyThrows
     public void disconnect() {
-        // channel.writeAndFlush(new CloseWebSocketFrame());
-        channel.channel().closeFuture().addListener((ChannelFutureListener) future -> {
-            online = false;
-        });
-
-    }
-    @SneakyThrows
-    public void disconnect(int exitCode,String reason) {
-        // channel.writeAndFlush(new CloseWebSocketFrame(exitCode,reason));
         channel.channel().closeFuture().addListener((ChannelFutureListener) future -> {
             online = false;
         });
