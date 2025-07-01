@@ -31,7 +31,7 @@ public class MongoMessageService implements MessageService {
         FindIterable<Document> docs = messages
                 .find(filter)
                 .sort(sort)
-                .limit(batchSize);
+                .limit(batchSize+1);
 
         List<Message> result = new ArrayList<>(batchSize);
         for (Document doc : docs) {
