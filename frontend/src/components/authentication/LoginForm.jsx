@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
@@ -24,6 +24,9 @@ const LoginForm = () => {
     if (!socket) {
       console.log("socket isnt ready");
       return;
+    }else {
+      console.log("socket is ready");
+
     }
 
     socket.onopen = () => {
@@ -31,6 +34,7 @@ const LoginForm = () => {
     };
 
     socket.onmessage = (event) => {
+      console.log("im here")
       const data = JSON.parse(event.data);
       const alertmessage = statusMessages[data.code];
 
