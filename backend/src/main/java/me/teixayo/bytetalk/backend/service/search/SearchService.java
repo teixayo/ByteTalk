@@ -8,8 +8,6 @@ public interface SearchService {
 //        if(ElasticDBConnection.isConnected()) return new ElasticSearchService();
         return new MemorySearchService();
     }
-
     List<Long> search(String word);
-
     void addThroughSearchCache(long messsageId, String word);
 }
