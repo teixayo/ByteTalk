@@ -2,16 +2,16 @@ package me.teixayo.bytetalk.backend.user;
 
 import lombok.Getter;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class UserManager {
     private static UserManager instance;
 
-    private HashMap<String,User> users;
+    private ConcurrentHashMap<String,User> users;
 
     public UserManager() {
-        users = new HashMap<>();
+        users = new ConcurrentHashMap<>();
     }
 
     public static UserManager getInstance() {
