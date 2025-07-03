@@ -31,4 +31,14 @@ public class Message {
     public int hashCode() {
         return Objects.hash(id, userID, content, date);
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "id=" + id +
+                ", userID=" + userID +
+                ", content='" + content + '\'' +
+                ", date=" + date +
+                '}';
+    }
 }

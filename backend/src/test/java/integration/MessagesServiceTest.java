@@ -55,6 +55,12 @@ public class MessagesServiceTest {
         }
         messages = messages.reversed();
 
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         List<Message> loadedMessages = service.loadMessagesBeforeDate(Date.from(Instant.now()), 100);
         for(int i = 0; i < 100; i++) {
             Message loadedMessage = loadedMessages.get(i);
