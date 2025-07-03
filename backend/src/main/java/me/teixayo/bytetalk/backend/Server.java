@@ -46,6 +46,7 @@ public final class Server implements LoopApp {
 
     public void start() {
 
+        long start = System.currentTimeMillis();
         log.info("Starting...");
 
         Yaml yaml = new Yaml();
@@ -73,6 +74,8 @@ public final class Server implements LoopApp {
         cacheService = CacheService.findBestService();
         log.info("Using {} as CacheService", cacheService.getClass().getSimpleName());
 
+        long end = System.currentTimeMillis();
+        log.info("Loaded sever on {} ms",(end-start));
     }
 
     @Override

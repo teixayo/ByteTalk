@@ -13,6 +13,7 @@ import me.teixayo.bytetalk.backend.protocol.client.ClientPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
 import me.teixayo.bytetalk.backend.security.RandomGenerator;
 
+import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -42,9 +43,11 @@ public class UserConnection {
 
     @SneakyThrows
     public void disconnect() {
+        InetSocketAddress socketAddress = (InetSocketAddress) channel.channel().remoteAddress();
         channel.channel().closeFuture().addListener((ChannelFutureListener) future -> {
             online = false;
             UserManager.getInstance().removeUser(user);
+            log.info("Disconnected the {} {}", user.getName(),socketAddress);
         });
 
     }

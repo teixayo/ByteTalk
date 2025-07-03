@@ -25,6 +25,8 @@ import me.teixayo.bytetalk.backend.user.UserConnection;
 import me.teixayo.bytetalk.backend.user.UserManager;
 import org.json.JSONObject;
 
+import java.net.InetSocketAddress;
+
 @Slf4j
 public class PacketHandler extends SimpleChannelInboundHandler<Object> {
     private static final String WEBSOCKET_PATH = "/websocket";
@@ -98,6 +100,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     public void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
+        InetSocketAddress socketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
         if (frame instanceof CloseWebSocketFrame) {
             handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
             return;
@@ -123,6 +126,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 if (user == null) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    log.info("Disconnected {} cause of invalid user",socketAddress.getAddress().getHostAddress());
                     return;
                 }
                 if (jsonObject.has("token")) {
@@ -131,12 +135,14 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                     if (jwt == null || !jwt.getToken().equals(token)) {
                         ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
                         handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                        log.info("Disconnected {} cause of invalid token",socketAddress.getAddress().getHostAddress());
                     }
                 } else {
                     String password = EncryptionUtils.encrypt(jsonObject.getString("password"));
                     if (!user.getPassword().equals(password)) {
                         ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
                         handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                        log.info("Disconnected {} cause of invalid password",socketAddress.getAddress().getHostAddress());
                         return;
                     }
                 }
@@ -151,6 +157,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                             EncryptionUtils.createLoginJWT(name)));
                 }
                 user.sendMessages(Server.getInstance().getCacheService().loadLastestMessages());
+                log.info("User {} logged in", name);
                 return;
             }
             if (type.equals("CreateUser")) {
@@ -159,16 +166,19 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 if (!EncryptionUtils.isValidName(name)) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_USER.createPacket().getData().toString()));
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    log.info("Disconnected {} cause of invalid name",socketAddress.getAddress().getHostAddress());
                     return;
                 }
                 if (!EncryptionUtils.isValidPassword(password)) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_PASSWORD.createPacket().getData().toString()));
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    log.info("Disconnected {} cause of invalid password",socketAddress.getAddress().getHostAddress());
                     return;
                 }
                 if (Server.getInstance().getUserService().isUserExists(name)) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.USER_EXISTS.createPacket().getData().toString()));
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    log.info("Disconnected {} cause of using created names for signup",socketAddress.getAddress().getHostAddress());
                     return;
                 }
                 log.info("User {} Created", name);
