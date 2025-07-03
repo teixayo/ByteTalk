@@ -136,6 +136,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                         ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
                         handshaker.close(ctx.channel(), new CloseWebSocketFrame());
                         log.info("Disconnected {} cause of invalid token",socketAddress.getAddress().getHostAddress());
+                        return;
                     }
                 } else {
                     String password = EncryptionUtils.encrypt(jsonObject.getString("password"));
