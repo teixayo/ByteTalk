@@ -32,7 +32,6 @@ public class Crypto {
         return Base64.getEncoder().encodeToString(buffer.array());
     }
 
-    // Decrypt from single Base64 string
     public static String decrypt(String base64Payload, PrivateKey rsaPrivateKey) throws Exception {
         byte[] payload = Base64.getDecoder().decode(base64Payload);
         ByteBuffer buffer = ByteBuffer.wrap(payload);
@@ -44,7 +43,6 @@ public class Crypto {
         byte[] encryptedMessage = new byte[buffer.remaining()];
         buffer.get(encryptedMessage);
 
-        // Decrypt AES key
         Cipher rsaCipher = Cipher.getInstance("RSA");
         rsaCipher.init(Cipher.DECRYPT_MODE, rsaPrivateKey);
         byte[] aesKeyBytes = rsaCipher.doFinal(encryptedAesKey);
