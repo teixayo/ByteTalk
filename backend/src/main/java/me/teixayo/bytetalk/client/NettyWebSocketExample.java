@@ -23,6 +23,7 @@ import java.util.Scanner;
 public class NettyWebSocketExample {
 
     public static String password;
+
     public static class NettyWebSocketClient {
         public static void main(String[] args) throws Exception {
             URI uri = new URI("ws://0.0.0.0:25565/websocket");
@@ -49,7 +50,7 @@ public class NettyWebSocketExample {
                 handler.handshakeFuture().sync();
 
                 Scanner scanner = new Scanner(System.in);
-                if(scanner.hasNextLine()){
+                if (scanner.hasNextLine()) {
                     if (scanner.nextLine().equals("1")) {
                         JSONObject jsonObject = new JSONObject();
 
@@ -103,9 +104,7 @@ public class NettyWebSocketExample {
         }
     }
 
-    /**
-     * Handler for client messages and handshake
-     */
+
     public static class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> {
         private final WebSocketClientHandshaker handshaker;
         private ChannelPromise handshakeFuture;
@@ -137,8 +136,7 @@ public class NettyWebSocketExample {
                 handshakeFuture.setSuccess();
                 return;
             }
-            if (msg instanceof FullHttpResponse) {
-                FullHttpResponse response = (FullHttpResponse) msg;
+            if (msg instanceof FullHttpResponse response) {
                 throw new IllegalStateException(
                         "Unexpected FullHttpResponse: " + response.status());
             }
@@ -146,7 +144,6 @@ public class NettyWebSocketExample {
             if (frame instanceof PingWebSocketFrame) {
                 ctx.channel().writeAndFlush(new PongWebSocketFrame(frame.content().retain()));
                 System.out.println("Ping");
-                return;
             } else if (frame instanceof CloseWebSocketFrame) {
                 System.out.println("Client received closing");
                 ch.close();
@@ -154,13 +151,13 @@ public class NettyWebSocketExample {
                 System.out.println("Client received: " + ((TextWebSocketFrame) frame).text());
                 JSONObject jsonObject = new JSONObject(((TextWebSocketFrame) frame).text());
                 String type = jsonObject.getString("type");
-                if(type.equals("Status") && jsonObject.getInt("code")== StatusCodes.SUCCESS.getStatusCode()) {
-                    jsonObject.put("type","Login");
+                if (type.equals("Status") && jsonObject.getInt("code") == StatusCodes.SUCCESS.getStatusCode()) {
+                    jsonObject.put("type", "Login");
                     jsonObject.put("name", "test");
-                    jsonObject.put("password",password);
+                    jsonObject.put("password", password);
                     ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
                 } else {
-                    System.out.println(jsonObject.toString());
+                    System.out.println(jsonObject);
                 }
             }
         }

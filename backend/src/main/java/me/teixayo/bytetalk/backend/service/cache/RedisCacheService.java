@@ -19,6 +19,7 @@ public class RedisCacheService implements CacheService {
         this.jedisPool = RedisDBConnection.getJedisPool();
         this.maxSize = maxSize;
     }
+
     public RedisCacheService() {
         this(10);
     }

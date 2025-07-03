@@ -18,15 +18,14 @@ public class MongoDBConnection {
     private static MongoDBConnection instance;
 
     private static MongoClient mongoClient;
-
-    private MongoDatabase userDatabase=null;
-    @Getter
-    private MongoCollection<Document> userCollection=null;
-    private MongoDatabase messageDatabase=null;
-    @Getter
-    private MongoCollection<Document> messageCollection=null;
     @Getter
     private static boolean isConnected = false;
+    private MongoDatabase userDatabase = null;
+    @Getter
+    private MongoCollection<Document> userCollection = null;
+    private MongoDatabase messageDatabase = null;
+    @Getter
+    private MongoCollection<Document> messageCollection = null;
 
     public MongoDBConnection(String connectionString) {
         instance = this;
@@ -49,20 +48,16 @@ public class MongoDBConnection {
         }
     }
 
-    public static void start(String url)
-    {
-        if(instance == null)
-        {
+    public static void start(String url) {
+        if (instance == null) {
             new MongoDBConnection(url);
         }
     }
 
-    public static void stop()
-    {
-        if(instance != null && mongoClient != null)
-        {
+    public static void stop() {
+        if (instance != null && mongoClient != null) {
             mongoClient.close();
-            isConnected=false;
+            isConnected = false;
         }
     }
 }

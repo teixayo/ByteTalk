@@ -5,8 +5,9 @@ import org.json.JSONObject;
 
 @Getter
 public class ServerPacket {
-    private ServerPacketType packetType;
-    private JSONObject data;
+    private final ServerPacketType packetType;
+    private final JSONObject data;
+
     public ServerPacket(ServerPacketType packetType, JSONObject data) {
         this.packetType = packetType;
         this.data = data;

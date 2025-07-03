@@ -10,7 +10,7 @@ import java.util.Map;
 @Getter
 public class Config {
 
-    private final Map<String,Object> data;
+    private final Map<String, Object> data;
 
     private final boolean redisToggle;
     private final String redisAddress;
@@ -73,10 +73,7 @@ public class Config {
         networkingWriteBufferWaterMarkLow = (int) get("networking.write-buffer-watermark.low");
         networkingWriteBufferWaterMarkHigh = (int) get("networking.write-buffer-watermark.high");
 
-
         cacheMessageSize = (int) get("cache.message-size");
-
-
         log.info("Config Loaded");
     }
 
@@ -94,7 +91,6 @@ public class Config {
 
         return current;
     }
-
 
 
 }

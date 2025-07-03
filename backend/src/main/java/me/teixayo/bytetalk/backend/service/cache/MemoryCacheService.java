@@ -15,9 +15,11 @@ public class MemoryCacheService implements CacheService {
         messageCache = new ConcurrentLinkedDeque<>();
         this.maxSize = maxSize;
     }
+
     public MemoryCacheService() {
         this(10);
     }
+
     @Override
     public Collection<Message> loadLastestMessages() {
         return messageCache;

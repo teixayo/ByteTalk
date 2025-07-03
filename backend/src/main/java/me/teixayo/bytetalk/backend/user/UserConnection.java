@@ -25,11 +25,11 @@ public class UserConnection {
 
     private final ChannelHandlerContext channel;
     private final ConcurrentLinkedQueue<ServerPacket> serverPackets = new ConcurrentLinkedQueue<>();
-    private boolean online = true;
     private final User user;
+    private boolean online = true;
     private long lastPongTime;
 
-    public UserConnection(ChannelHandlerContext channel,User user) {
+    public UserConnection(ChannelHandlerContext channel, User user) {
         this.channel = channel;
         this.user = user;
         lastPongTime = System.currentTimeMillis();
@@ -60,14 +60,15 @@ public class UserConnection {
         }
         if (hasPacket) channel.flush();
     }
+
     public void keepAlive() {
         lastPongTime = System.currentTimeMillis();
     }
 
     public void checkTimeOut() {
-        if(System.currentTimeMillis() - lastPongTime >= Server.getInstance().getConfig().getMaxTimeOut() * 1000L) {
+        if (System.currentTimeMillis() - lastPongTime >= Server.getInstance().getConfig().getMaxTimeOut() * 1000L) {
             disconnect();
-            online=false;
+            online = false;
             log.info("Disconnected the {} (Timed Out)", user.getName());
         }
     }

@@ -2,7 +2,7 @@ package me.teixayo.bytetalk.backend.service.search;
 
 import java.util.*;
 
-public class MemorySearchService implements SearchService{
+public class MemorySearchService implements SearchService {
     private final NavigableMap<String, List<Long>> index = new TreeMap<>();
 
     @Override

@@ -26,16 +26,16 @@ public final class Server implements LoopApp {
 
     @Getter
     private static Server instance;
+    private final Loop loop;
     private UserService userService;
     private MessageService messageService;
     private SearchService searchService;
     private CacheService cacheService;
     private NettyHandler nettyHandler;
     private Config config;
-    private final Loop loop;
 
-    public Server(){
-        instance=this;
+    public Server() {
+        instance = this;
 
         loop = LoopBuilder.builder()
                 .loopType(LoopType.LOCK)
@@ -54,11 +54,11 @@ public final class Server implements LoopApp {
 
         nettyHandler = new NettyHandler();
 
-        if(config.isMongoToggle()) {
+        if (config.isMongoToggle()) {
             MongoDBConnection.start(config.getMongoConnectionUrl());
         }
-        if(config.isRedisToggle()) {
-            RedisDBConnection.start(config.getRedisAddress(),config.getRedisPort(),config.getRedisPassword(),config.isRedisSSL());
+        if (config.isRedisToggle()) {
+            RedisDBConnection.start(config.getRedisAddress(), config.getRedisPort(), config.getRedisPassword(), config.isRedisSSL());
         }
 
         userService = UserService.findBestService();
@@ -85,9 +85,9 @@ public final class Server implements LoopApp {
             }
             user.getUserConnection().processPackets();
         }
-        if(loop.getUpdates() % 10000 == 0) {
+        if (loop.getUpdates() % 10000 == 0) {
             for (String token : EncryptionUtils.getTokens().keySet()) {
-                if(EncryptionUtils.getJWT(token)==null) {
+                if (EncryptionUtils.getJWT(token) == null) {
                     log.info("{} token expired", token);
                 }
 

@@ -10,12 +10,12 @@ public enum RedisKeys {
 
     private final String template;
 
-    private RedisKeys(String template) {
+    RedisKeys(String template) {
         this.template = template;
     }
 
     public String getKey(Object... replacements) {
-        if(Server.getInstance() == null) {
+        if (Server.getInstance() == null) {
             return String.format(this.template, replacements);
         }
         return Server.getInstance().getConfig().getRedisPrefix() + ':' + String.format(this.template, replacements);

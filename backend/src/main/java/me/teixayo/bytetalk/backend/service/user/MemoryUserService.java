@@ -16,17 +16,18 @@ public class MemoryUserService implements UserService {
     public MemoryUserService() {
         users = new HashMap<>();
     }
+
     @Override
     public long saveUser(String username, String password) {
         long userId = RandomGenerator.generateId();
-        User user = new User(userId,username,password,null);
-        users.put(userId,user);
+        User user = new User(userId, username, password, null);
+        users.put(userId, user);
         return userId;
     }
 
     @Override
     public boolean isUserExists(String username) {
-        return getUserByUserName(username)!=null;
+        return getUserByUserName(username) != null;
     }
 
     @Override
@@ -57,9 +58,9 @@ public class MemoryUserService implements UserService {
 
     @Override
     public HashMap<Long, String> getUsernameByIds(Collection<Long> usersId) {
-        HashMap<Long,String> usernames = new HashMap<>(users.size());
+        HashMap<Long, String> usernames = new HashMap<>(users.size());
         for (long userId : usersId) {
-            usernames.put(userId,getUserById(userId).getName());
+            usernames.put(userId, getUserById(userId).getName());
         }
 
         return usernames;

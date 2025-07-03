@@ -15,7 +15,7 @@ public class Main {
         });
         Server server = new Server();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if(server.isRunning()) {
+            if (server.isRunning()) {
                 server.close();
             }
         }));

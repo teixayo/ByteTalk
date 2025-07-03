@@ -18,7 +18,7 @@ public class MemoryMessageService implements MessageService {
 
     @Override
     public List<Message> loadMessagesBeforeDate(Date date, int batchSize) {
-        Message ceiling = new Message(RandomGenerator.generateId(), RandomGenerator.generateId(),"",date);
+        Message ceiling = new Message(RandomGenerator.generateId(), RandomGenerator.generateId(), "", date);
 
         NavigableSet<Message> head = messagesByDate.headSet(ceiling, false);
 

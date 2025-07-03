@@ -9,8 +9,7 @@ import redis.clients.jedis.JedisPoolConfig;
 import java.time.Duration;
 
 @Log4j2
-public class RedisDBConnection
-{
+public class RedisDBConnection {
 
     @Getter
     private static RedisDBConnection instance;
@@ -20,6 +19,7 @@ public class RedisDBConnection
 
     @Getter
     private static boolean isConnected = false;
+
     public RedisDBConnection(String address, int port, String password, boolean useSSL) {
 
         instance = this;
@@ -32,11 +32,11 @@ public class RedisDBConnection
         config.setTestOnBorrow(true);
         config.setTestOnReturn(true);
         config.setTestWhileIdle(true);
-        jedisPool = new JedisPool(config, address, port, 2000,password,useSSL);
+        jedisPool = new JedisPool(config, address, port, 2000, password, useSSL);
 
         try (Jedis jedis = jedisPool.getResource()) {
             String response = jedis.ping();
-            isConnected=true;
+            isConnected = true;
             if ("PONG".equals(response)) {
                 log.info("Redis is connected successfully");
             } else {
@@ -49,14 +49,14 @@ public class RedisDBConnection
 
     public static void start(String address, int port, String password, boolean useSSL) {
         if (instance == null) {
-            new RedisDBConnection(address,port,password,useSSL);
+            new RedisDBConnection(address, port, password, useSSL);
         }
     }
 
     public static void stop() {
         if (instance != null) {
             jedisPool.close();
-            isConnected=false;
+            isConnected = false;
         }
     }
 }

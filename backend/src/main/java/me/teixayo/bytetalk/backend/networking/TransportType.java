@@ -38,6 +38,7 @@ public enum TransportType {
     private final ChannelFactory<? extends SocketChannel> socketChannelFactory;
     private final Supplier<IoHandlerFactory> ioHandlerFactorySupplier;
     private final String name;
+
     TransportType(ChannelFactory<? extends ServerSocketChannel> serverSocketChannelFactory, ChannelFactory<? extends SocketChannel> socketChannelFactory, Supplier<IoHandlerFactory> ioHandlerFactorySupplier) {
         this.serverSocketChannelFactory = serverSocketChannelFactory;
         this.socketChannelFactory = socketChannelFactory;
@@ -48,16 +49,17 @@ public enum TransportType {
     private static ThreadFactory createThreadFactory() {
         return runnable -> new FastThreadLocalThread(runnable, "Netty Worker");
     }
-    public EventLoopGroup createEventLoopGroup() {
-        return new MultiThreadIoEventLoopGroup(
-                0, createThreadFactory(), this.ioHandlerFactorySupplier.get());
-    }
 
     public static TransportType bestTransportType() {
-        if(IoUring.isAvailable()) return IO_URING;
+        if (IoUring.isAvailable()) return IO_URING;
         if (Epoll.isAvailable()) return EPOLL;
         if (KQueue.isAvailable()) return KQUEUE;
         return NIO;
+    }
+
+    public EventLoopGroup createEventLoopGroup() {
+        return new MultiThreadIoEventLoopGroup(
+                0, createThreadFactory(), this.ioHandlerFactorySupplier.get());
     }
 
 

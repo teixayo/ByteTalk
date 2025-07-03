@@ -14,7 +14,7 @@ public class ElasticDBConnection {
 
 
     public ElasticDBConnection() {
-        instance=this;
+        instance = this;
         RestClient restClient = RestClient.builder(new HttpHost("localhost", 9200, "http")).build();
         RestClientTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
         elasticClient = new ElasticsearchClient(transport);

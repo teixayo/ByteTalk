@@ -17,7 +17,7 @@ public class EncryptionUtils {
 
     private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
     @Getter
-    private static HashMap<String,String> tokens = new HashMap<>();
+    private static final HashMap<String, String> tokens = new HashMap<>();
     @Getter
     private static Algorithm algorithm;
     private static JWTVerifier verifier;
@@ -54,8 +54,9 @@ public class EncryptionUtils {
     public static boolean isValidName(String name) {
         return name != null && name.matches("^[A-Za-z][A-Za-z0-9__-]{3,19}$");
     }
+
     public static boolean isValidPassword(String password) {
-        return password !=null && password.matches("^[\\S]{8,30}$");
+        return password != null && password.matches("^[\\S]{8,30}$");
     }
 
     public static String createLoginJWT(String username) {
@@ -64,12 +65,13 @@ public class EncryptionUtils {
                 .withIssuedAt(new Date())
                 .withExpiresAt(Date.from(Instant.now().plus(7, ChronoUnit.DAYS)))
                 .sign(algorithm);
-        tokens.put(username,token);
+        tokens.put(username, token);
         return token;
     }
+
     public static DecodedJWT getJWT(String username) {
-        if(!tokens.containsKey(username)) return null;
-        String token =tokens.get(username);
+        if (!tokens.containsKey(username)) return null;
+        String token = tokens.get(username);
         DecodedJWT jwt = verifier.verify(token);
         if (jwt.getExpiresAt().toInstant().isBefore(Instant.now())) {
             tokens.remove(username);

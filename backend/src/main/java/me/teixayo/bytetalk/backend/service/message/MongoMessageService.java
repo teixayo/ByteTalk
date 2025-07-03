@@ -4,8 +4,8 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
-import me.teixayo.bytetalk.backend.message.Message;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
+import me.teixayo.bytetalk.backend.message.Message;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -31,7 +31,7 @@ public class MongoMessageService implements MessageService {
         FindIterable<Document> docs = messages
                 .find(filter)
                 .sort(sort)
-                .limit(batchSize+1);
+                .limit(batchSize + 1);
 
         List<Message> result = new ArrayList<>(batchSize);
         for (Document doc : docs) {

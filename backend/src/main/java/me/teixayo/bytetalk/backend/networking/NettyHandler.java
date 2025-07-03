@@ -19,12 +19,13 @@ public class NettyHandler {
             Server.getInstance().getConfig().getNetworkingWriteBufferWaterMarkHigh());
     private EventLoopGroup workerGroup;
     private ChannelInitializer channelInitializer;
+
     public NettyHandler() {
         Thread thread = new Thread(() -> {
 
             TransportType transportType = Server.getInstance().getConfig().getNetworkingTransportType();
             channelInitializer = new ChannelInitializer();
-            log.info("Using {} threads for Netty based {}", NettyRuntime.availableProcessors()*2, transportType.name());
+            log.info("Using {} threads for Netty based {}", NettyRuntime.availableProcessors() * 2, transportType.name());
             try {
                 workerGroup = transportType.createEventLoopGroup();
 
@@ -37,11 +38,11 @@ public class NettyHandler {
                         .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, SERVER_WRITE_MARK)
                         .childOption(ChannelOption.IP_TOS, 0x18)
                         .localAddress(new InetSocketAddress(Server.getInstance().getConfig().getNetworkingIp(), Server.getInstance().getConfig().getNetworkingPort()));
-                if(Server.getInstance().getConfig().isNetworkingTcpFastOpen()) {
-                    bootstrap.option(ChannelOption.TCP_FASTOPEN,3);
+                if (Server.getInstance().getConfig().isNetworkingTcpFastOpen()) {
+                    bootstrap.option(ChannelOption.TCP_FASTOPEN, 3);
                 }
 
-                if(Server.getInstance().getConfig().isNetworkingTcpNoDelay()) {
+                if (Server.getInstance().getConfig().isNetworkingTcpNoDelay()) {
                     bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
                 }
                 if (transportType != TransportType.NIO) {

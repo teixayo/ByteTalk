@@ -8,12 +8,12 @@ import java.util.Objects;
 @Getter
 public class Message {
 
-    private long id;
-    private long userID;
-    private String content;
-    private Date date;
+    private final long id;
+    private final long userID;
+    private final String content;
+    private final Date date;
 
-    public Message(long id,long userID,  String content, Date date) {
+    public Message(long id, long userID, String content, Date date) {
         this.id = id;
         this.userID = userID;
         this.content = content;

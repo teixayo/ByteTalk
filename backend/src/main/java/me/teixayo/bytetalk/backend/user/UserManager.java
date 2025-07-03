@@ -8,21 +8,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public class UserManager {
     private static UserManager instance;
 
-    private ConcurrentHashMap<String,User> users;
+    private final ConcurrentHashMap<String, User> users;
 
     public UserManager() {
         users = new ConcurrentHashMap<>();
     }
 
     public static UserManager getInstance() {
-        if(instance==null) {
+        if (instance == null) {
             instance = new UserManager();
         }
         return instance;
     }
 
     public void addUser(User user) {
-        users.put(user.getName(),user);
+        users.put(user.getName(), user);
     }
 
     public void removeUser(User user) {
