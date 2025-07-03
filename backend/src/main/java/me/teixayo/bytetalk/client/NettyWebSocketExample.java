@@ -79,7 +79,7 @@ public class NettyWebSocketExample {
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("type", "Login");
                         jsonObject.put("name", "test");
-                        jsonObject.put("password", scanner.nextLine());
+                        jsonObject.put("token", scanner.nextLine());
                         ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
 
                         Thread.sleep(1000);

@@ -50,6 +50,7 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-core:2.20.0")
 
     implementation("com.github.teixayo:JEGL:v1.0")
+    implementation("com.auth0:java-jwt:4.4.0")
 
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")

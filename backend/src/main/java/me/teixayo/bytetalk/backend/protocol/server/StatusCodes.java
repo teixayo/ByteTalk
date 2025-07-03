@@ -7,7 +7,7 @@ public enum StatusCodes {
     INCORRECT_USER_OR_PASSWORD(1001),
     USER_EXISTS(1002),
     INVALID_USER(1003),
-    INVALID_PASSWORD(1004);
+    INVALID_PASSWORD(1004),;
 
 
     @Getter

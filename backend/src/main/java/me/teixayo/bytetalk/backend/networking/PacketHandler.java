@@ -1,5 +1,6 @@
 package me.teixayo.bytetalk.backend.networking;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -16,6 +17,7 @@ import me.teixayo.bytetalk.backend.Server;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacket;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacketType;
 import me.teixayo.bytetalk.backend.protocol.client.ClientStateType;
+import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
 import me.teixayo.bytetalk.backend.protocol.server.StatusCodes;
 import me.teixayo.bytetalk.backend.security.EncryptionUtils;
 import me.teixayo.bytetalk.backend.user.User;
@@ -91,7 +93,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
         if(ctx.channel().attr(ChannelInitializer.getState()).get()== ClientStateType.IN_LOGIN) {
             if(type.equals("Login")) {
                 String name = jsonObject.getString("name");
-                String password = EncryptionUtils.encrypt(jsonObject.getString("password"));
+
                 User user = Server.getInstance().getUserService().getUserByUserName(name);
 
                 if(user==null) {
@@ -99,10 +101,20 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
                     return;
                 }
-                if(!user.getPassword().equals(password)) {
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
-                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                    return;
+                if(jsonObject.has("token")) {
+                    String token = jsonObject.getString("token");
+                    DecodedJWT jwt = EncryptionUtils.getJWT(name);
+                    if(jwt ==null||!jwt.getToken().equals(token)) {
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
+                        handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    }
+                } else {
+                    String password = EncryptionUtils.encrypt(jsonObject.getString("password"));
+                    if(!user.getPassword().equals(password)) {
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
+                        handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                        return;
+                    }
                 }
                 ctx.channel().attr(ChannelInitializer.getState()).set(ClientStateType.AFTER_LOGIN);
 
@@ -110,6 +122,10 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 this.user = user;
                 UserManager.getInstance().addUser(user);
                 user.sendPacket(StatusCodes.SUCCESS.createPacket());
+                if(EncryptionUtils.getJWT(name)==null) {
+                    user.sendPacket(ServerPacketType.LoginToken.createPacket("token",
+                            EncryptionUtils.createLoginJWT(name)));
+                }
                 user.sendMessages(Server.getInstance().getCacheService().loadLastestMessages());
                 return;
             }

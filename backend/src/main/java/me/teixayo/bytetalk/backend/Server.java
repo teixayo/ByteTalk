@@ -2,13 +2,14 @@ package me.teixayo.bytetalk.backend;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
+import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
+import me.teixayo.bytetalk.backend.networking.NettyHandler;
+import me.teixayo.bytetalk.backend.security.EncryptionUtils;
 import me.teixayo.bytetalk.backend.service.cache.CacheService;
 import me.teixayo.bytetalk.backend.service.message.MessageService;
 import me.teixayo.bytetalk.backend.service.search.SearchService;
 import me.teixayo.bytetalk.backend.service.user.UserService;
-import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
-import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
-import me.teixayo.bytetalk.backend.networking.NettyHandler;
 import me.teixayo.bytetalk.backend.user.User;
 import me.teixayo.bytetalk.backend.user.UserManager;
 import me.teixayo.jegl.loop.LoopApp;
@@ -18,8 +19,6 @@ import me.teixayo.jegl.loop.loops.LoopType;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
-import java.util.Iterator;
-import java.util.Map;
 
 @Slf4j
 @Getter
@@ -78,15 +77,21 @@ public final class Server implements LoopApp {
 
     @Override
     public void update() {
-        Iterator<Map.Entry<String, User>> iterator = UserManager.getInstance().getUsers().entrySet().iterator();
-        while (iterator.hasNext()) {
-            User user = iterator.next().getValue();
+        for (User user : UserManager.getInstance().getUsers().values()) {
             user.getUserConnection().checkTimeOut();
             if (!user.getUserConnection().isOnline()) {
-                iterator.remove();
+                UserManager.getInstance().removeUser(user);
                 continue;
             }
             user.getUserConnection().processPackets();
+        }
+        if(loop.getUpdates() % 10000 == 0) {
+            for (String token : EncryptionUtils.getTokens().keySet()) {
+                if(EncryptionUtils.getJWT(token)==null) {
+                    log.info("{} token expired", token);
+                }
+
+            }
         }
     }
 
