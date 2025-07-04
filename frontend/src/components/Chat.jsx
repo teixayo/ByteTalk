@@ -17,20 +17,9 @@ const Chat = () => {
       return;
     } else {
       console.log("socket is ready");
-      setMessages();
+      // setMessages();
     }
 
-    const username = localStorage.getItem("username");
-    const token = localStorage.getItem("token");
-    console.log(username, token);
-
-    const loginTokenPayload = {
-      type: "Login",
-      name: username,
-      token: token,
-    };
-    console.log(loginTokenPayload)
-    socket.send(JSON.stringify(loginTokenPayload));
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       console.log("📨 Message received:", data);
@@ -38,36 +27,28 @@ const Chat = () => {
       if (data.type == "LoginToken") {
         console.log("Data: ", data);
         localStorage.setItem("token", data.token);
+        loginWithToken();
+        return;
       }
+
     };
+    setTimeout(() => {
+      loginWithToken();
+      
+    }, 1000);
   }, [socket]);
 
-  // useEffect(() => {
-  //   if (!socket) {
-  //     console.log("socket isnt ready");
-  //     return;
-  //   } else {
-  //     console.log("socket is ready");
-  //     // setMessages();
-  //     const username = localStorage.getItem("username");
-  //     const token = localStorage.getItem("token");
-  //     console.log(username, token);
-  
-  //     const loginTokenPayload = {
-  //       type: "Login",
-  //       username: username,
-  //       token: token,
-  //     };
-  //     console.log(loginTokenPayload);
-  //     socket.send(JSON.stringify(loginTokenPayload));
-  //   }
-  // }, []);
-
-  useEffect(() => {
-    // if (flag) {
-    //   setMessages();
-    // }
-  }, [bulkMessages]);
+  const loginWithToken = () => {
+    const username = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
+    const loginTokenPayload = {
+      type: "Login",
+      name: username,
+      token: token,
+    };
+    console.log(loginTokenPayload);
+    socket.send(JSON.stringify(loginTokenPayload));
+  };
 
   const sendMessage = () => {
     console.log("send message run");
