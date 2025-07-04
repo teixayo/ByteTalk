@@ -26,7 +26,7 @@ const Chat = () => {
 
     const loginTokenPayload = {
       type: "Login",
-      username: username,
+      name: username,
       token: token,
     };
     console.log(loginTokenPayload)
