@@ -6,6 +6,9 @@ import * as Yup from "yup";
 
 import { useSocket } from "../../context/SocketContext.jsx";
 
+import { useSetAtom } from "jotai";
+import { bulkMessagesAtom } from "../../atoms/chatAtoms";
+
 let localUserName;
 let localUserPassword;
 const statusMessages = {
@@ -19,6 +22,7 @@ const statusMessages = {
 const LoginForm = () => {
   const navigate = useNavigate();
   const { socket } = useSocket();
+  const setBulkMessages = useSetAtom(bulkMessagesAtom)
 
   useEffect(() => {
     if (!socket) {
@@ -29,18 +33,19 @@ const LoginForm = () => {
 
     }
 
-    socket.onopen = () => {
-      console.log("✅ WebSocket connected");
-    };
-
     socket.onmessage = (event) => {
       console.log("im here")
       const data = JSON.parse(event.data);
-      const alertmessage = statusMessages[data.code];
-
+      
       console.log("📨 Message received:", data);
+      if(data.type == "BulkMessages") {
+        setBulkMessages(data.messages)
+      }
 
-      alert(alertmessage);
+      if(data.type == "Status") {
+        const alertmessage = statusMessages[data.code];
+        alert(alertmessage);
+      }
       if (data.type == "Status" && data.code == "1000") {
         navigate("/chat");
       }

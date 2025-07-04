@@ -11,6 +11,9 @@ export const SocketProvider = ({ children }) => {
 
     ws.onopen = () => {
       console.log("✅ WebSocket connected");
+      const username = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
+    console.log(username, token)
       setSocket(ws);
     };
 

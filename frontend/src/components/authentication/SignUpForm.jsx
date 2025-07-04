@@ -7,12 +7,12 @@ import { useSocket } from "../../context/SocketContext";
 let localUserName = "";
 let localUserPassword = "";
 const statusMessages = {
-  "1000": "✅ Success",
-  "1001": "❌ Incorrect username or password",
-  "1002": "❌ This username is already taken",
-  "1003": "❌ Invalid username format",
-  "1004": "❌ Invalid password format",
-}
+  1000: "✅ Success",
+  1001: "❌ Incorrect username or password",
+  1002: "❌ This username is already taken",
+  1003: "❌ Invalid username format",
+  1004: "❌ Invalid password format",
+};
 
 const SignUpForm = () => {
   const navigate = useNavigate();
@@ -20,16 +20,20 @@ const SignUpForm = () => {
 
   useEffect(() => {
     if (!socket) return;
-
+    
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      const alertmessage = statusMessages[data.code]
-
       console.log("📨 Message received:", data);
 
-      alert(alertmessage)
+      
+      if (data.type == "Status") {
+        const alertmessage = statusMessages[data.code];
+        alert(alertmessage);
+      }
+
       if (data.type == "Status" && data.code == "1000") {
         setTimeout(() => {
+          localStorage.setItem("username", localUserName)
           const loginPayload = {
             type: "Login",
             name: localUserName,
