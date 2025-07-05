@@ -24,17 +24,23 @@ const Chat = () => {
       const data = JSON.parse(event.data);
       console.log("📨 Message received:", data);
 
+      if (data.type == "BulkMessages") {
+        console.log("bulk: ", data);
+        data.messages.map((msg) => {
+          setMessage((prev) => [...prev, msg.content]);
+        });
+      }
+
       if (data.type == "LoginToken") {
         console.log("Data: ", data);
         localStorage.setItem("token", data.token);
         loginWithToken();
         return;
       }
-
     };
     setTimeout(() => {
+      console.log("login with token is run");
       loginWithToken();
-      
     }, 1000);
   }, [socket]);
 
@@ -47,14 +53,14 @@ const Chat = () => {
       token: token,
     };
     console.log(loginTokenPayload);
-    socket.send(JSON.stringify(loginTokenPayload));
+      socket.send(JSON.stringify(loginTokenPayload));
   };
 
   const sendMessage = () => {
     console.log("send message run");
     setMessage((prev) => [...prev, text]);
     // setMessages();
-    console.log(message);
+    console.log("message:", message);
     if (socket && socket.readyState == WebSocket.OPEN) {
       console.log("websocket is run");
       const messagePayload = {
@@ -102,9 +108,6 @@ const Chat = () => {
         </div>
         <div className=" w-full h-full">
           <div className="mt-4 list-disc pl-5">
-            {/* {flag ? setMessages() : null}
-            {flag ? setFlag(false) : null} */}
-
             {Array.isArray(message) &&
               message.map((msg, i) => <p key={i}>{msg}</p>)}
           </div>

@@ -6,11 +6,11 @@ import App from "./App.jsx";
 import { SocketProvider } from "./context/SocketContext"; 
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  // <StrictMode>
     <BrowserRouter>
       <SocketProvider>
         <App />
       </SocketProvider>
     </BrowserRouter>
-  </StrictMode>
+  // </StrictMode>
 );
