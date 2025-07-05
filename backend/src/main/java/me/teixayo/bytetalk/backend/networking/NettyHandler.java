@@ -32,7 +32,7 @@ public class NettyHandler {
                 ServerBootstrap bootstrap = new ServerBootstrap()
                         .channelFactory(transportType.getServerSocketChannelFactory())
                         .group(workerGroup)
-                        .handler(new LoggingHandler(LogLevel.INFO))
+                        .handler(new LoggingHandler(LogLevel.DEBUG))
                         .childHandler(channelInitializer)
                         .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                         .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, SERVER_WRITE_MARK)

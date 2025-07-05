@@ -156,6 +156,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 if (EncryptionUtils.getJWT(name) == null) {
                     user.sendPacket(ServerPacketType.LoginToken.createPacket("token",
                             EncryptionUtils.createLoginJWT(name)));
+                    log.info("Created token for {}", name);
                 }
                 user.sendMessages(Server.getInstance().getCacheService().loadLastestMessages());
                 log.info("User {} logged in", name);
