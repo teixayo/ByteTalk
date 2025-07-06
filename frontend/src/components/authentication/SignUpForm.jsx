@@ -16,23 +16,44 @@ const statusMessages = {
 
 const SignUpForm = () => {
   const navigate = useNavigate();
-  const { socket } = useSocket();
+  const { socket, status } = useSocket();
+
+  // useEffect(() => {
+  //   if (!socket) return;
+    
+  //   socket.onmessage = (event) => {
+  //     const data = JSON.parse(event.data);
+  //     console.log("📨 Message received:", data);
+
+  //     if (data.type == "Status" && data.code == "1000") {
+  //       setTimeout(() => {
+  //         localStorage.setItem("username", localUserName)
+  //         const loginPayload = {
+  //           type: "Login",
+  //           name: localUserName,
+  //           password: localUserPassword,
+  //         };
+  //         console.log("📨 Sending login:", loginPayload);
+  //         console.log("WS readyState:", socket.readyState);
+  //         socket.send(JSON.stringify(loginPayload));
+  //       }, 1000);
+
+  //       navigate("/chat");
+  //     }
+
+  //     if (data.type === "Error") {
+  //       console.error("❌ Server Error:", data.description);
+  //     }
+  //   };
+  // }, [socket]);
 
   useEffect(() => {
-    if (!socket) return;
-    
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log("📨 Message received:", data);
-
-      
-      if (data.type == "Status") {
-        const alertmessage = statusMessages[data.code];
-        alert(alertmessage);
+      if (status.code) {
+        alert(statusMessages[status.code]);
       }
-
-      if (data.type == "Status" && data.code == "1000") {
-        setTimeout(() => {
+  
+      if (status.type == "Status" && status.code == "1000") {
+          setTimeout(() => {
           localStorage.setItem("username", localUserName)
           const loginPayload = {
             type: "Login",
@@ -45,14 +66,9 @@ const SignUpForm = () => {
         }, 1000);
 
         navigate("/chat");
-      }
-
-      if (data.type === "Error") {
-        console.error("❌ Server Error:", data.description);
-      }
-    };
-  }, [socket]);
-
+        }
+    }, [status]);
+  
 
   const handleSubmit = (values) => {
     console.log("🚀 Form submitted", values);

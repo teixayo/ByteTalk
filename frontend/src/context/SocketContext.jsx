@@ -35,7 +35,8 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type === "BulkMessages") {
-        setBulkMessages(data.content);
+        console.log(data)
+        setBulkMessages(data);
       }
     };
 
