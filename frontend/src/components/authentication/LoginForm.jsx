@@ -21,36 +21,18 @@ const statusMessages = {
 
 const LoginForm = () => {
   const navigate = useNavigate();
-  const { socket } = useSocket();
-  const setBulkMessages = useSetAtom(bulkMessagesAtom)
+  const { socket, status } = useSocket();
+  const setBulkMessages = useSetAtom(bulkMessagesAtom);
 
   useEffect(() => {
-    if (!socket) {
-      console.log("socket isnt ready");
-      return;
-    }else {
-      console.log("socket is ready");
-
+    if (status.code) {
+      alert(statusMessages[status.code]);
     }
 
-    socket.onmessage = (event) => {
-      console.log("im here")
-      const data = JSON.parse(event.data);
-      
-      console.log("📨 Message received:", data);
-      if(data.type == "BulkMessages") {
-        setBulkMessages(data.messages)
-      }
-
-      if(data.type == "Status") {
-        const alertmessage = statusMessages[data.code];
-        alert(alertmessage);
-      }
-      if (data.type == "Status" && data.code == "1000") {
+    if (status.type == "Status" && status.code == "1000") {
         navigate("/chat");
       }
-    };
-  }, [socket]);
+  }, [status]);
 
   const handleSubmit = (event) => {
     localUserName = event.fildname;

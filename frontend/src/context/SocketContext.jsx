@@ -5,6 +5,9 @@ const SocketContext = createContext();
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const reconnectTimeoutRef = useRef(null);
+  const [bulkMessages, setBulkMessages] = useState([]);
+  const [loginToken, setLoginToken] = useState(null);
+  const [status, setStatus] = useState({})
 
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
@@ -12,13 +15,29 @@ export const SocketProvider = ({ children }) => {
     ws.onopen = () => {
       console.log("✅ WebSocket connected");
       const username = localStorage.getItem("username");
-    const token = localStorage.getItem("token");
-    console.log(username, token)
+      const token = localStorage.getItem("token");
+      console.log(username, token);
       setSocket(ws);
     };
 
     ws.onmessage = (event) => {
-      console.log("📨 Message received:", event.data);
+      const data = JSON.parse(event.data);
+
+      console.log("📨 WS received:", data);
+
+      if (data.type == "Status") {
+        setStatus(data)
+      }
+
+      if (data.type === "LoginToken") {
+        localStorage.setItem("token", data.token);
+        setLoginToken(data.token);
+      }
+
+      if (data.type === "BulkMessages") {
+        console.log(data)
+        setBulkMessages(data);
+      }
     };
 
     ws.onerror = (err) => {
@@ -47,7 +66,9 @@ export const SocketProvider = ({ children }) => {
   }, []);
 
   return (
-    <SocketContext.Provider value={{ socket }}>
+    <SocketContext.Provider
+      value={{ socket, bulkMessages, loginToken, status }}
+    >
       {children}
     </SocketContext.Provider>
   );
