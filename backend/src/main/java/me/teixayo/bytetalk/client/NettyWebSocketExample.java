@@ -151,7 +151,7 @@ public class NettyWebSocketExample {
                 System.out.println("Client received: " + ((TextWebSocketFrame) frame).text());
                 JSONObject jsonObject = new JSONObject(((TextWebSocketFrame) frame).text());
                 String type = jsonObject.getString("type");
-                if (type.equals("Status") && jsonObject.getInt("code") == StatusCodes.SUCCESS.getStatusCode()) {
+                if (type.equals("Status") && jsonObject.getInt("code") == StatusCodes.SUCCESS_SIGNUP.getStatusCode()) {
                     jsonObject.put("type", "Login");
                     jsonObject.put("name", "test");
                     jsonObject.put("password", password);
