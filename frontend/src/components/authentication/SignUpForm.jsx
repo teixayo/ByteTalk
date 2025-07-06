@@ -1,4 +1,4 @@
-import { use, useEffect } from "react";
+import { useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate, Link } from "react-router-dom";
@@ -6,69 +6,41 @@ import { useSocket } from "../../context/SocketContext";
 
 let localUserName = "";
 let localUserPassword = "";
+
 const statusMessages = {
-  1000: "✅ Success",
-  1001: "❌ Incorrect username or password",
-  1002: "❌ This username is already taken",
-  1003: "❌ Invalid username format",
-  1004: "❌ Invalid password format",
+  1004: "✅ Success",
+  1005: "❌ This username is already taken",
+  1006: "❌ Invalid username format",
+  1007: "❌ Invalid password format",
 };
 
 const SignUpForm = () => {
   const navigate = useNavigate();
   const { socket, status } = useSocket();
 
-  // useEffect(() => {
-  //   if (!socket) return;
-    
-  //   socket.onmessage = (event) => {
-  //     const data = JSON.parse(event.data);
-  //     console.log("📨 Message received:", data);
-
-  //     if (data.type == "Status" && data.code == "1000") {
-  //       setTimeout(() => {
-  //         localStorage.setItem("username", localUserName)
-  //         const loginPayload = {
-  //           type: "Login",
-  //           name: localUserName,
-  //           password: localUserPassword,
-  //         };
-  //         console.log("📨 Sending login:", loginPayload);
-  //         console.log("WS readyState:", socket.readyState);
-  //         socket.send(JSON.stringify(loginPayload));
-  //       }, 1000);
-
-  //       navigate("/chat");
-  //     }
-
-  //     if (data.type === "Error") {
-  //       console.error("❌ Server Error:", data.description);
-  //     }
-  //   };
-  // }, [socket]);
-
   useEffect(() => {
-      if (status.code) {
-        alert(statusMessages[status.code]);
-      }
-  
-      if (status.type == "Status" && status.code == "1000") {
-          setTimeout(() => {
-          localStorage.setItem("username", localUserName)
-          const loginPayload = {
-            type: "Login",
-            name: localUserName,
-            password: localUserPassword,
-          };
-          console.log("📨 Sending login:", loginPayload);
-          console.log("WS readyState:", socket.readyState);
-          socket.send(JSON.stringify(loginPayload));
-        }, 1000);
+    if (status.code == "1004") {
+      alert(statusMessages[status.code]);
+    } else if (status.code == "1005") {
+      alert(statusMessages[status.code]);
+    }
 
-        navigate("/chat");
-        }
-    }, [status]);
-  
+    if (status.type == "Status" && status.code == "1004") {
+      setTimeout(() => {
+        localStorage.setItem("username", localUserName);
+        const loginPayload = {
+          type: "Login",
+          name: localUserName,
+          password: localUserPassword,
+        };
+        console.log("📨 Sending login:", loginPayload);
+        console.log("WS readyState:", socket.readyState);
+        socket.send(JSON.stringify(loginPayload));
+      }, 1000);
+
+      navigate("/chat");
+    }
+  }, [status]);
 
   const handleSubmit = (values) => {
     console.log("🚀 Form submitted", values);

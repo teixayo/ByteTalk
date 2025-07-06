@@ -6,32 +6,31 @@ import * as Yup from "yup";
 
 import { useSocket } from "../../context/SocketContext.jsx";
 
-import { useSetAtom } from "jotai";
-import { bulkMessagesAtom } from "../../atoms/chatAtoms";
-
 let localUserName;
 let localUserPassword;
 const statusMessages = {
   1000: "✅ Success",
   1001: "❌ Incorrect username or password",
-  1002: "❌ This username is already taken",
-  1003: "❌ Invalid username format",
-  1004: "❌ Invalid password format",
+  1006: "❌ Invalid username format",
+  1007: "❌ Invalid password format",
 };
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const { socket, status } = useSocket();
-  const setBulkMessages = useSetAtom(bulkMessagesAtom);
 
   useEffect(() => {
-    if (status.code) {
+    if (status.code == "1000") {
+      alert(statusMessages[status.code]);
+    } else if (status.code == "1001") {
       alert(statusMessages[status.code]);
     }
+    
+    console.log("✅ useEffect in login form is running");
 
     if (status.type == "Status" && status.code == "1000") {
-        navigate("/chat");
-      }
+      navigate("/chat");
+    }
   }, [status]);
 
   const handleSubmit = (event) => {

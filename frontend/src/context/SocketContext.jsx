@@ -9,14 +9,12 @@ export const SocketProvider = ({ children }) => {
   const [loginToken, setLoginToken] = useState(null);
   const [status, setStatus] = useState({})
 
+
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
 
     ws.onopen = () => {
       console.log("✅ WebSocket connected");
-      const username = localStorage.getItem("username");
-      const token = localStorage.getItem("token");
-      console.log(username, token);
       setSocket(ws);
     };
 
@@ -30,12 +28,12 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type === "LoginToken") {
+        console.log("login token::::::::::::::", data.token)
         localStorage.setItem("token", data.token);
         setLoginToken(data.token);
       }
 
       if (data.type === "BulkMessages") {
-        console.log(data)
         setBulkMessages(data);
       }
     };
