@@ -122,18 +122,24 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 String name = jsonObject.getString("name");
 
                 User user = Server.getInstance().getUserService().getUserByUserName(name);
+                boolean useToken = jsonObject.has("token");
 
                 if (user == null) {
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
+
+                    if(useToken) {
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_TOKEN.createPacket().getData().toString()));
+                    } else {
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
+                    }
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
                     log.info("Disconnected {} cause of invalid user",socketAddress.getAddress().getHostAddress());
                     return;
                 }
-                if (jsonObject.has("token")) {
+                if (useToken) {
                     String token = jsonObject.getString("token");
                     DecodedJWT jwt = EncryptionUtils.getJWT(name);
                     if (jwt == null || !jwt.getToken().equals(token)) {
-                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_TOKEN.createPacket().getData().toString()));
                         handshaker.close(ctx.channel(), new CloseWebSocketFrame());
                         log.info("Disconnected {} cause of invalid token",socketAddress.getAddress().getHostAddress());
                         return;
@@ -141,7 +147,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 } else {
                     String password = EncryptionUtils.encrypt(jsonObject.getString("password"));
                     if (!user.getPassword().equals(password)) {
-                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INCORRECT_USER_OR_PASSWORD.createPacket().getData().toString()));
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
                         handshaker.close(ctx.channel(), new CloseWebSocketFrame());
                         log.info("Disconnected {} cause of invalid password",socketAddress.getAddress().getHostAddress());
                         return;
@@ -152,7 +158,11 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 user.setUserConnection(new UserConnection(ctx, user));
                 this.user = user;
                 UserManager.getInstance().addUser(user);
-                user.sendPacket(StatusCodes.SUCCESS.createPacket());
+                if(useToken) {
+                    user.sendPacket(StatusCodes.SUCCESS_LOGIN_WITH_TOKEN.createPacket());
+                } else {
+                    user.sendPacket(StatusCodes.SUCCESS_LOGIN_WITH_PASSWORD.createPacket());
+                }
                 if (EncryptionUtils.getJWT(name) == null) {
                     user.sendPacket(ServerPacketType.LoginToken.createPacket("token",
                             EncryptionUtils.createLoginJWT(name)));
@@ -186,7 +196,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 log.info("User {} Created", name);
                 password = EncryptionUtils.encrypt(password);
                 Server.getInstance().getUserService().saveUser(name, password);
-                ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.SUCCESS.createPacket().getData().toString()));
+                ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.SUCCESS_SIGNUP.createPacket().getData().toString()));
             }
         } else {
             ClientPacketType packetType;
