@@ -82,13 +82,13 @@ const SignUpForm = () => {
   });
 
   return (
-    <div className="flex justify-center itmes-center w-full">
+    <div className="flex justify-center text-white itmes-center w-full">
       <Formik
         initialValues={{ fildname: "", password: "" }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        <Form className="bg-white rounded-2xl w-6/12 h-70 flex justify-center items-center mt-10 pb-2">
+        <Form className="bg-neutral-900 rounded-2xl w-6/12 h-70 flex justify-center items-center mt-10 pb-2">
           <div className="w-full">
             <div className="flex justify-center mt-4 ">
               <div className="w-10/12">
@@ -96,7 +96,7 @@ const SignUpForm = () => {
                   name="fildname"
                   type="text"
                   placeholder="UserName"
-                  className="w-full h-10 border border-gray-400 px-3 rounded-md"
+                  className="w-full h-10 bg-neutral-700 px-3 rounded-md"
                 />
                 <ErrorMessage
                   name="fildname"
@@ -107,12 +107,12 @@ const SignUpForm = () => {
                   name="password"
                   type="text"
                   placeholder="Password"
-                  className="w-full h-10 border mt-4 border-gray-400 px-3 rounded-md"
+                  className="w-full h-10 mt-4 bg-neutral-700 px-3 rounded-md"
                 />
                 <ErrorMessage
                   name="password"
                   component="div"
-                  className="text-red-500 text-sm ml-0.5"
+                  className="text-red-500 t`ext-sm ml-0.5"
                 />
               </div>
             </div>
