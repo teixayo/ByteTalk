@@ -3,7 +3,7 @@ import { useSocket } from "../context/SocketContext";
 
 const Chat = () => {
   const [text, setText] = useState("");
-  const [message, setMessage] = useState([]);
+  const [messages, setMessage] = useState([]);
   const { socket, bulkMessages } = useSocket();
   // const [bulkMessages] = useAtom(bulkMessagesAtom);
 
@@ -76,8 +76,20 @@ const Chat = () => {
 
   const sendMessage = () => {
     console.log("send message run");
-    setMessage((prev) => [...prev, text]);
-    console.log("message:", message);
+    const user = localStorage.getItem("username");
+    const timestamp = Date.now();
+    const date = new Date(timestamp);
+    setMessage((prev) => [
+      ...prev,
+      {
+        content: text,
+        time: `${date.getHours()}:${
+          date.getMinutes() == "0" ? "00" : date.getMinutes()
+        }`,
+        username: user,
+      },
+    ]);
+    console.log("message:", messages);
     if (socket && socket.readyState == WebSocket.OPEN) {
       console.log("websocket is run");
       const messagePayload = {
@@ -87,19 +99,6 @@ const Chat = () => {
       socket.send(JSON.stringify(messagePayload));
     }
   };
-
-  // const setMessages = () => {
-  //   console.log(bulkMessages);
-  //   console.log(message);
-  //   // if (flag) {
-  //   // console.log(flag);
-  //   bulkMessages.map((msg) => {
-  //     console.log(msg.content);
-  //     setMessage((prev) => [...prev, msg.content]);
-  //   });
-  //   console.log("bulkMessages:", bulkMessages);
-  //   // }
-  // };
 
   return (
     <div className="grid grid-cols-11 text-gray-300">
@@ -113,10 +112,12 @@ const Chat = () => {
               setText(event.target.value);
             }}
             onKeyDown={(event) => {
-              if (event.code == "Enter") {
+              if (
+                event.code == "Enter" &&
+                event.target.value.replace(/\s/g, "") != ""
+              ) {
                 setText("");
                 sendMessage();
-                console.log(message);
               }
             }}
             placeholder="Message"
@@ -126,15 +127,15 @@ const Chat = () => {
         <div className=" w-full h-full">
           <div className="mt-4 list-disc pl-5">
             {Array.isArray(bulkMessages) &&
-              bulkMessages.map((msg, i) => (
+              messages.map((msg, i) => (
                 <div key={i} className="flex mb-3 ">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
-                    strokeWidth={1.25}
+                    strokeWidth={0.75}
                     stroke="currentColor"
-                    className="size-11"
+                    className="size-12"
                   >
                     <path
                       strokeLinecap="round"
@@ -144,17 +145,12 @@ const Chat = () => {
                   </svg>
 
                   <div className=" items-center">
-                    <div className="flex">
-                      <p className="mr-4 ml-1">{msg.username}</p>
-                    <p className="text-xs mt-1">
-                      {msg.time}
-                    </p>
+                    <div className="flex mt-0.5">
+                      <p className="mr-3 ml-1">{msg.username}</p>
+                      <p className="text-xs mt-1">{msg.time}</p>
                     </div>
                     <div>
-
-                    <p className="mr-10">
-                      {msg.content}
-                    </p>
+                      <p className="mr-10 text-sm">{msg.content}</p>
                     </div>
                   </div>
                 </div>
