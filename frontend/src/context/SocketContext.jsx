@@ -7,8 +7,7 @@ export const SocketProvider = ({ children }) => {
   const reconnectTimeoutRef = useRef(null);
   const [bulkMessages, setBulkMessages] = useState([]);
   const [loginToken, setLoginToken] = useState(null);
-  const [status, setStatus] = useState({})
-
+  const [status, setStatus] = useState({});
 
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
@@ -24,17 +23,32 @@ export const SocketProvider = ({ children }) => {
       console.log("📨 WS received:", data);
 
       if (data.type == "Status") {
-        setStatus(data)
+        setStatus(data);
       }
 
       if (data.type === "LoginToken") {
-        console.log("login token::::::::::::::", data.token)
+        console.log("login token::::::::::::::", data.token);
         localStorage.setItem("token", data.token);
         setLoginToken(data.token);
       }
 
       if (data.type === "BulkMessages") {
-        setBulkMessages(data);
+        data.messages.map((msg) => {
+          const date = new Date(msg.date);
+          if (msg.content != "") {
+            setBulkMessages((prev) => [
+              ...prev,
+              {
+                content: msg.content,
+                time: `${date.getHours()}:${
+                  date.getMinutes() == "0" ? "00" : date.getMinutes()
+                }`,
+                username: msg.username
+              },
+            ]);
+          }
+        });
+        // setBulkMessages(data);
       }
     };
 

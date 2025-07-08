@@ -41,25 +41,24 @@ const Chat = () => {
   // }, [socket]);
 
   useEffect(() => {
-    if (bulkMessages.messages) {
-      console.log("bulk: ", bulkMessages);
-      bulkMessages.messages.map((msg) => {
-        setMessage((prev) => [...prev, msg.content]);
-      });
-    }
-  }, [bulkMessages])
+    // if (bulkMessages.messages) {
+    console.log("bulk: ", bulkMessages);
+    bulkMessages.map((msg) => {
+      setMessage(bulkMessages);
+      console.log(msg);
+    });
+    // }
+  }, [bulkMessages]);
 
   useEffect(() => {
-    if(!socket){
-      console.log('socket isnt ready')
+    if (!socket) {
+      console.log("socket isnt ready");
       return;
     }
-    if(localStorage.getItem("token")){
-
+    if (localStorage.getItem("token")) {
       // loginWithToken()
     }
-
-  }, [socket])
+  }, [socket]);
 
   // const loginWithToken = () => {
   //   const username = localStorage.getItem("username");
@@ -71,7 +70,7 @@ const Chat = () => {
   //   };
   //   console.log(loginTokenPayload);
   //   console.log(socket)
-      
+
   //     socket.send(JSON.stringify(loginTokenPayload));
   // };
 
@@ -103,9 +102,9 @@ const Chat = () => {
   // };
 
   return (
-    <div className="grid grid-cols-9 text-gray-300">
-      <div className="bg-neutral-900 col-span-2 h-screen w-full"></div>
-      <div className="col-span-7 h-screen w-full relative">
+    <div className="grid grid-cols-11 text-gray-300">
+      <div className="bg-neutral-900 col-span-3 h-screen w-full"></div>
+      <div className="col-span-8 h-screen w-full relative">
         <div className="absolute bottom-3 left-0 right-0 flex justify-center w-full">
           <input
             type="text"
@@ -117,6 +116,7 @@ const Chat = () => {
               if (event.code == "Enter") {
                 setText("");
                 sendMessage();
+                console.log(message);
               }
             }}
             placeholder="Message"
@@ -125,8 +125,40 @@ const Chat = () => {
         </div>
         <div className=" w-full h-full">
           <div className="mt-4 list-disc pl-5">
-            {Array.isArray(message) &&
-              message.map((msg, i) => <p key={i}>{msg}</p>)}
+            {Array.isArray(bulkMessages) &&
+              bulkMessages.map((msg, i) => (
+                <div key={i} className="flex mb-3 ">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.25}
+                    stroke="currentColor"
+                    className="size-11"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                    />
+                  </svg>
+
+                  <div className=" items-center">
+                    <div className="flex">
+                      <p className="mr-4 ml-1">{msg.username}</p>
+                    <p className="text-xs mt-1">
+                      {msg.time}
+                    </p>
+                    </div>
+                    <div>
+
+                    <p className="mr-10">
+                      {msg.content}
+                    </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
           </div>
         </div>
       </div>
