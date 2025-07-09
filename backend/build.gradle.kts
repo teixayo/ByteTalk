@@ -45,3 +45,7 @@ dependencies {
     testAnnotationProcessor(libs.lombok)
     testCompileOnly(libs.lombok)
 }
+
+tasks.test {
+    useJUnitPlatform()
+}
