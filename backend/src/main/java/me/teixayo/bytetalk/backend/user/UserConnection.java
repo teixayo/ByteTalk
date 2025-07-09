@@ -95,6 +95,7 @@ public class UserConnection {
                             "date", message.getDate().toInstant().toEpochMilli()
                     ));
                 }
+
             }
             case RequestBulkMessage -> {
                 long time = packet.getData().getLong("time");
