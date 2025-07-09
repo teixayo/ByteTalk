@@ -23,6 +23,7 @@ public class Message {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
+
         Message message = (Message) o;
         return id == message.id && userID == message.userID && Objects.equals(content, message.content) && Objects.equals(date, message.date);
     }
