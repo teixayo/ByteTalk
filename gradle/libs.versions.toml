@@ -1,0 +1,39 @@
+[versions]
+lombok = "1.18.34"
+log4j = "2.20.0"
+netty = "4.2.1.Final"
+testcontainer = "1.21.0"
+
+[libraries]
+
+log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
+log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
+log4j-slf4j-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
+netty-codec = { module = "io.netty:netty-codec", version.ref = "netty" }
+netty-codec-http = { module = "io.netty:netty-codec-http", version.ref = "netty" }
+netty-handler = { module = "io.netty:netty-handler", version.ref = "netty" }
+netty-transport-native-epoll = { module = "io.netty:netty-transport-native-epoll", version.ref = "netty" }
+netty-transport-native-kqueue = { module = "io.netty:netty-transport-native-kqueue", version.ref = "netty" }
+netty-transport-native-iouring = { module = "io.netty:netty-transport-native-io_uring", version.ref = "netty" }
+
+
+testcontainer-testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainer" }
+testcontainer-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer" }
+testcontainer-mongodb = { module = "org.testcontainers:mongodb", version.ref = "testcontainer" }
+
+lombok =  { module = "org.projectlombok:lombok", version.ref = "lombok" }
+
+slf4j = "org.slf4j:slf4j-api:2.0.17"
+snakeyaml = "org.yaml:snakeyaml:2.2"
+jegl = "com.github.teixayo:JEGL:v1.0"
+jwt = "com.auth0:java-jwt:4.4.0"
+junit = "org.junit.jupiter:junit-jupiter:5.8.1"
+json = "org.json:json:20240303"
+elasticsearch = "co.elastic.clients:elasticsearch-java:8.17.0"
+jedis = "redis.clients:jedis:5.1.0"
+mongodb = "org.mongodb:mongodb-driver-sync:4.11.0"
+
+[bundles]
+log4j = ["log4j-api", "log4j-core", "log4j-slf4j-impl"]
+testcontainer = ["testcontainer-testcontainers","testcontainer-junit","testcontainer-mongodb"]
+
