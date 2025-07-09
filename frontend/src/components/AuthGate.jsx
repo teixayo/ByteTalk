@@ -42,7 +42,7 @@ const AuthGate = ({ children }) => {
     // ارسال پکت لاگین با توکن برای اعتبارسنجی
     const loginTokenPayload = {
       type: "Login",
-      name: username,
+      username: username,
       token,
     };
     console.log("🔐 Sent loginTokenPayload:", loginTokenPayload);
