@@ -3,23 +3,40 @@ import { useSocket } from "../context/SocketContext";
 
 const Chat = () => {
   const [text, setText] = useState("");
-  const [messages, setMessage] = useState([]);
-  const { socket, bulkMessages } = useSocket();
+  const [messages, setMessages] = useState([]);
+  const { socket, bulkMessages, newMessage } = useSocket();
 
   useEffect(() => {
     console.log("bulk: ", bulkMessages);
     bulkMessages.map((msg) => {
-      setMessage(bulkMessages);
+      setMessages(bulkMessages);
       console.log(msg);
     });
   }, [bulkMessages]);
+
+  useEffect(() => {
+    if (newMessage.date) {
+      const date = new Date(newMessage.date);
+      setMessages((prev) => [
+        ...prev,
+        {
+          content: newMessage.content,
+          time: `${date.getHours()}:${
+            date.getMinutes() == "0" ? "00" : date.getMinutes()
+          }`,
+          username: newMessage.username,
+        },
+      ]);
+      console.log(newMessage);
+    }
+  }, [newMessage]);
 
   const sendMessage = () => {
     console.log("send message run");
     const user = localStorage.getItem("username");
     const timestamp = Date.now();
     const date = new Date(timestamp);
-    setMessage((prev) => [
+    setMessages((prev) => [
       ...prev,
       {
         content: text,

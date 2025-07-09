@@ -8,6 +8,8 @@ export const SocketProvider = ({ children }) => {
   const [bulkMessages, setBulkMessages] = useState([]);
   const [loginToken, setLoginToken] = useState(null);
   const [status, setStatus] = useState({});
+  const [newMessage, setNewMessage] = useState({});
+
 
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
@@ -50,7 +52,12 @@ export const SocketProvider = ({ children }) => {
         });
         // setBulkMessages(data);
       }
+
+      if (data.type == "SendMessage") {
+          setNewMessage(data)
+        }
     };
+
 
     ws.onerror = (err) => {
       console.error("❌ WebSocket error:", err);
@@ -79,7 +86,7 @@ export const SocketProvider = ({ children }) => {
 
   return (
     <SocketContext.Provider
-      value={{ socket, bulkMessages, loginToken, status }}
+      value={{ socket, bulkMessages, loginToken, status, newMessage }}
     >
       {children}
     </SocketContext.Provider>
