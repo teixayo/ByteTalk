@@ -2,7 +2,7 @@ package integration;
 
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
-import me.teixayo.bytetalk.backend.security.EncryptionUtils;
+import me.teixayo.bytetalk.backend.security.Crypto;
 import me.teixayo.bytetalk.backend.service.user.MemoryUserService;
 import me.teixayo.bytetalk.backend.service.user.MongoUserService;
 import me.teixayo.bytetalk.backend.service.user.UserService;
@@ -44,7 +44,7 @@ public class UserServiceTest {
 
     public void testUserService(UserService service) {
         String name = "Test";
-        String password = EncryptionUtils.encrypt("MyPassword");
+        String password = Crypto.encryptSHA256("MyPassword");
         long id = service.saveUser(name, password);
 
         assertUserEquals(service.getUserByUserName(name), name, password, id);

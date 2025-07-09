@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.networking.TransportType;
 
+import java.io.File;
 import java.util.Map;
 
 @Slf4j
@@ -41,6 +42,11 @@ public class Config {
 
     private final int maxTimeOut;
 
+    private final boolean sslToggleUsingWSS;
+    private final boolean sslToggleUsingKeys;
+    private File sslCertifiateFile=null;
+    private File sslPrivateKeyFile=null;
+
     public Config(Map<String, Object> data) {
         this.data = data;
         redisToggle = (boolean) get("database.redis.toggle");
@@ -74,6 +80,18 @@ public class Config {
         networkingWriteBufferWaterMarkHigh = (int) get("networking.write-buffer-watermark.high");
 
         cacheMessageSize = (int) get("cache.message-size");
+
+
+        sslToggleUsingKeys = (boolean) get("ssl.toggleUsingKeys");
+        sslToggleUsingWSS = (boolean) get("ssl.toggleUsingWSS") | sslToggleUsingKeys;
+
+        if(sslToggleUsingKeys) {
+            sslCertifiateFile = new File((String) get("ssl.certificateFile"));
+            sslPrivateKeyFile = new File((String) get("ssl.privateKeyFile"));
+            if(!sslCertifiateFile.exists() || !sslPrivateKeyFile.exists()) {
+                throw new IllegalArgumentException("ssl keys doesn't exists");
+            }
+        }
         log.info("Config Loaded");
     }
 

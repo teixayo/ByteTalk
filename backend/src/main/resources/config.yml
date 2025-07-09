@@ -32,4 +32,9 @@ networking:
     low: 1048576
     high: 2097152
 cache:
-  message-size: 10
+  message-size: 50
+ssl:
+  toggleUsingWSS: false
+  toggleUsingKeys: false
+  certificateFile: ""
+  privateKeyFile: ""

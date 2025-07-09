@@ -6,8 +6,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.Getter;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -15,42 +13,15 @@ import java.util.HashMap;
 
 public class EncryptionUtils {
 
-    private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
     @Getter
     private static final HashMap<String, String> tokens = new HashMap<>();
     @Getter
     private static Algorithm algorithm;
     private static JWTVerifier verifier;
-    private static MessageDigest messageDigest;
-
     static {
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-            algorithm = Algorithm.HMAC256(RandomGenerator.generateSecureBytes(32));
-            verifier = JWT.require(algorithm)
-                    .build();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+        algorithm = Algorithm.HMAC256(RandomGenerator.generateSecureBytes(32));
+        verifier = JWT.require(algorithm).build();
     }
-
-    public static byte[] encrypt(byte[] data) {
-        return messageDigest.digest(data);
-    }
-
-    public static String encrypt(String data) {
-        byte[] encryptedData = encrypt(data.getBytes());
-        char[] hexChars = new char[encryptedData.length * 2];
-
-        for (int i = 0; i < encryptedData.length; i++) {
-            int v = encryptedData[i] & 0xFF;
-            hexChars[i * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[i * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-
-        return new String(hexChars);
-    }
-
     public static boolean isValidName(String name) {
         return name != null && name.matches("^[A-Za-z][A-Za-z0-9__-]{3,19}$");
     }

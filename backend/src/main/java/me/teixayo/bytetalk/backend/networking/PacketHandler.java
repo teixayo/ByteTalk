@@ -19,6 +19,7 @@ import me.teixayo.bytetalk.backend.protocol.client.ClientPacketType;
 import me.teixayo.bytetalk.backend.protocol.client.ClientStateType;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
 import me.teixayo.bytetalk.backend.protocol.server.StatusCodes;
+import me.teixayo.bytetalk.backend.security.Crypto;
 import me.teixayo.bytetalk.backend.security.EncryptionUtils;
 import me.teixayo.bytetalk.backend.user.User;
 import me.teixayo.bytetalk.backend.user.UserConnection;
@@ -48,7 +49,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
     private static String getWebSocketLocation(FullHttpRequest req) {
         String protocol = "ws";
-        if (req.headers().get(HttpHeaderNames.ORIGIN).startsWith("https")) {
+        if(Server.getInstance().getConfig().isSslToggleUsingWSS()) {
             protocol = "wss";
         }
         return protocol + "://" + req.headers().get(HttpHeaderNames.HOST) + WEBSOCKET_PATH;
@@ -145,7 +146,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                         return;
                     }
                 } else {
-                    String password = EncryptionUtils.encrypt(jsonObject.getString("password"));
+                    String password = Crypto.encryptSHA256(jsonObject.getString("password"));
                     if (!user.getPassword().equals(password)) {
                         ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
                         handshaker.close(ctx.channel(), new CloseWebSocketFrame());
@@ -194,7 +195,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                     return;
                 }
                 log.info("User {} Created", name);
-                password = EncryptionUtils.encrypt(password);
+                password = Crypto.encryptSHA256(password);
                 Server.getInstance().getUserService().saveUser(name, password);
                 ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.SUCCESS_SIGNUP.createPacket().getData().toString()));
             }
