@@ -16,6 +16,7 @@ const Chat = () => {
 
   useEffect(() => {
     if (newMessage.date) {
+      const user = localStorage.getItem("username")
       const date = new Date(newMessage.date);
       setMessages((prev) => [
         ...prev,
@@ -24,7 +25,7 @@ const Chat = () => {
           time: `${date.getHours()}:${
             date.getMinutes() == "0" ? "00" : date.getMinutes()
           }`,
-          username: newMessage.username,
+          username: user,
         },
       ]);
       console.log(newMessage);
