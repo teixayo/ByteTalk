@@ -95,6 +95,7 @@ public class Config {
         log.info("Config Loaded");
     }
 
+    @SuppressWarnings("unchecked")
     public Object get(String path) {
         String[] parts = path.split("\\.");
         Object current = data;

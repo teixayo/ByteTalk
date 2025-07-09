@@ -1,13 +1,9 @@
 plugins {
-    id("application")
+    application
 }
 
-group = "com.bytetalk"
-version = "1.0.0"
-java.sourceCompatibility = JavaVersion.VERSION_21
-
 application {
-    mainClass.set("me.teixayo.bytetalk.Main") // ← Replace with your actual main class
+    mainClass.set("me.teixayo.bytetalk.Main")
 }
 
 repositories {
@@ -48,8 +44,4 @@ dependencies {
     testImplementation(libs.bundles.testcontainer)
     testAnnotationProcessor(libs.lombok)
     testCompileOnly(libs.lombok)
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
