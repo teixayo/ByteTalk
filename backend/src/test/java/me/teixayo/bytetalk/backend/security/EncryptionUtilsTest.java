@@ -18,6 +18,7 @@ public class EncryptionUtilsTest {
         assertTrue(EncryptionUtils.isValidName("A".repeat(19)));
         assertTrue(EncryptionUtils.isValidName("Ali-AA"));
         assertTrue(EncryptionUtils.isValidName("Ali_AA"));
+        assertTrue(EncryptionUtils.isValidName("Test1"));
 
         assertFalse(EncryptionUtils.isValidName("AA"));
         assertFalse(EncryptionUtils.isValidName("AAA  B23"));

@@ -99,7 +99,7 @@ public class UserConnection {
 
             }
             case RequestBulkMessage -> {
-                long time = packet.getData().getLong("time");
+                long time = packet.getData().getLong("date");
                 Date date = Date.from(Instant.ofEpochMilli(time));
 
                 List<Message> loadedMessages = Server.getInstance().getMessageService().loadMessagesBeforeDate(date, 100);

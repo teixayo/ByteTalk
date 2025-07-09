@@ -1,5 +1,6 @@
 plugins {
     application
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 application {
@@ -13,6 +14,13 @@ repositories {
     }
 }
 
+
+tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+    archiveClassifier.set("")
+    manifest {
+        attributes["Main-Class"] = "me.teixayo.bytetalk.Main"
+    }
+}
 dependencies {
 
     implementation(libs.netty.codec)
