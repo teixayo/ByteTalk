@@ -6,7 +6,9 @@ public enum ServerPacketType {
     Status,
     BulkMessages,
     Messaging,
+    SendMessage,
     LoginToken,
+
     ;
 
 

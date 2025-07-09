@@ -11,10 +11,12 @@ import me.teixayo.bytetalk.backend.Server;
 import me.teixayo.bytetalk.backend.message.Message;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
+import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
 import me.teixayo.bytetalk.backend.security.RandomGenerator;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -83,6 +85,16 @@ public class UserConnection {
                 Message message = new Message(RandomGenerator.generateId(), user.getId(), packet.getData().getString("content"), Date.from(Instant.now()));
                 Server.getInstance().getMessageService().saveMessage(message);
                 Server.getInstance().getCacheService().addMessageToCache(message);
+                for (User user : UserManager.getInstance().getUsers().values()) {
+                    if (user.equals(this.user)) continue;
+                    String username = Server.getInstance().getUserService().getUsernameByIds(Collections.singleton(message.getUserID())).get(0);
+                    sendPacket(ServerPacketType.SendMessage.createPacket(
+                            "id", String.valueOf(message.getId()),
+                            "username", username,
+                            "content", message.getContent(),
+                            "date", String.valueOf(message.getDate().toInstant().toEpochMilli())
+                    ));
+                }
             }
             case RequestBulkMessage -> {
                 long time = packet.getData().getLong("time");
