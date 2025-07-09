@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../context/SocketContext";
 
 const Chat = () => {
@@ -6,34 +6,49 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const { socket, bulkMessages, newMessage } = useSocket();
 
-  useEffect(() => {
-    console.log("bulk: ", bulkMessages);
-    bulkMessages.map((msg) => {
-      setMessages(bulkMessages);
-      console.log(msg);
-    });
-  }, [bulkMessages]);
+  const scrollContainerRef = useRef(null);  // ← تعریف درستش
+  const bottomRef = useRef(null);           // ← این برای اسکرول به انتها
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
   useEffect(() => {
+    console.log("bulk: ", bulkMessages);
+    if (bulkMessages?.length > 0) {
+      setMessages(bulkMessages);
+    }
+  }, [bulkMessages]);
+
+  // بررسی پیام جدید
+  useEffect(() => {
     if (newMessage.date) {
-      const user = localStorage.getItem("username")
+      const user = localStorage.getItem("username");
       const date = new Date(newMessage.date);
       setMessages((prev) => [
         ...prev,
         {
           content: newMessage.content,
-          time: `${date.getHours()}:${
-            date.getMinutes() == "0" ? "00" : date.getMinutes()
-          }`,
+          time: `${date.getHours()}:${date.getMinutes() == "0" ? "00" : date.getMinutes()}`,
           username: user,
         },
       ]);
-      console.log(newMessage);
     }
   }, [newMessage]);
 
+  // اسکرول به پایین فقط اگر کاربر پایین بود
+  useEffect(() => {
+    if (isAtBottom) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const atBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight < 50;
+    setIsAtBottom(atBottom);
+  };
+
   const sendMessage = () => {
-    console.log("send message run");
     const user = localStorage.getItem("username");
     const timestamp = Date.now();
     const date = new Date(timestamp);
@@ -41,15 +56,11 @@ const Chat = () => {
       ...prev,
       {
         content: text,
-        time: `${date.getHours()}:${
-          date.getMinutes() == "0" ? "00" : date.getMinutes()
-        }`,
+        time: `${date.getHours()}:${date.getMinutes() == "0" ? "00" : date.getMinutes()}`,
         username: user,
       },
     ]);
-    console.log("message:", messages);
     if (socket && socket.readyState == WebSocket.OPEN) {
-      console.log("websocket is run");
       const messagePayload = {
         type: "SendMessage",
         content: text,
@@ -59,62 +70,56 @@ const Chat = () => {
   };
 
   return (
-    <div className="grid grid-cols-11 text-gray-300">
-      <div className="bg-neutral-900 col-span-3 h-screen w-full"></div>
-      <div className="col-span-8 h-screen w-full relative">
-        <div className="absolute bottom-3 left-0 right-0 flex justify-center w-full">
-          <input
-            type="text"
-            value={text}
-            onChange={(event) => {
-              setText(event.target.value);
-            }}
-            onKeyDown={(event) => {
-              if (
-                event.code == "Enter" &&
-                event.target.value.replace(/\s/g, "") != ""
-              ) {
-                setText("");
-                sendMessage();
-              }
-            }}
-            placeholder="Message"
-            className="w-11/12 h-14 pl-4 pb-1 bg-neutral-700 border border-black rounded-lg "
-          />
-        </div>
-        <div className=" w-full h-full">
-          <div className="mt-4 list-disc pl-5">
-            {Array.isArray(bulkMessages) &&
-              messages.map((msg, i) => (
-                <div key={i} className="flex mb-3 ">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={0.75}
-                    stroke="currentColor"
-                    className="size-12"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                    />
-                  </svg>
-
-                  <div className=" items-center">
-                    <div className="flex mt-0.5">
-                      <p className="mr-3 ml-1">{msg.username}</p>
-                      <p className="text-xs mt-1">{msg.time}</p>
-                    </div>
-                    <div>
-                      <p className="mr-10 text-sm">{msg.content}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+    <div className="h-screen flex flex-col text-gray-300">
+      {/* پیام‌ها */}
+      <div
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-3 mb-20"
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+      >
+        {messages.map((msg, i) => (
+          <div key={i} className="flex">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={0.75}
+              stroke="currentColor"
+              className="size-12"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+              />
+            </svg>
+            <div>
+              <div className="flex mt-0.5">
+                <p className="mr-3 ml-1">{msg.username}</p>
+                <p className="text-xs mt-1">{msg.time}</p>
+              </div>
+              <p className="mr-10 text-sm">{msg.content}</p>
+            </div>
           </div>
-        </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* فیلد پیام در پایین */}
+      <div className="fixed bottom-0 left-0 right-0 px-3 pb-5.5">
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.code === "Enter" && e.target.value.trim() !== "") {
+              sendMessage();
+              setText("");
+            }
+          }}
+          placeholder="Message"
+          className="w-full h-14 pl-4 pb-1 bg-neutral-700 border border-black rounded-lg"
+        />
       </div>
     </div>
   );
