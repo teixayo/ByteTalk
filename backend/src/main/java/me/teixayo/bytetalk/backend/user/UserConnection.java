@@ -16,7 +16,6 @@ import me.teixayo.bytetalk.backend.security.RandomGenerator;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -87,13 +86,15 @@ public class UserConnection {
                 Server.getInstance().getCacheService().addMessageToCache(message);
                 for (User otherUser : UserManager.getInstance().getUsers().values()) {
                     if (otherUser.equals(this.user)) continue;
-                    String username = Server.getInstance().getUserService().getUsernameByIds(Collections.singleton(message.getUserID())).get(0);
-                    otherUser.sendPacket(ServerPacketType.SendMessage.createPacket(
+                    ServerPacket packet1 = ServerPacketType.SendMessage.createPacket(
+
                             "id", message.getId(),
-                            "username", username,
+                            "username", this.user.getName(),
                             "content", message.getContent(),
                             "date", message.getDate().toInstant().toEpochMilli()
-                    ));
+                    );
+                    log.info(packet1.getData().toString());
+                    otherUser.sendPacket(packet1);
                 }
 
             }

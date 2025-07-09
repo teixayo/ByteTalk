@@ -120,7 +120,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
         if (ctx.channel().attr(ChannelInitializer.getState()).get() == ClientStateType.IN_LOGIN) {
             if (type.equals("Login")) {
-                String name = jsonObject.getString("name");
+                String name = jsonObject.getString("username");
 
                 User user = Server.getInstance().getUserService().getUserByUserName(name);
                 boolean useToken = jsonObject.has("token");
@@ -174,7 +174,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 return;
             }
             if (type.equals("CreateUser")) {
-                String name = jsonObject.getString("name");
+                String name = jsonObject.getString("username");
                 String password = jsonObject.getString("password");
                 if (!EncryptionUtils.isValidName(name)) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_USER.createPacket().getData().toString()));
