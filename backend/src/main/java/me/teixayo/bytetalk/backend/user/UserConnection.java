@@ -85,10 +85,10 @@ public class UserConnection {
                 Message message = new Message(RandomGenerator.generateId(), user.getId(), packet.getData().getString("content"), Date.from(Instant.now()));
                 Server.getInstance().getMessageService().saveMessage(message);
                 Server.getInstance().getCacheService().addMessageToCache(message);
-                for (User user : UserManager.getInstance().getUsers().values()) {
-                    if (user.equals(this.user)) continue;
+                for (User otherUser : UserManager.getInstance().getUsers().values()) {
+                    if (otherUser.equals(this.user)) continue;
                     String username = Server.getInstance().getUserService().getUsernameByIds(Collections.singleton(message.getUserID())).get(0);
-                    sendPacket(ServerPacketType.SendMessage.createPacket(
+                    otherUser.sendPacket(ServerPacketType.SendMessage.createPacket(
                             "id", String.valueOf(message.getId()),
                             "username", username,
                             "content", message.getContent(),
