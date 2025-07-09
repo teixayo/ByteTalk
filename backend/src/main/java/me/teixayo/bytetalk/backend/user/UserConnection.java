@@ -89,10 +89,10 @@ public class UserConnection {
                     if (otherUser.equals(this.user)) continue;
                     String username = Server.getInstance().getUserService().getUsernameByIds(Collections.singleton(message.getUserID())).get(0);
                     otherUser.sendPacket(ServerPacketType.SendMessage.createPacket(
-                            "id", String.valueOf(message.getId()),
+                            "id", message.getId(),
                             "username", username,
                             "content", message.getContent(),
-                            "date", String.valueOf(message.getDate().toInstant().toEpochMilli())
+                            "date", message.getDate().toInstant().toEpochMilli()
                     ));
                 }
             }
