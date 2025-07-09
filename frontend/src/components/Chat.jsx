@@ -6,8 +6,8 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const { socket, bulkMessages, newMessage } = useSocket();
 
-  const scrollContainerRef = useRef(null);  // ← تعریف درستش
-  const bottomRef = useRef(null);           // ← این برای اسکرول به انتها
+  const scrollContainerRef = useRef(null);  
+  const bottomRef = useRef(null);           
   const [isAtBottom, setIsAtBottom] = useState(true);
 
   useEffect(() => {
@@ -17,23 +17,21 @@ const Chat = () => {
     }
   }, [bulkMessages]);
 
-  // بررسی پیام جدید
+
   useEffect(() => {
     if (newMessage.date) {
-      const user = localStorage.getItem("username");
       const date = new Date(newMessage.date);
       setMessages((prev) => [
         ...prev,
         {
           content: newMessage.content,
           time: `${date.getHours()}:${date.getMinutes() == "0" ? "00" : date.getMinutes()}`,
-          username: user,
+          username: newMessage.username,
         },
       ]);
     }
   }, [newMessage]);
 
-  // اسکرول به پایین فقط اگر کاربر پایین بود
   useEffect(() => {
     if (isAtBottom) {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });

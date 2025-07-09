@@ -40,7 +40,7 @@ const LoginForm = () => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       const loginPayload = {
         type: "Login",
-        name: localUserName,
+        username: localUserName,
         password: localUserPassword,
       };
 

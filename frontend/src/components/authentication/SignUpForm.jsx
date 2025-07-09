@@ -30,7 +30,7 @@ const SignUpForm = () => {
         localStorage.setItem("username", localUserName);
         const loginPayload = {
           type: "Login",
-          name: localUserName,
+          username: localUserName,
           password: localUserPassword,
         };
         console.log("📨 Sending login:", loginPayload);
@@ -54,7 +54,7 @@ const SignUpForm = () => {
 
     const signupPayload = {
       type: "CreateUser",
-      name: localUserName,
+      username: localUserName,
       password: localUserPassword,
     };
 
