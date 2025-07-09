@@ -16,12 +16,14 @@ public class EncryptionUtils {
     @Getter
     private static final HashMap<String, String> tokens = new HashMap<>();
     @Getter
-    private static Algorithm algorithm;
-    private static JWTVerifier verifier;
+    private static final Algorithm algorithm;
+    private static final JWTVerifier verifier;
+
     static {
         algorithm = Algorithm.HMAC256(RandomGenerator.generateSecureBytes(32));
         verifier = JWT.require(algorithm).build();
     }
+
     public static boolean isValidName(String name) {
         return name != null && name.matches("^[A-Za-z][A-Za-z0-9__-]{3,19}$");
     }

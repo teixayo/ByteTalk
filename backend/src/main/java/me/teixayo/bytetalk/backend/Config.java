@@ -44,8 +44,8 @@ public class Config {
 
     private final boolean sslToggleUsingWSS;
     private final boolean sslToggleUsingKeys;
-    private File sslCertifiateFile=null;
-    private File sslPrivateKeyFile=null;
+    private File sslCertifiateFile = null;
+    private File sslPrivateKeyFile = null;
 
     public Config(Map<String, Object> data) {
         this.data = data;
@@ -85,10 +85,10 @@ public class Config {
         sslToggleUsingKeys = (boolean) get("ssl.toggleUsingKeys");
         sslToggleUsingWSS = (boolean) get("ssl.toggleUsingWSS") | sslToggleUsingKeys;
 
-        if(sslToggleUsingKeys) {
+        if (sslToggleUsingKeys) {
             sslCertifiateFile = new File((String) get("ssl.certificateFile"));
             sslPrivateKeyFile = new File((String) get("ssl.privateKeyFile"));
-            if(!sslCertifiateFile.exists() || !sslPrivateKeyFile.exists()) {
+            if (!sslCertifiateFile.exists() || !sslPrivateKeyFile.exists()) {
                 throw new IllegalArgumentException("ssl keys doesn't exists");
             }
         }

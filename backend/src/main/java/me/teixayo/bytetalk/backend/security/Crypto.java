@@ -14,6 +14,16 @@ import java.util.Base64;
 public class Crypto {
 
     private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
+    private static MessageDigest messageDigest;
+
+    static {
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static String encryptSHA256(String message, PublicKey rsaPublicKey) throws Exception {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         keyGen.init(128);
@@ -56,17 +66,6 @@ public class Crypto {
         byte[] decryptedMessage = aesCipher.doFinal(encryptedMessage);
 
         return new String(decryptedMessage);
-    }
-
-
-    private static MessageDigest messageDigest;
-
-    static {
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
     }
 
     public static byte[] encryptSHA256(byte[] data) {

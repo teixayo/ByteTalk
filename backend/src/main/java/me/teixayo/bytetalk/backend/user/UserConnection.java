@@ -47,7 +47,7 @@ public class UserConnection {
         channel.channel().closeFuture().addListener((ChannelFutureListener) future -> {
             online = false;
             UserManager.getInstance().removeUser(user);
-            log.info("Disconnected the {} {}", user.getName(),socketAddress);
+            log.info("Disconnected the {} {}", user.getName(), socketAddress);
         });
 
     }

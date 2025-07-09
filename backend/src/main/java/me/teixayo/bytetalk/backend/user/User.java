@@ -17,9 +17,9 @@ import java.util.HashSet;
 public class User {
     private final String name;
     private final String password;
+    private final long id;
     @Setter
     private UserConnection userConnection;
-    private final long id;
 
     public User(long id, String name, String password, UserConnection userConnection) {
         this.id = id;

@@ -21,8 +21,9 @@ public class ChannelInitializer extends io.netty.channel.ChannelInitializer<Chan
     private static final AttributeKey<ClientStateType> state = AttributeKey.newInstance("State");
 
     private static SslContext sslContent = null;
+
     static {
-        if(Server.getInstance().getConfig().isSslToggleUsingKeys()) {
+        if (Server.getInstance().getConfig().isSslToggleUsingKeys()) {
             try {
 
                 sslContent = SslContextBuilder.forServer(

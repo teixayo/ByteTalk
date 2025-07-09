@@ -75,7 +75,7 @@ public final class Server implements LoopApp {
         log.info("Using {} as CacheService", cacheService.getClass().getSimpleName());
 
         long end = System.currentTimeMillis();
-        log.info("Loaded sever on {} ms",(end-start));
+        log.info("Loaded sever on {} ms", (end - start));
     }
 
     @Override

@@ -49,7 +49,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
     private static String getWebSocketLocation(FullHttpRequest req) {
         String protocol = "ws";
-        if(Server.getInstance().getConfig().isSslToggleUsingWSS()) {
+        if (Server.getInstance().getConfig().isSslToggleUsingWSS()) {
             protocol = "wss";
         }
         return protocol + "://" + req.headers().get(HttpHeaderNames.HOST) + WEBSOCKET_PATH;
@@ -127,13 +127,13 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
                 if (user == null) {
 
-                    if(useToken) {
+                    if (useToken) {
                         ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_TOKEN.createPacket().getData().toString()));
                     } else {
                         ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
                     }
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                    log.info("Disconnected {} cause of invalid user",socketAddress.getAddress().getHostAddress());
+                    log.info("Disconnected {} cause of invalid user", socketAddress.getAddress().getHostAddress());
                     return;
                 }
                 if (useToken) {
@@ -142,7 +142,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                     if (jwt == null || !jwt.getToken().equals(token)) {
                         ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_TOKEN.createPacket().getData().toString()));
                         handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                        log.info("Disconnected {} cause of invalid token",socketAddress.getAddress().getHostAddress());
+                        log.info("Disconnected {} cause of invalid token", socketAddress.getAddress().getHostAddress());
                         return;
                     }
                 } else {
@@ -150,7 +150,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                     if (!user.getPassword().equals(password)) {
                         ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
                         handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                        log.info("Disconnected {} cause of invalid password",socketAddress.getAddress().getHostAddress());
+                        log.info("Disconnected {} cause of invalid password", socketAddress.getAddress().getHostAddress());
                         return;
                     }
                 }
@@ -159,7 +159,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 user.setUserConnection(new UserConnection(ctx, user));
                 this.user = user;
                 UserManager.getInstance().addUser(user);
-                if(useToken) {
+                if (useToken) {
                     user.sendPacket(StatusCodes.SUCCESS_LOGIN_WITH_TOKEN.createPacket());
                 } else {
                     user.sendPacket(StatusCodes.SUCCESS_LOGIN_WITH_PASSWORD.createPacket());
@@ -179,19 +179,19 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 if (!EncryptionUtils.isValidName(name)) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_USER.createPacket().getData().toString()));
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                    log.info("Disconnected {} cause of invalid name",socketAddress.getAddress().getHostAddress());
+                    log.info("Disconnected {} cause of invalid name", socketAddress.getAddress().getHostAddress());
                     return;
                 }
                 if (!EncryptionUtils.isValidPassword(password)) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_PASSWORD.createPacket().getData().toString()));
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                    log.info("Disconnected {} cause of invalid password",socketAddress.getAddress().getHostAddress());
+                    log.info("Disconnected {} cause of invalid password", socketAddress.getAddress().getHostAddress());
                     return;
                 }
                 if (Server.getInstance().getUserService().isUserExists(name)) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.USER_EXISTS.createPacket().getData().toString()));
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                    log.info("Disconnected {} cause of using created names for signup",socketAddress.getAddress().getHostAddress());
+                    log.info("Disconnected {} cause of using created names for signup", socketAddress.getAddress().getHostAddress());
                     return;
                 }
                 log.info("User {} Created", name);
