@@ -13,6 +13,7 @@ import me.teixayo.bytetalk.backend.protocol.client.ClientPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
 import me.teixayo.bytetalk.backend.security.RandomGenerator;
+import me.teixayo.bytetalk.backend.security.RateLimiter;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
@@ -30,11 +31,14 @@ public class UserConnection {
     private final User user;
     private boolean online = true;
     private long lastPongTime;
+    private RateLimiter sendMessageRateLimiter;
 
     public UserConnection(ChannelHandlerContext channel, User user) {
         this.channel = channel;
         this.user = user;
-        lastPongTime = System.currentTimeMillis();
+        this.lastPongTime = System.currentTimeMillis();
+        this.sendMessageRateLimiter = Server.getInstance().getConfig().getSendMessageLimiter().copy();
+
     }
 
 
@@ -81,7 +85,11 @@ public class UserConnection {
         log.info(packet.getData().toString());
         switch (packet.getPacketType()) {
             case SendMessage -> {
-                Message message = new Message(RandomGenerator.generateId(), user.getId(), packet.getData().getString("content"), Date.from(Instant.now()));
+                if(!sendMessageRateLimiter.allowRequest()) return;
+                String content = packet.getData().getString("content");
+                if(content == null || content.isBlank() || content.length() > Server.getInstance().getConfig().getMaxSendMessageSize()) return;
+                //TODO Code Status for these things
+                Message message = new Message(RandomGenerator.generateId(), user.getId(), content, Date.from(Instant.now()));
                 Server.getInstance().getMessageService().saveMessage(message);
                 Server.getInstance().getCacheService().addMessageToCache(message);
                 for (User otherUser : UserManager.getInstance().getUsers().values()) {

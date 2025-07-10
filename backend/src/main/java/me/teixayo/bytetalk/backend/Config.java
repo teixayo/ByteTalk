@@ -3,6 +3,7 @@ package me.teixayo.bytetalk.backend;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.networking.TransportType;
+import me.teixayo.bytetalk.backend.security.RateLimiter;
 
 import java.io.File;
 import java.util.Map;
@@ -46,6 +47,9 @@ public class Config {
     private final boolean sslToggleUsingKeys;
     private File sslCertifiateFile = null;
     private File sslPrivateKeyFile = null;
+
+    private RateLimiter sendMessageLimiter;
+    private int maxSendMessageSize;
 
     public Config(Map<String, Object> data) {
         this.data = data;
@@ -92,6 +96,20 @@ public class Config {
                 throw new IllegalArgumentException("ssl keys doesn't exists");
             }
         }
+
+        /*
+        rate-limiter:
+  send-message:
+    max-size: 2000 #character
+    time: 5
+    tokens: 10
+         */
+
+        sendMessageLimiter = new RateLimiter(
+                (int) get("rate-limiter.send-message.tokens"),
+                (int) get("rate-limiter.send-message.time")
+        );
+        maxSendMessageSize = (int) get("rate-limiter.send-message.max-size");
         log.info("Config Loaded");
     }
 
