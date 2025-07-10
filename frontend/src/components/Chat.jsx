@@ -18,6 +18,13 @@ const Chat = () => {
     console.log("bulk: ", bulkMessages);
     if (bulkMessages?.length > 0) {
       setMessages(bulkMessages);
+      const container = scrollContainerRef.current;
+      const prevScrollHeight = container.scrollHeight;
+      setTimeout(() => {
+        const newScrollHeight = container.scrollHeight;
+        container.scrollTop =
+          newScrollHeight - prevScrollHeight + container.scrollTop;
+      }, 0);
     }
   }, [bulkMessages]);
 
@@ -66,16 +73,16 @@ const Chat = () => {
     }
     if (!sendStatus) return;
     // رسیدن به بالا
-    if (didUserScroll && container.scrollTop < 50) {
+    if (didUserScroll && container.scrollTop < 400) {
       console.log("🟡 کاربر دستی به بالای لیست رسید");
-      setSendStatus(false); // این تابع تو تعریف کن برای fetch قبلیا
+      setSendStatus(false);
       const firstMessageTimecode = messages[0].timecode;
       console.log(firstMessageTimecode);
       const prevMessagesPayload = {
         type: "RequestBulkMessage",
-        date: firstMessageTimecode
-      }
-      socket.send(JSON.stringify(prevMessagesPayload))
+        date: firstMessageTimecode,
+      };
+      socket.send(JSON.stringify(prevMessagesPayload));
     }
   };
 
@@ -94,7 +101,7 @@ const Chat = () => {
         username: user,
       },
     ]);
-    console.log(bulkMessages)
+    console.log(bulkMessages);
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
         type: "SendMessage",
