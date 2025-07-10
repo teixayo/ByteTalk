@@ -8,6 +8,7 @@ import me.teixayo.bytetalk.backend.networking.NettyHandler;
 import me.teixayo.bytetalk.backend.security.EncryptionUtils;
 import me.teixayo.bytetalk.backend.service.cache.CacheService;
 import me.teixayo.bytetalk.backend.service.message.MessageService;
+import me.teixayo.bytetalk.backend.service.message.MongoMessageService;
 import me.teixayo.bytetalk.backend.service.search.SearchService;
 import me.teixayo.bytetalk.backend.service.user.UserService;
 import me.teixayo.bytetalk.backend.user.User;
@@ -95,6 +96,9 @@ public final class Server implements LoopApp {
                 }
 
             }
+        }
+        if(messageService instanceof MongoMessageService mongoMessageService) {
+            mongoMessageService.finalizeAllMessages();
         }
     }
 

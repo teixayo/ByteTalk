@@ -17,6 +17,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -62,6 +65,10 @@ public class MessagesServiceTest {
 
         }
 
+        if(service instanceof MongoMessageService mongoMessageService) {
+            ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+            scheduledExecutorService.schedule(mongoMessageService::finalizeAllMessages,1, TimeUnit.SECONDS);
+        }
         List<Message> loadedMessages = service.loadMessagesBeforeDate(Date.from(Instant.now()), 100);
         for(int i = 0; i < 100; i++) {
             Message loadedMessage = loadedMessages.get(i);
