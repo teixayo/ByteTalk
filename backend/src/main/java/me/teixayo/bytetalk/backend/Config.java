@@ -50,6 +50,7 @@ public class Config {
 
     private RateLimiter sendMessageLimiter;
     private int maxSendMessageSize;
+    private RateLimiter bulkMessageLimiter;
 
     public Config(Map<String, Object> data) {
         this.data = data;
@@ -110,6 +111,10 @@ public class Config {
                 (int) get("rate-limiter.send-message.time")
         );
         maxSendMessageSize = (int) get("rate-limiter.send-message.max-size");
+        bulkMessageLimiter =new RateLimiter(
+                (int) get("rate-limiter.bulk-message.tokens"),
+                (int) get("rate-limiter.bulk-message.time")
+        );
         log.info("Config Loaded");
     }
 

@@ -41,5 +41,8 @@ ssl:
 rate-limiter:
   send-message:
     max-size: 2000 #character
-    time: 5
+    time: 5000
     tokens: 10
+  bulk-message:
+    time: 1000
+    tokens: 5

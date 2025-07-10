@@ -19,7 +19,9 @@ import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Getter
@@ -31,13 +33,15 @@ public class UserConnection {
     private final User user;
     private boolean online = true;
     private long lastPongTime;
-    private RateLimiter sendMessageRateLimiter;
+    private final RateLimiter sendMessageRateLimiter;
+    private final RateLimiter bulkMessageRateLimiter;
 
     public UserConnection(ChannelHandlerContext channel, User user) {
         this.channel = channel;
         this.user = user;
         this.lastPongTime = System.currentTimeMillis();
         this.sendMessageRateLimiter = Server.getInstance().getConfig().getSendMessageLimiter().copy();
+        this.bulkMessageRateLimiter = Server.getInstance().getConfig().getBulkMessageLimiter().copy();
 
     }
 
@@ -109,10 +113,16 @@ public class UserConnection {
             case RequestBulkMessage -> {
                 long time = packet.getData().getLong("date");
                 Date date = Date.from(Instant.ofEpochMilli(time));
-
-                List<Message> loadedMessages = Server.getInstance().getMessageService().loadMessagesBeforeDate(date, 100);
-                user.sendMessages(loadedMessages);
+                sendBulkMessage(date);
             }
+        }
+    }
+    private void sendBulkMessage(Date date) {
+        if(!bulkMessageRateLimiter.allowRequest()) {
+            CompletableFuture.runAsync(() -> sendBulkMessage(date),CompletableFuture.delayedExecutor(bulkMessageRateLimiter.getRefillIntervalMillis(), TimeUnit.MILLISECONDS));
+        } else {
+            List<Message> loadedMessages = Server.getInstance().getMessageService().loadMessagesBeforeDate(date, 100);
+            user.sendMessages(loadedMessages);
         }
     }
 }

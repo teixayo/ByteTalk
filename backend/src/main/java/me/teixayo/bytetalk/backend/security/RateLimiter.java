@@ -1,7 +1,10 @@
 package me.teixayo.bytetalk.backend.security;
 
+import lombok.Getter;
+
 public class RateLimiter {
     private final int maxTokens;
+    @Getter
     private final long refillIntervalMillis;
     private int tokens;
     private long lastRefillTimestamp;
