@@ -69,8 +69,13 @@ const Chat = () => {
     if (didUserScroll && container.scrollTop < 50) {
       console.log("🟡 کاربر دستی به بالای لیست رسید");
       setSendStatus(false); // این تابع تو تعریف کن برای fetch قبلیا
-      const firstMessage = messages[0];
-      console.log(firstMessage);
+      const firstMessageTimecode = messages[0].timecode;
+      console.log(firstMessageTimecode);
+      const prevMessagesPayload = {
+        type: "RequestBulkMessage",
+        date: firstMessageTimecode
+      }
+      socket.send(JSON.stringify(prevMessagesPayload))
     }
   };
 

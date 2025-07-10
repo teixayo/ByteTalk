@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 const SocketContext = createContext();
 
+let initialLoaded = false
+
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const reconnectTimeoutRef = useRef(null);
@@ -34,24 +36,47 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type === "BulkMessages") {
-        data.messages.map((msg) => {
-          const date = new Date(msg.date);
-          const originalTime = date.toLocaleTimeString();
-          const [time, period] = originalTime.split(" "); // time = "12:05:45", period = "AM"
-          const shortTime = time.slice(0, 5) + " " + period;
+        if(!initialLoaded) {
+          data.messages.map((msg) => {
+            const date = new Date(msg.date);
+            const originalTime = date.toLocaleTimeString();
+            const [time, period] = originalTime.split(" "); // time = "12:05:45", period = "AM"
+            const shortTime = time.slice(0, 5) + " " + period;
+  
+            if (msg.content != "") {
+              setBulkMessages((prev) => [
+                ...prev,
+                {
+                  content: msg.content,
+                  time: shortTime,
+                  username: msg.username,
+                  timecode: msg.date,
+                },
+              ]);
+            }
+          });
+          console.log(initialLoaded)
+          initialLoaded = true
+        } else {
+          const newMessages = data.messages
+  .filter(msg => msg.content !== "")
+  .map((msg) => {
+    const date = new Date(msg.date);
+    const originalTime = date.toLocaleTimeString();
+    const [time, period] = originalTime.split(" ");
+    const shortTime = time.slice(0, 5) + " " + period;
 
-          if (msg.content != "") {
-            setBulkMessages((prev) => [
-              ...prev,
-              {
-                content: msg.content,
-                time: shortTime,
-                username: msg.username,
-                timecode: msg.date
-              },
-            ]);
-          }
-        });
+    return {
+      content: msg.content,
+      time: shortTime,
+      username: msg.username,
+      timecode: msg.date,
+    };
+  });
+ console.log(newMessages)
+// حالا فقط یکبار state رو آپدیت کن:
+setBulkMessages((prev) => [...newMessages.reverse(), ...prev]);
+        }
         // setBulkMessages(data);
       }
 
