@@ -33,15 +33,18 @@ public class UserConnection {
     private final User user;
     private boolean online = true;
     private long lastPongTime;
-    private final RateLimiter sendMessageRateLimiter;
-    private final RateLimiter bulkMessageRateLimiter;
+    private RateLimiter sendMessageRateLimiter;
+    private RateLimiter bulkMessageRateLimiter;
 
     public UserConnection(ChannelHandlerContext channel, User user) {
         this.channel = channel;
         this.user = user;
         this.lastPongTime = System.currentTimeMillis();
-        this.sendMessageRateLimiter = Server.getInstance().getConfig().getSendMessageLimiter().copy();
-        this.bulkMessageRateLimiter = Server.getInstance().getConfig().getBulkMessageLimiter().copy();
+        if(Server.getInstance()!=null) {
+            this.sendMessageRateLimiter = Server.getInstance().getConfig().getSendMessageLimiter().copy();
+            this.bulkMessageRateLimiter = Server.getInstance().getConfig().getBulkMessageLimiter().copy();
+        }
+
 
     }
 
