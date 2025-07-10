@@ -88,7 +88,7 @@ const SignUpForm = () => {
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        <Form className="bg-neutral-900 rounded-2xl w-6/12 h-70 flex justify-center items-center mt-10 pb-2">
+        <Form className="bg-neutral-900 rounded-2xl w-11/12 sm:10/12 md:w-7/12 xl:w-4/12 h-70 flex justify-center items-center mt-10 pb-2">
           <div className="w-full">
             <div className="flex justify-center mt-4 ">
               <div className="w-10/12">

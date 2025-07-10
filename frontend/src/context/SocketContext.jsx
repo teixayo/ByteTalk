@@ -10,7 +10,6 @@ export const SocketProvider = ({ children }) => {
   const [status, setStatus] = useState({});
   const [newMessage, setNewMessage] = useState({});
 
-
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
 
@@ -37,15 +36,18 @@ export const SocketProvider = ({ children }) => {
       if (data.type === "BulkMessages") {
         data.messages.map((msg) => {
           const date = new Date(msg.date);
+          const originalTime = date.toLocaleTimeString();
+          const [time, period] = originalTime.split(" "); // time = "12:05:45", period = "AM"
+          const shortTime = time.slice(0, 5) + " " + period;
+
           if (msg.content != "") {
             setBulkMessages((prev) => [
               ...prev,
               {
                 content: msg.content,
-                time: `${date.getHours()}:${
-                  date.getMinutes() == "0" ? "00" : date.getMinutes()
-                }`,
-                username: msg.username
+                time: shortTime,
+                username: msg.username,
+                timecode: msg.date
               },
             ]);
           }
@@ -54,10 +56,9 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type == "SendMessage") {
-          setNewMessage(data)
-        }
+        setNewMessage(data);
+      }
     };
-
 
     ws.onerror = (err) => {
       console.error("❌ WebSocket error:", err);

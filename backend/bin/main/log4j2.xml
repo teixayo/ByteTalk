@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout disableAnsi="false" charset="UTF-8">
+                <Pattern>
+                    %highlight{%d{HH:mm:ss.SSS} [%level] [%t] %C{1} » %msg%n%throwable}{ERROR=red, WARN=bright yellow, INFO=bright green, DEBUG=bright cyan, TRACE=bright black}
+                </Pattern>
+            </PatternLayout>
+
+
+        </Console>
+
+        <RollingFile name="File"
+                     fileName="logs/app.log"
+                     filePattern="logs/app-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout disableAnsi="false" charset="UTF-8">
+                <Pattern>
+                    %d{HH:mm:ss.SSS} [%level] [%t] %C{1} » %msg%n%throwable
+                </Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.mongodb.driver" level="ERROR" />
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+
+</Configuration>

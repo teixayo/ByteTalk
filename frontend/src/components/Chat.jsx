@@ -6,9 +6,13 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const { socket, bulkMessages, newMessage } = useSocket();
 
-  const scrollContainerRef = useRef(null);  
-  const bottomRef = useRef(null);           
+  const scrollContainerRef = useRef(null);
+  const bottomRef = useRef(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
+
+  const [didUserScroll, setDidUserScroll] = useState(false);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(true);
+  const [sendStatus, setSendStatus] = useState(true);
 
   useEffect(() => {
     console.log("bulk: ", bulkMessages);
@@ -17,15 +21,18 @@ const Chat = () => {
     }
   }, [bulkMessages]);
 
-
   useEffect(() => {
     if (newMessage.date) {
       const date = new Date(newMessage.date);
+      const originalTime = date.toLocaleTimeString();
+      const [time, period] = originalTime.split(" ");
+      const shortTime = time.slice(0, 5) + " " + period;
+      console.log(shortTime);
       setMessages((prev) => [
         ...prev,
         {
           content: newMessage.content,
-          time: `${date.getHours()}:${date.getMinutes() == "0" ? "00" : date.getMinutes()}`,
+          time: shortTime,
           username: newMessage.username,
         },
       ]);
@@ -34,30 +41,55 @@ const Chat = () => {
 
   useEffect(() => {
     if (isAtBottom) {
+      setIsAutoScrolling(true); // داریم خودمون اسکرول می‌کنیم
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      // بعد از اسکرول خودکار یه کم صبر می‌کنیم تا تموم شه، بعدش میگیم از اینجا به بعد کاربر اسکرول کنه
+      setTimeout(() => setIsAutoScrolling(false), 300);
     }
   }, [messages]);
 
   const handleScroll = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
+
     const atBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight < 50;
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      50;
     setIsAtBottom(atBottom);
+
+    // اگه هنوز تو حالت اسکرول خودکار هستیم، هیچی نگو
+    if (isAutoScrolling) return;
+
+    // فقط وقتی کاربر واقعاً اسکرول کرد
+    if (!didUserScroll) {
+      setDidUserScroll(true);
+    }
+    if (!sendStatus) return;
+    // رسیدن به بالا
+    if (didUserScroll && container.scrollTop < 50) {
+      console.log("🟡 کاربر دستی به بالای لیست رسید");
+      setSendStatus(false); // این تابع تو تعریف کن برای fetch قبلیا
+      const firstMessage = messages[0];
+      console.log(firstMessage);
+    }
   };
 
   const sendMessage = () => {
     const user = localStorage.getItem("username");
     const timestamp = Date.now();
     const date = new Date(timestamp);
+    const originalTime = date.toLocaleTimeString();
+    const [time, period] = originalTime.split(" ");
+    const shortTime = time.slice(0, 5) + " " + period;
     setMessages((prev) => [
       ...prev,
       {
         content: text,
-        time: `${date.getHours()}:${date.getMinutes() == "0" ? "00" : date.getMinutes()}`,
+        time: shortTime,
         username: user,
       },
     ]);
+    console.log(bulkMessages)
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
         type: "SendMessage",
