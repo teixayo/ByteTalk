@@ -25,7 +25,7 @@ const LoginForm = () => {
     } else if (status.code == "1001") {
       alert(statusMessages[status.code]);
     }
-    
+
     console.log("✅ useEffect in login form is running");
 
     if (status.type == "Status" && status.code == "1000") {
@@ -55,8 +55,8 @@ const LoginForm = () => {
     fildname: Yup.string()
       .min(4, "Username must be at least 4 characters")
       .matches(
-        /^[a-zA-Z]+$/,
-        "Username must only contain lowercase letters (a-z)"
+        /^[a-zA-Z0-9]+$/,
+        "Username must only contain letters and numbers"
       )
       .max(19, "Username must be a maximum of 19 characters")
       .required("Username is required"),
