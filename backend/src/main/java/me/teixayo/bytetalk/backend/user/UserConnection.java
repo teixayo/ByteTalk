@@ -124,7 +124,7 @@ public class UserConnection {
         if(!bulkMessageRateLimiter.allowRequest()) {
             CompletableFuture.runAsync(() -> sendBulkMessage(date),CompletableFuture.delayedExecutor(bulkMessageRateLimiter.getRefillIntervalMillis(), TimeUnit.MILLISECONDS));
         } else {
-            List<Message> loadedMessages = Server.getInstance().getMessageService().loadMessagesBeforeDate(date, 100);
+            List<Message> loadedMessages = Server.getInstance().getMessageService().loadMessagesBeforeDate(date, 40);
             user.sendMessages(loadedMessages);
         }
     }
