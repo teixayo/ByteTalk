@@ -12,6 +12,11 @@ export const SocketProvider = ({ children }) => {
   const [status, setStatus] = useState({});
   const [newMessage, setNewMessage] = useState({});
 
+  const [messages, setMessages] = useState([]);
+
+
+  const [sendStatus, setSendStatus] = useState(true);
+
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
 
@@ -58,6 +63,9 @@ export const SocketProvider = ({ children }) => {
           console.log(initialLoaded);
           initialLoaded = true;
         } else {
+          console.log(data.messages.length);
+          if (data.messages.length < 1) return;
+
           const newMessages = data.messages
             .filter((msg) => msg.content !== "")
             .map((msg) => {
@@ -77,7 +85,6 @@ export const SocketProvider = ({ children }) => {
           // حالا فقط یکبار state رو آپدیت کن:
           setBulkMessages((prev) => [...newMessages.reverse(), ...prev]);
         }
-        // setBulkMessages(data);
       }
 
       if (data.type == "SendMessage") {
@@ -112,7 +119,16 @@ export const SocketProvider = ({ children }) => {
 
   return (
     <SocketContext.Provider
-      value={{ socket, bulkMessages, loginToken, status, newMessage }}
+      value={{
+        socket,
+        bulkMessages,
+        loginToken,
+        status,
+        newMessage,
+        sendStatus,
+        setSendStatus,
+        messages, setMessages
+      }}
     >
       {children}
     </SocketContext.Provider>

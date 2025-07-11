@@ -3,21 +3,30 @@ import { useSocket } from "../context/SocketContext";
 
 const Chat = () => {
   const [text, setText] = useState("");
-  const [messages, setMessages] = useState([]);
-  const { socket, bulkMessages, newMessage } = useSocket();
+  const {
+    socket,
+    bulkMessages,
+    newMessage,
+    sendStatus,
+    setSendStatus,
+    messages,
+    setMessages,
+  } = useSocket();
 
   const scrollContainerRef = useRef(null);
   const bottomRef = useRef(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
 
   const [didUserScroll, setDidUserScroll] = useState(false);
-  const [isAutoScrolling, setIsAutoScrolling] = useState(true);
-  const [sendStatus, setSendStatus] = useState(true);
+
+  const [localMessages, setLocalMessages] = useState([]);
+
+const debounceTimeout = useRef(null);
 
   useEffect(() => {
     console.log("bulk: ", bulkMessages);
     if (bulkMessages?.length > 0) {
-      setMessages(bulkMessages);
+      setMessages([...bulkMessages, ...localMessages]);
       const container = scrollContainerRef.current;
       const prevScrollHeight = container.scrollHeight;
       setTimeout(() => {
@@ -25,6 +34,9 @@ const Chat = () => {
         container.scrollTop =
           newScrollHeight - prevScrollHeight + container.scrollTop;
       }, 0);
+
+      // ریست مجدد وضعیت تا دوباره اجازه ارسال داشته باشیم
+      setSendStatus(true);
     }
   }, [bulkMessages]);
 
@@ -48,10 +60,7 @@ const Chat = () => {
 
   useEffect(() => {
     if (isAtBottom) {
-      setIsAutoScrolling(true); // داریم خودمون اسکرول می‌کنیم
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-      // بعد از اسکرول خودکار یه کم صبر می‌کنیم تا تموم شه، بعدش میگیم از اینجا به بعد کاربر اسکرول کنه
-      setTimeout(() => setIsAutoScrolling(false), 300);
     }
   }, [messages]);
 
@@ -64,23 +73,25 @@ const Chat = () => {
       50;
     setIsAtBottom(atBottom);
 
-    // اگه هنوز تو حالت اسکرول خودکار هستیم، هیچی نگو
-    if (isAutoScrolling) return;
-
     // فقط وقتی کاربر واقعاً اسکرول کرد
-    if (!didUserScroll) {
-      setDidUserScroll(true);
-    }
+      if (!didUserScroll) setDidUserScroll(true);
     if (!sendStatus) return;
     // رسیدن به بالا
-    if (didUserScroll && container.scrollTop < 400) {
-      console.log("🟡 کاربر دستی به بالای لیست رسید");
+    if (didUserScroll && container.scrollTop < 200) {
       setSendStatus(false);
+      
+      console.log("🟡 کاربر دستی به بالای لیست رسید");
+      if (debounceTimeout.current) return;
+
+    debounceTimeout.current = setTimeout(() => {
+      debounceTimeout.current = null;
+    }, 1000); // تا ۱ ثانیه بعد دیگه اجازه اجرا نمی‌ده
+
       const firstMessageTimecode = messages[0].timecode;
-      console.log(firstMessageTimecode);
+
       const prevMessagesPayload = {
         type: "RequestBulkMessage",
-        date: firstMessageTimecode,
+        date: firstMessageTimecode - 1,
       };
       socket.send(JSON.stringify(prevMessagesPayload));
     }
@@ -93,14 +104,17 @@ const Chat = () => {
     const originalTime = date.toLocaleTimeString();
     const [time, period] = originalTime.split(" ");
     const shortTime = time.slice(0, 4) + " " + period;
-    setMessages((prev) => [
-      ...prev,
-      {
-        content: text,
-        time: shortTime,
-        username: user,
-      },
-    ]);
+
+    const msg = {
+      content: text,
+      time: shortTime,
+      username: user,
+      timecode: timestamp,
+    };
+
+    setLocalMessages((prev) => [...prev, msg]);
+    setMessages((prev) => [...prev, msg]);
+
     console.log(bulkMessages);
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
@@ -113,7 +127,6 @@ const Chat = () => {
 
   return (
     <div className="h-screen flex flex-col text-gray-300">
-      {/* پیام‌ها */}
       <div
         className="flex-1 overflow-y-auto px-4 py-4 space-y-3 mb-20"
         ref={scrollContainerRef}
@@ -147,7 +160,6 @@ const Chat = () => {
         <div ref={bottomRef} />
       </div>
 
-      {/* فیلد پیام در پایین */}
       <div className="fixed bottom-0 left-0 right-0 px-3 pb-5.5">
         <input
           type="text"
