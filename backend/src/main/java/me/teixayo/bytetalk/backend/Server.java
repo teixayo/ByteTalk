@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
+import me.teixayo.bytetalk.backend.message.Message;
 import me.teixayo.bytetalk.backend.networking.NettyHandler;
 import me.teixayo.bytetalk.backend.security.EncryptionUtils;
 import me.teixayo.bytetalk.backend.service.cache.CacheService;
@@ -20,6 +21,8 @@ import me.teixayo.jegl.loop.loops.LoopType;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
+import java.time.Instant;
+import java.util.Date;
 
 @Slf4j
 @Getter
@@ -77,11 +80,21 @@ public final class Server implements LoopApp {
 
         long end = System.currentTimeMillis();
         log.info("Loaded sever on {} ms", (end - start));
+
     }
 
+    private boolean a;
     @Override
     public void update() {
         for (User user : UserManager.getInstance().getUsers().values()) {
+            if(!a) {
+                for(int i = 0 ; i < 1000; i++) {
+                    Message message = new Message(i,user.getId(), Integer.toString(i), Date.from(Instant.now()));
+                    cacheService.addMessageToCache(message);
+                    messageService.saveMessage(message);
+                }
+                a=true;
+            }
             user.getUserConnection().checkTimeOut();
             if (!user.getUserConnection().isOnline()) {
                 UserManager.getInstance().removeUser(user);
