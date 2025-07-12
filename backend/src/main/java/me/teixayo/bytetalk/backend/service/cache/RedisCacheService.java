@@ -2,7 +2,7 @@ package me.teixayo.bytetalk.backend.service.cache;
 
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
 import me.teixayo.bytetalk.backend.database.redis.RedisKeys;
-import me.teixayo.bytetalk.backend.message.Message;
+import me.teixayo.bytetalk.backend.service.message.Message;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;

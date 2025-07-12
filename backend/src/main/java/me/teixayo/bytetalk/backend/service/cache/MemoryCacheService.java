@@ -1,6 +1,6 @@
 package me.teixayo.bytetalk.backend.service.cache;
 
-import me.teixayo.bytetalk.backend.message.Message;
+import me.teixayo.bytetalk.backend.service.message.Message;
 
 import java.util.Collection;
 import java.util.List;

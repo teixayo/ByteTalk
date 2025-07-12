@@ -7,7 +7,6 @@ import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Sorts;
 import lombok.SneakyThrows;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
-import me.teixayo.bytetalk.backend.message.Message;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 

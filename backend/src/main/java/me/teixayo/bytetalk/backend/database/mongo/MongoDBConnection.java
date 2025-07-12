@@ -27,6 +27,14 @@ public class MongoDBConnection {
     @Getter
     private MongoCollection<Document> messageCollection = null;
 
+    private MongoDatabase channelDatabase = null;
+    @Getter
+    private MongoCollection<Document> channelCollection = null;
+
+    private MongoDatabase channelMessagesDatabase = null;
+    @Getter
+    private MongoCollection<Document> channelMessagesCollection = null;
+
     public MongoDBConnection(String connectionString) {
         instance = this;
         MongoClientSettings settings = MongoClientSettings.builder()
@@ -41,6 +49,13 @@ public class MongoDBConnection {
 
             this.userDatabase = mongoClient.getDatabase("User");
             this.userCollection = userDatabase.getCollection("User");
+
+
+            this.channelDatabase = mongoClient.getDatabase("channel");
+            this.channelCollection = userDatabase.getCollection("channel");
+
+            this.channelMessagesDatabase = mongoClient.getDatabase("channel_messages");
+            this.channelMessagesCollection = userDatabase.getCollection("channel_messages");
             userDatabase.runCommand(new Document("ping", 1));
             isConnected = true;
         } catch (Exception exception) {

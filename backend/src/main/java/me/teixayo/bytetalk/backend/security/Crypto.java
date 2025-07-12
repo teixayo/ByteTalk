@@ -24,7 +24,7 @@ public class Crypto {
         }
     }
 
-    public static String encryptSHA256(String message, PublicKey rsaPublicKey) throws Exception {
+    public static String encrypt(String message, PublicKey rsaPublicKey) throws Exception {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         keyGen.init(128);
         SecretKey aesKey = keyGen.generateKey();
