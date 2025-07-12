@@ -8,6 +8,8 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const reconnectTimeoutRef = useRef(null);
   const [bulkMessages, setBulkMessages] = useState([]);
+  const [bulkLength, setBulkLength] = useState(0)
+
   const [loginToken, setLoginToken] = useState(null);
   const [status, setStatus] = useState({});
   const [newMessage, setNewMessage] = useState({});
@@ -64,6 +66,7 @@ export const SocketProvider = ({ children }) => {
           initialLoaded = true;
         } else {
           console.log(data.messages.length);
+          setBulkLength(data.messages.length)
           if (data.messages.length < 1) return;
 
           const newMessages = data.messages
@@ -127,7 +130,9 @@ export const SocketProvider = ({ children }) => {
         newMessage,
         sendStatus,
         setSendStatus,
-        messages, setMessages
+        messages,
+        setMessages,
+        bulkLength
       }}
     >
       {children}
