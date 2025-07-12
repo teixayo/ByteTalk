@@ -63,6 +63,7 @@ public class RedisCacheService implements CacheService {
             }
             pipeline.sync();
 
+
             long listLen = jedis.llen(RedisKeys.MESSAGES_LIST.getKey());
             if (!(listLen > maxSize)) return;
 
