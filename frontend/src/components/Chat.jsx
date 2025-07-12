@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../context/SocketContext";
 import { FixedSizeList as List } from "react-window";
 
-let flag = true
+let flag = true;
 
 const Chat = () => {
   const [text, setText] = useState("");
@@ -14,7 +14,9 @@ const Chat = () => {
     setSendStatus,
     messages,
     setMessages,
-    bulkLength
+    bulkLength,
+    setLoginCheck,
+    loginCheck,
   } = useSocket();
 
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -23,24 +25,26 @@ const Chat = () => {
   const listRef = useRef(null);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
 
-  // وقتی bulkMessages میاد، پیام‌ها رو ست کن و بعدش اسکرول کن به پایین
   useEffect(() => {
-    console.log("bulk",bulkMessages.length)
+    console.log("bulk", bulkMessages.length);
     if (bulkMessages?.length > 0 && listRef.current) {
-      console.log("run")
+      console.log("run");
       setMessages([...bulkMessages, ...localMessages]);
 
-      // اسکرول به پایین‌ترین پیام
       listRef.current.scrollToItem(bulkLength + 1, "start");
 
-      // فلگ جلوگیری از تریگر شدن onItemsRendered
       setTimeout(() => {
         setInitialScrollDone(true);
       }, 300);
     }
+    if (loginCheck) {
+      setTimeout(() => {
+        listRef.current.scrollToItem(bulkMessages.length, "end");
+        setLoginCheck(false)
+      }, 1);
+    }
   }, [bulkMessages]);
 
-  // اضافه کردن پیام جدید به لیست
   useEffect(() => {
     if (newMessage.date) {
       const date = new Date(newMessage.date);
@@ -56,17 +60,20 @@ const Chat = () => {
           username: newMessage.username,
         },
       ]);
+
+      setTimeout(() => {
+        listRef.current.scrollToItem(messages.length + 3, "end");
+      }, 1);
     }
   }, [newMessage]);
 
-  // اسکرول به پایین موقع رسیدن پیام جدید اگر کاربر پایین بود
   useEffect(() => {
     if (isAtBottom && listRef.current && flag) {
       listRef.current.scrollToItem(bulkMessages.length - 1, "start");
-      console.log(bulkMessages.length - 1)
+
+      console.log(bulkMessages.length - 1);
       setTimeout(() => {
-        
-        flag = false
+        flag = false;
       }, 100);
     }
   }, [messages]);
@@ -96,6 +103,9 @@ const Chat = () => {
       };
       socket.send(JSON.stringify(messagePayload));
     }
+    setTimeout(() => {
+      listRef.current.scrollToItem(messages.length + 3, "end");
+    }, 1);
   };
 
   const Row = ({ index, style }) => {
@@ -129,7 +139,6 @@ const Chat = () => {
 
   return (
     <div className="h-screen flex flex-col text-gray-300">
-      {/* لیست پیام‌ها */}
       <div className="flex-1">
         <List
           ref={listRef}
@@ -168,7 +177,6 @@ const Chat = () => {
         </List>
       </div>
 
-      {/* فیلد پیام در پایین */}
       <div className="h-20 px-3 pb-2">
         <input
           type="text"

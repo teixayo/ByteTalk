@@ -88,11 +88,11 @@ public final class Server implements LoopApp {
     public void update() {
         for (User user : UserManager.getInstance().getUsers().values()) {
             if(!a) {
-                for(int i = 0 ; i < 1000; i++) {
-                    Message message = new Message(i,user.getId(), Integer.toString(i), Date.from(Instant.now()));
-                    cacheService.addMessageToCache(message);
-                    messageService.saveMessage(message);
-                }
+                // for(int i = 0 ; i < 1000; i++) {
+                //     Message message = new Message(i,user.getId(), Integer.toString(i), Date.from(Instant.now()));
+                //     cacheService.addMessageToCache(message);
+                //     messageService.saveMessage(message);
+                // }
                 a=true;
             }
             user.getUserConnection().checkTimeOut();
