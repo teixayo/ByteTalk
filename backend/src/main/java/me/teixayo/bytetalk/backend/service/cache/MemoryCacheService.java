@@ -30,6 +30,10 @@ public class MemoryCacheService implements CacheService {
     @Override
     public void addMessageToCache(long channelID, Message message) {
         ConcurrentLinkedDeque<Message> currentCache = messageCache.get(channelID);
+        if(currentCache == null) {
+            currentCache = new ConcurrentLinkedDeque<>();
+            messageCache.put(channelID,currentCache);
+        }
         while (currentCache.size() >= maxSize) {
             currentCache.removeFirst();
         }

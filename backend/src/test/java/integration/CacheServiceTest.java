@@ -2,10 +2,10 @@ package integration;
 
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
-import me.teixayo.bytetalk.backend.service.message.Message;
 import me.teixayo.bytetalk.backend.service.cache.CacheService;
 import me.teixayo.bytetalk.backend.service.cache.MemoryCacheService;
 import me.teixayo.bytetalk.backend.service.cache.RedisCacheService;
+import me.teixayo.bytetalk.backend.service.message.Message;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -67,6 +67,5 @@ public class CacheServiceTest {
         assertEquals(290, newestMessage.getUserID());
         assertEquals("HelloWorld29", newestMessage.getContent());
         assertEquals(lastDate, newestMessage.getDate());
-
     }
 }
