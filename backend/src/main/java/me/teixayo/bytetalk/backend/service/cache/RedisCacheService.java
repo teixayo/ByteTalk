@@ -5,6 +5,7 @@ import me.teixayo.bytetalk.backend.database.redis.RedisKeys;
 import me.teixayo.bytetalk.backend.service.message.Message;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.StreamEntryID;
 import redis.clients.jedis.params.XAddParams;
 import redis.clients.jedis.resps.StreamEntry;
@@ -75,6 +76,7 @@ public class RedisCacheService implements CacheService {
         XAddParams xAddParams = new XAddParams()
                 .maxLen(maxSize);
         try (Jedis jedis = jedisPool.getResource()) {
+            Pipeline pipeline = jedis.pipelined();
             for (Message msg : messages) {
                 Map<String,String> map = Map.of(
                         "id",      String.valueOf(msg.getId()),
@@ -82,8 +84,9 @@ public class RedisCacheService implements CacheService {
                         "content", msg.getContent(),
                         "date",    msg.getDate().toInstant().toString()
                 );
-                jedis.xadd(RedisKeys.MESSAGES.getKey(channelID), map, xAddParams);
+                pipeline.xadd(RedisKeys.MESSAGES.getKey(channelID), map, xAddParams);
             }
+            pipeline.sync();
         }
     }
 
