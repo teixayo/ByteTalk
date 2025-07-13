@@ -1,6 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../context/SocketContext";
 import { FixedSizeList as List } from "react-window";
+import linkifyHtml from "linkify-html";
+import DOMPurify from "dompurify";
+
+const convertMessage = (text) => {
+  const options = {
+    target: "_blank",
+    rel: "noopener noreferrer",
+    // فقط URLهایی که با http/https شروع می‌شن اجازه می‌دیم
+    validate: {
+      url: (value) =>
+        value.startsWith("http://") || value.startsWith("https://"),
+    },
+  };
+
+  const linked = linkifyHtml(text, options);
+
+  // پاکسازی HTML از هر نوع کد خطرناک
+  return DOMPurify.sanitize(linked);
+};
 
 let flag = true;
 
@@ -40,7 +59,7 @@ const Chat = () => {
     if (loginCheck) {
       setTimeout(() => {
         listRef.current.scrollToItem(bulkMessages.length, "end");
-        setLoginCheck(false)
+        setLoginCheck(false);
       }, 1);
     }
   }, [bulkMessages]);
@@ -110,6 +129,7 @@ const Chat = () => {
 
   const Row = ({ index, style }) => {
     const msg = messages[index];
+
     return (
       <div style={style} className="flex">
         <svg
@@ -131,7 +151,10 @@ const Chat = () => {
             <p className="mr-3 ml-1">{msg.username}</p>
             <p className="text-xs mt-1">{msg.time}</p>
           </div>
-          <p className="mr-10 text-sm">{msg.content}</p>
+          <p
+            className="mr-10 text-sm"
+            dangerouslySetInnerHTML={{ __html: convertMessage(msg.content) }}
+          ></p>
         </div>
       </div>
     );

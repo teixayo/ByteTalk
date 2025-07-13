@@ -50,8 +50,10 @@ export const SocketProvider = ({ children }) => {
           data.messages.map((msg) => {
             const date = new Date(msg.date);
             const originalTime = date.toLocaleTimeString();
+              console.log(originalTime)
+
             const [time, period] = originalTime.split(" ");
-            const shortTime = time.slice(0, 4) + " " + period;
+            const shortTime = time.slice(0, 5) + " " + period;
 
             if (msg.content != "") {
               setBulkMessages((prev) => [
@@ -78,7 +80,7 @@ export const SocketProvider = ({ children }) => {
               const date = new Date(msg.date);
               const originalTime = date.toLocaleTimeString();
               const [time, period] = originalTime.split(" ");
-              const shortTime = time.slice(0, 4) + " " + period;
+              const shortTime = time.slice(0, 5) + " " + period;
 
               return {
                 content: msg.content,
