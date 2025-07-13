@@ -38,6 +38,7 @@ const Chat = () => {
     loginCheck,
   } = useSocket();
 
+  const [writing, setWriting] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [localMessages, setLocalMessages] = useState([]);
   const debounceTimeout = useRef(null);
@@ -200,20 +201,53 @@ const Chat = () => {
         </List>
       </div>
 
-      <div className="h-20 px-3 pb-2">
+      <div className="h-17 flex items-center bg-neutral-700">
         <input
           type="text"
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            setText(e.target.value);
+            e.target.value == "" || e.target.value.trim() == ""
+              ? setWriting(false)
+              : setWriting(true);
+            console.log(e.target.value == "");
+          }}
           onKeyDown={(e) => {
             if (e.code === "Enter" && e.target.value.trim() !== "") {
               sendMessage();
+              setWriting(false);
               setText("");
             }
           }}
           placeholder="Message"
-          className="w-full h-full pl-4 pb-1 bg-neutral-700 border border-black rounded-lg"
+          className="w-full h-full pl-4 pb-1 bg-neutral-700 border-0 focus:outline-none focus:ring-0"
         />
+        {writing ? (
+          <div
+            onClick={() => {
+              if (text.trim() !== "") {
+                sendMessage();
+                setWriting(false);
+                setText("");
+              }
+            }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-7 m-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
+              />
+            </svg>
+          </div>
+        ) : null}
       </div>
     </div>
   );
