@@ -6,20 +6,24 @@ import DOMPurify from "dompurify";
 import TextareaAutosize from "react-textarea-autosize";
 
 const convertMessage = (text) => {
-  const options = {
+  // مرحله 1: تبدیل لینک‌ها به <a>
+  const linkified = linkifyHtml(text, {
     target: "_blank",
     rel: "noopener noreferrer",
-    // فقط URLهایی که با http/https شروع می‌شن اجازه می‌دیم
     validate: {
       url: (value) =>
         value.startsWith("http://") || value.startsWith("https://"),
     },
-  };
+  });
 
-  const linked = linkifyHtml(text, options);
+  // مرحله 2: تبدیل \n به <br>
+  const withLineBreaks = linkified.replace(/\n/g, "<br />");
 
-  // پاکسازی HTML از هر نوع کد خطرناک
-  return DOMPurify.sanitize(linked);
+  // مرحله 3: پاک‌سازی نهایی
+  return DOMPurify.sanitize(withLineBreaks, {
+    ALLOWED_TAGS: ["a", "br"], // فقط <a> و <br> مجاز باشن
+    ALLOWED_ATTR: ["href", "target", "rel"], // فقط این خصوصیات برای <a> مجازه
+  });
 };
 
 let flag = true;
@@ -162,28 +166,32 @@ const Chat = () => {
 
     return (
       <div style={style} className="flex p-2">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={0.75}
-          stroke="currentColor"
-          className="size-12"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-          />
-        </svg>
+        <div className="flex-shrink-0">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={0.75}
+            stroke="currentColor"
+            className="size-12 "
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+            />
+          </svg>
+        </div>
         <div>
           <div className="flex mt-0.5">
             <p className="mr-3 ml-1">{msg.username}</p>
             <p className="text-xs mt-1">{msg.time}</p>
           </div>
           <p
-            className="mr-10 text-sm"
-            dangerouslySetInnerHTML={{ __html: convertMessage(msg.content) }}
+            className="break-words whitespace-pre-wrap"
+            dangerouslySetInnerHTML={{
+              __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
+            }}
           ></p>
         </div>
       </div>
@@ -197,7 +205,7 @@ const Chat = () => {
           ref={listRef}
           height={listHeight}
           itemCount={messages.length}
-          itemSize={75}
+          itemSize={120}
           width={"100%"}
           onItemsRendered={({ visibleStartIndex }) => {
             if (

@@ -31,3 +31,8 @@ textarea {
 textarea::-webkit-scrollbar {
   display: none; /* برای کروم */
 }
+
+.break-words {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
