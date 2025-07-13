@@ -47,24 +47,26 @@ const Chat = () => {
   const [initialScrollDone, setInitialScrollDone] = useState(false);
 
   const inputRef = useRef(null);
-const [inputHeight, setInputHeight] = useState(70); // ارتفاع پیش‌فرض
-const [listHeight, setListHeight] = useState(window.innerHeight - inputHeight);
+  const [inputHeight, setInputHeight] = useState(70); // ارتفاع پیش‌فرض
+  const [listHeight, setListHeight] = useState(
+    window.innerHeight - inputHeight
+  );
 
-useEffect(() => {
-  const handleResize = () => {
-    setListHeight(window.innerHeight - inputHeight);
+  useEffect(() => {
+    const handleResize = () => {
+      setListHeight(window.innerHeight - inputHeight);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [inputHeight]);
+
+  const handleInputResize = () => {
+    if (inputRef.current) {
+      const newHeight = inputRef.current.offsetHeight;
+      setInputHeight(newHeight);
+      setListHeight(window.innerHeight - newHeight);
+    }
   };
-  window.addEventListener("resize", handleResize);
-  return () => window.removeEventListener("resize", handleResize);
-}, [inputHeight]);
-
-const handleInputResize = () => {
-  if (inputRef.current) {
-    const newHeight = inputRef.current.offsetHeight;
-    setInputHeight(newHeight);
-    setListHeight(window.innerHeight - newHeight);
-  }
-};
 
   useEffect(() => {
     console.log("bulk", bulkMessages.length);
@@ -88,10 +90,14 @@ const handleInputResize = () => {
 
   useEffect(() => {
     if (newMessage.date) {
-      const date = new Date(newMessage.date);
-      const originalTime = date.toLocaleTimeString();
-      const [time, period] = originalTime.split(" ");
-      const shortTime = time.slice(0, 4) + " " + period;
+      const timestamp = Date.now(newMessage.date);
+      const date = new Date(timestamp);
+
+      const shortTime = date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
 
       setMessages((prev) => [
         ...prev,
@@ -120,17 +126,19 @@ const handleInputResize = () => {
   }, [messages]);
 
   const sendMessage = () => {
-    const user = localStorage.getItem("username");
     const timestamp = Date.now();
     const date = new Date(timestamp);
-    const originalTime = date.toLocaleTimeString();
-    const [time, period] = originalTime.split(" ");
-    const shortTime = time.slice(0, 4) + " " + period;
+
+    const shortTime = date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
 
     const msg = {
       content: text,
       time: shortTime,
-      username: user,
+      username: localStorage.getItem("username"),
       timecode: timestamp,
     };
 
@@ -222,7 +230,7 @@ const handleInputResize = () => {
         </List>
       </div>
 
-      <div  className=" flex bg-neutral-700 w-full">
+      <div className=" flex bg-neutral-700 w-full">
         <TextareaAutosize
           type="text"
           ref={inputRef}

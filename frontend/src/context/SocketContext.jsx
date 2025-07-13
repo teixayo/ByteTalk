@@ -48,10 +48,14 @@ export const SocketProvider = ({ children }) => {
       if (data.type === "BulkMessages") {
         if (!initialLoaded) {
           data.messages.map((msg) => {
-            const date = new Date(msg.date);
-            const originalTime = date.toLocaleTimeString();
-            const [time, period] = originalTime.split(" ");
-            const shortTime = time.slice(0, 5) + " " + period;
+            const timestamp = Date.now(msg.date);
+            const date = new Date(timestamp);
+
+            const shortTime = date.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            });
 
             if (msg.content != "") {
               setBulkMessages((prev) => [
@@ -75,10 +79,14 @@ export const SocketProvider = ({ children }) => {
           const newMessages = data.messages
             .filter((msg) => msg.content !== "")
             .map((msg) => {
-              const date = new Date(msg.date);
-              const originalTime = date.toLocaleTimeString();
-              const [time, period] = originalTime.split(" ");
-              const shortTime = time.slice(0, 5) + " " + period;
+              const timestamp = Date.now(msg.date);
+              const date = new Date(timestamp);
+
+              const shortTime = date.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              });
 
               return {
                 content: msg.content,
@@ -137,7 +145,7 @@ export const SocketProvider = ({ children }) => {
         setMessages,
         bulkLength,
         setLoginCheck,
-        loginCheck
+        loginCheck,
       }}
     >
       {children}
