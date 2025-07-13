@@ -22,10 +22,12 @@ a {
   word-break: break-word; /* برای شکستن لینک‌های طولانی */
 }
 
-textarea::-webkit-scrollbar {
-  display: none;
+textarea {
+  overflow-y: auto;
+  max-height: 8rem; /* یا مثلاً 6 خط */
+  scrollbar-width: none; /* برای فایرفاکس */
 }
 
-textarea {
-  scrollbar-width: none; /* Firefox */
+textarea::-webkit-scrollbar {
+  display: none; /* برای کروم */
 }

@@ -47,24 +47,24 @@ const Chat = () => {
   const [initialScrollDone, setInitialScrollDone] = useState(false);
 
   const inputRef = useRef(null);
-  const inputWrapperRef = useRef(null);
-  const [listHeight, setListHeight] = useState(window.innerHeight - 100);
+const [inputHeight, setInputHeight] = useState(70); // ارتفاع پیش‌فرض
+const [listHeight, setListHeight] = useState(window.innerHeight - inputHeight);
 
-  useEffect(() => {
-    const updateListHeight = () => {
-      const inputBoxHeight = inputWrapperRef.current?.offsetHeight || 80;
-      setListHeight(window.innerHeight - inputBoxHeight);
-    };
+useEffect(() => {
+  const handleResize = () => {
+    setListHeight(window.innerHeight - inputHeight);
+  };
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, [inputHeight]);
 
-    updateListHeight();
-
-    const resizeObserver = new ResizeObserver(updateListHeight);
-    if (inputWrapperRef.current) {
-      resizeObserver.observe(inputWrapperRef.current);
-    }
-
-    return () => resizeObserver.disconnect();
-  }, [text]);
+const handleInputResize = () => {
+  if (inputRef.current) {
+    const newHeight = inputRef.current.offsetHeight;
+    setInputHeight(newHeight);
+    setListHeight(window.innerHeight - newHeight);
+  }
+};
 
   useEffect(() => {
     console.log("bulk", bulkMessages.length);
@@ -222,7 +222,7 @@ const Chat = () => {
         </List>
       </div>
 
-      <div ref={inputWrapperRef} className=" flex bg-neutral-700 w-full">
+      <div  className=" flex bg-neutral-700 w-full">
         <TextareaAutosize
           type="text"
           ref={inputRef}
@@ -245,8 +245,9 @@ const Chat = () => {
               }
             }
           }}
+          onHeightChange={handleInputResize}
           placeholder="Message"
-          className="w-12/12 h-full pb-4.5 pt-4.5 pl-4 bg-neutral-700 border-0 focus:outline-none overflow-y-auto  focus:ring-0 scrollbar-none resize-none"
+          className="w-12/12 h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-neutral-700 border-0 focus:outline-none overflow-y-auto  focus:ring-0 scrollbar-none resize-none"
         />
         {writing ? (
           <div
