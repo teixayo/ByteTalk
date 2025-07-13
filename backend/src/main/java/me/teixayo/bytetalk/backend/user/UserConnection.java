@@ -98,7 +98,7 @@ public class UserConnection {
                 //TODO Code Status for these things
                 Message message = new Message(RandomGenerator.generateId(), user.getId(), content, Date.from(Instant.now()));
                 Server.getInstance().getMessageService().saveMessage(message);
-                Server.getInstance().getCacheService().addMessageToCache(message);
+                Server.getInstance().getCacheService().addMessageToCache(1,message);
                 for (User otherUser : UserManager.getInstance().getUsers().values()) {
                     if (otherUser.equals(this.user)) continue;
                     ServerPacket packet1 = ServerPacketType.SendMessage.createPacket(

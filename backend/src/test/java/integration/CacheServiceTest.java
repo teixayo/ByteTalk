@@ -53,8 +53,8 @@ public class CacheServiceTest {
             messages.add(message);
             lastDate = message.getDate();
         }
-        service.addMessagesToCache(messages);
-        Message[] lastestMessages = service.loadLastestMessages().toArray(new Message[0]);
+        service.addMessagesToCache(1,messages);
+        Message[] lastestMessages = service.loadLastestMessages(1).toArray(new Message[0]);
         List<Message> last10 = messages.stream()
                 .skip(Math.max(0, messages.size() - 10))
                 .toList();

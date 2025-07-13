@@ -44,6 +44,7 @@ dependencies {
     implementation(libs.jegl)
     implementation(libs.jwt)
     implementation(libs.snakeyaml)
+    implementation(libs.bouncycastle)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)

@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.Getter;
+import me.teixayo.bytetalk.backend.Server;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -20,7 +21,7 @@ public class EncryptionUtils {
     private static final JWTVerifier verifier;
 
     static {
-        algorithm = Algorithm.HMAC256(RandomGenerator.generateSecureBytes(32));
+        algorithm = Algorithm.HMAC512(Server.getInstance().getConfig().getJwtSecret());
         verifier = JWT.require(algorithm).build();
     }
 

@@ -4,10 +4,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
-import me.teixayo.bytetalk.backend.service.message.Message;
 import me.teixayo.bytetalk.backend.networking.NettyHandler;
 import me.teixayo.bytetalk.backend.security.EncryptionUtils;
 import me.teixayo.bytetalk.backend.service.cache.CacheService;
+import me.teixayo.bytetalk.backend.service.message.Message;
 import me.teixayo.bytetalk.backend.service.message.MessageService;
 import me.teixayo.bytetalk.backend.service.message.MongoMessageService;
 import me.teixayo.bytetalk.backend.service.search.SearchService;
@@ -90,7 +90,7 @@ public final class Server implements LoopApp {
             if(!a) {
                 for(int i = 0 ; i < 1000; i++) {
                     Message message = new Message(i,user.getId(), Integer.toString(i), Date.from(Instant.now()));
-                    cacheService.addMessageToCache(message);
+                    cacheService.addMessageToCache(1,message);
                     messageService.saveMessage(message);
                 }
                 a=true;

@@ -2,13 +2,11 @@ package me.teixayo.bytetalk.backend.security;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.util.Base64;
 
 public class Crypto {
@@ -22,6 +20,17 @@ public class Crypto {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public static Cipher getCipher(String algorithm) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
+        Cipher cipher;
+        try {
+            cipher = Cipher.getInstance(algorithm);
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
+            cipher = Cipher.getInstance(algorithm, "BC");
+        }
+        return cipher;
     }
 
     public static String encrypt(String message, PublicKey rsaPublicKey) throws Exception {

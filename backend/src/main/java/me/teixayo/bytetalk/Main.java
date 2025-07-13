@@ -3,22 +3,26 @@ package me.teixayo.bytetalk;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import me.teixayo.bytetalk.backend.Server;
-import me.teixayo.bytetalk.backend.security.Crypto;
 import org.slf4j.LoggerFactory;
-
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 
 @Log4j2
 public class Main {
     @SneakyThrows
     public static void main(String[] args) {
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-        kpg.initialize(1024);
-        KeyPair keyPair = kpg.genKeyPair();
-        String encrypt = Crypto.encrypt("Hello ljkjhkjkjh kjh kh kjhkjhk kjh kjhjkh kjh khkjh khjkkh world!", keyPair.getPublic());
-        System.out.println(encrypt);
-        System.out.println(Crypto.decrypt(encrypt, keyPair.getPrivate()));
+
+//        Security.addProvider(new BouncyCastleProvider());
+//        Key RsaKey = Key.generateAsymmetricKey("RSA");
+//        Key AesKey = Key.generateSymmetricKey("AES",128);
+//
+//        byte[] encryptedMessage = AesKey.encrypt("Hello World".getBytes(), "AES");
+//        byte[] encryptedAESKey = RsaKey.encrypt(AesKey.getPrivateKey().getEncoded(), "RSA");
+//
+//        Key AesKey2 = Key.generateSymmetricKey("AES",RsaKey.decrypt(encryptedAESKey,"RSA"));
+//        assert AesKey2.equals(AesKey);
+//
+//        byte[] decryptedMessage = AesKey.decrypt(encryptedMessage, "AES");
+//        System.out.println(new String(decryptedMessage));
+//
 
 
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
