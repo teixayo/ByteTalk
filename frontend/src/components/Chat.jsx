@@ -1,12 +1,36 @@
 import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../context/SocketContext";
-import { FixedSizeList as List } from "react-window";
 import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
 import TextareaAutosize from "react-textarea-autosize";
+import { VariableSizeList as List } from "react-window";
+
+let flag = true;
 
 const convertMessage = (text) => {
-  // مرحله 1: تبدیل لینک‌ها به <a>
+  // تشخیص پیام‌های حاوی کد یا تگ‌های HTML
+  const isCode =
+    /[<>]/.test(text) ||
+    text.includes("function") ||
+    text.includes("script") ||
+    text.includes("svg") ||
+    text.includes("href=");
+
+  if (isCode) {
+    // پاک‌سازی کامل و نمایش به عنوان کد
+    const sanitized = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br />");
+
+    return `<div class="message-code">${DOMPurify.sanitize(sanitized, {
+      ALLOWED_TAGS: ["br"],
+      ALLOWED_ATTR: [],
+    })}</div>`;
+  }
+
+  // پردازش معمولی برای پیام‌های عادی
   const linkified = linkifyHtml(text, {
     target: "_blank",
     rel: "noopener noreferrer",
@@ -16,17 +40,11 @@ const convertMessage = (text) => {
     },
   });
 
-  // مرحله 2: تبدیل \n به <br>
-  const withLineBreaks = linkified.replace(/\n/g, "<br />");
-
-  // مرحله 3: پاک‌سازی نهایی
-  return DOMPurify.sanitize(withLineBreaks, {
-    ALLOWED_TAGS: ["a", "br"], // فقط <a> و <br> مجاز باشن
-    ALLOWED_ATTR: ["href", "target", "rel"], // فقط این خصوصیات برای <a> مجازه
+  return DOMPurify.sanitize(linkified.replace(/\n/g, "<br />"), {
+    ALLOWED_TAGS: ["a", "br"],
+    ALLOWED_ATTR: ["href", "target", "rel"],
   });
 };
-
-let flag = true;
 
 const Chat = () => {
   const [text, setText] = useState("");
@@ -47,7 +65,6 @@ const Chat = () => {
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [localMessages, setLocalMessages] = useState([]);
   const debounceTimeout = useRef(null);
-  const listRef = useRef(null);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
 
   const inputRef = useRef(null);
@@ -55,6 +72,10 @@ const Chat = () => {
   const [listHeight, setListHeight] = useState(
     window.innerHeight - inputHeight
   );
+
+  const rowHeights = useRef({});
+  const listRef = useRef();
+  // const rowRefs = useRef([]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -161,12 +182,40 @@ const Chat = () => {
     }, 1);
   };
 
+  // تابع اندازه‌گیری ارتفاع
+  const getRowHeight = (index) => {
+    return rowHeights.current[index] || 80; // مقدار پیش‌فرض موقت
+  };
+
+  // تابع برای تنظیم ارتفاع واقعی
+  const setRowHeight = (index, height) => {
+    if (rowHeights.current[index] !== height) {
+      rowHeights.current[index] = height;
+      listRef.current.resetAfterIndex(index);
+    }
+  };
+
   const Row = ({ index, style }) => {
     const msg = messages[index];
+    const rowRef = useRef();
+
+    useEffect(() => {
+      if (rowRef.current) {
+        // محاسبه ارتفاع کل ردیف شامل حاشیه‌ها و پدینگ
+        const rowElement = rowRef.current;
+        const height = rowElement.getBoundingClientRect().height;
+
+        setRowHeight(index, height);
+      }
+    }, [index, msg.content]); // وابستگی به محتوای پیام
 
     return (
-      <div style={style} className="flex p-2">
-        <div className="flex-shrink-0">
+      <div style={style}>
+        <div
+          ref={rowRef}
+          className="flex p-2"
+          style={{ minHeight: "80px" }} // حداقل ارتفاع
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -181,18 +230,20 @@ const Chat = () => {
               d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
             />
           </svg>
-        </div>
-        <div>
-          <div className="flex mt-0.5">
-            <p className="mr-3 ml-1">{msg.username}</p>
-            <p className="text-xs mt-1">{msg.time}</p>
+          {/* محتوای پیام شما */}
+          <div className="flex-shrink-0">{/* آیکون کاربر */}</div>
+          <div className="flex-1">
+            <div className="flex mt-0.5">
+              <p className="mr-3 ml-1 message-username">{msg.username}</p>
+              <p className="text-xs mt-1 message-time">{msg.time}</p>
+            </div>
+            <p
+              className="break-words whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{
+                __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
+              }}
+            ></p>
           </div>
-          <p
-            className="break-words whitespace-pre-wrap"
-            dangerouslySetInnerHTML={{
-              __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
-            }}
-          ></p>
         </div>
       </div>
     );
@@ -205,8 +256,9 @@ const Chat = () => {
           ref={listRef}
           height={listHeight}
           itemCount={messages.length}
-          itemSize={120}
+          itemSize={getRowHeight} // استفاده از تابع اندازه‌گیری پویا
           width={"100%"}
+          estimatedItemSize={120} // ارتفاع تخمینی برای محاسبه اولیه
           onItemsRendered={({ visibleStartIndex }) => {
             if (
               visibleStartIndex === 0 &&

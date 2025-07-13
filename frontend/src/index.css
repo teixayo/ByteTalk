@@ -36,3 +36,54 @@ textarea::-webkit-scrollbar {
   word-break: break-word;
   overflow-wrap: anywhere;
 }
+
+/* استایل عمومی پیام‌ها */
+.message-container {
+  padding: 10px 15px;
+  margin: 5px 0;
+  border-radius: 18px;
+  max-width: 80%;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+/* پیام‌های عادی */
+.message-normal {
+  background-color: #2d3748;
+  color: #e2e8f0;
+  align-self: flex-start;
+}
+
+/* پیام‌های حاوی کد */
+.message-code {
+  background-color: #1a202c;
+  color: #81e6d9;
+  border-left: 3px solid #4fd1c5;
+  padding: 10px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  white-space: pre-wrap;
+  border-radius: 8px;
+  margin: 5px 0;
+  font-size: 0.9em;
+  overflow-x: auto;
+}
+
+/* استایل لینک‌های داخل پیام‌های کد */
+.message-code a {
+  color: #63b3ed;
+  text-decoration: underline;
+}
+
+/* استایل تایم‌استمپ */
+.message-time {
+  font-size: 0.75rem;
+  color: #a0aec0;
+  margin-top: 4px;
+}
+
+/* استایل نام کاربر */
+.message-username {
+  font-weight: bold;
+  color: #68d391dd;
+  margin-bottom: 4px;
+}
