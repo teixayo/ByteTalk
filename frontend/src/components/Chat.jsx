@@ -3,6 +3,7 @@ import { useSocket } from "../context/SocketContext";
 import { FixedSizeList as List } from "react-window";
 import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
+import TextareaAutosize from "react-textarea-autosize";
 
 const convertMessage = (text) => {
   const options = {
@@ -44,6 +45,26 @@ const Chat = () => {
   const debounceTimeout = useRef(null);
   const listRef = useRef(null);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
+
+  const inputRef = useRef(null);
+  const inputWrapperRef = useRef(null);
+  const [listHeight, setListHeight] = useState(window.innerHeight - 100);
+
+  useEffect(() => {
+    const updateListHeight = () => {
+      const inputBoxHeight = inputWrapperRef.current?.offsetHeight || 80;
+      setListHeight(window.innerHeight - inputBoxHeight);
+    };
+
+    updateListHeight();
+
+    const resizeObserver = new ResizeObserver(updateListHeight);
+    if (inputWrapperRef.current) {
+      resizeObserver.observe(inputWrapperRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, [text]);
 
   useEffect(() => {
     console.log("bulk", bulkMessages.length);
@@ -132,7 +153,7 @@ const Chat = () => {
     const msg = messages[index];
 
     return (
-      <div style={style} className="flex">
+      <div style={style} className="flex p-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -163,12 +184,12 @@ const Chat = () => {
 
   return (
     <div className="h-screen flex flex-col text-gray-300">
-      <div className="flex-1">
+      <div className="flex-1 ">
         <List
           ref={listRef}
-          height={window.innerHeight - 70}
+          height={listHeight}
           itemCount={messages.length}
-          itemSize={80}
+          itemSize={75}
           width={"100%"}
           onItemsRendered={({ visibleStartIndex }) => {
             if (
@@ -201,29 +222,35 @@ const Chat = () => {
         </List>
       </div>
 
-      <div className="h-17 flex items-center bg-neutral-700">
-        <input
+      <div ref={inputWrapperRef} className=" flex bg-neutral-700 w-full">
+        <TextareaAutosize
           type="text"
+          ref={inputRef}
+          minRows={1}
+          maxRows={4}
           value={text}
           onChange={(e) => {
             setText(e.target.value);
             e.target.value == "" || e.target.value.trim() == ""
               ? setWriting(false)
               : setWriting(true);
-            console.log(e.target.value == "");
           }}
           onKeyDown={(e) => {
-            if (e.code === "Enter" && e.target.value.trim() !== "") {
-              sendMessage();
-              setWriting(false);
-              setText("");
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (text.trim() !== "") {
+                sendMessage();
+                setWriting(false);
+                setText("");
+              }
             }
           }}
           placeholder="Message"
-          className="w-full h-full pl-4 pb-1 bg-neutral-700 border-0 focus:outline-none focus:ring-0"
+          className="w-12/12 h-full pb-4.5 pt-4.5 pl-4 bg-neutral-700 border-0 focus:outline-none overflow-y-auto  focus:ring-0 scrollbar-none resize-none"
         />
         {writing ? (
           <div
+            role="button"
             onClick={() => {
               if (text.trim() !== "") {
                 sendMessage();
@@ -231,6 +258,7 @@ const Chat = () => {
                 setText("");
               }
             }}
+            className="flex items-end cursor-pointer"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -238,7 +266,7 @@ const Chat = () => {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="size-7 m-4"
+              className="size-7 mx-4 mb-3.25"
             >
               <path
                 strokeLinecap="round"

@@ -21,3 +21,11 @@ a {
   text-decoration: underline;
   word-break: break-word; /* برای شکستن لینک‌های طولانی */
 }
+
+textarea::-webkit-scrollbar {
+  display: none;
+}
+
+textarea {
+  scrollbar-width: none; /* Firefox */
+}
