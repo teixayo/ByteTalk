@@ -17,12 +17,14 @@ public class EncryptionUtils {
     @Getter
     private static final HashMap<String, String> tokens = new HashMap<>();
     @Getter
-    private static final Algorithm algorithm;
-    private static final JWTVerifier verifier;
+    private static Algorithm algorithm;
+    private static JWTVerifier verifier;
 
     static {
-        algorithm = Algorithm.HMAC512(Server.getInstance().getConfig().getJwtSecret());
-        verifier = JWT.require(algorithm).build();
+        if(Server.getInstance()!=null) {
+            algorithm = Algorithm.HMAC512(Server.getInstance().getConfig().getJwtSecret());
+            verifier = JWT.require(algorithm).build();
+        }
     }
 
     public static boolean isValidName(String name) {
