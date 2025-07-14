@@ -6,7 +6,7 @@ import TextareaAutosize from "react-textarea-autosize";
 import { VariableSizeList as List } from "react-window";
 
 let flag = true;
-
+let firstRender = true;
 const convertMessage = (text) => {
   // تشخیص پیام‌های حاوی کد یا تگ‌های HTML
   const isCode =
@@ -57,8 +57,8 @@ const Chat = () => {
     messages,
     setMessages,
     bulkLength,
-    setLoginCheck,
-    loginCheck,
+    // setLoginCheck,
+    // loginCheck,
   } = useSocket();
 
   const [writing, setWriting] = useState(false);
@@ -99,21 +99,33 @@ const Chat = () => {
       console.log("run");
       setMessages([...bulkMessages, ...localMessages]);
 
-      console.log(bulkMessages)
-      console.log(localMessages)
+      console.log(bulkMessages);
+      console.log(localMessages);
 
-      listRef.current.scrollToItem(bulkLength + 1, "start");
+      listRef.current.scrollToItem(bulkLength , "start");
+      if (firstRender) {
+        setTimeout(() => {
+          listRef.current.scrollToItem(bulkMessages.length, "end");
+          
+        }, 100);
+        setTimeout(() => {
+          listRef.current.scrollToItem(bulkMessages.length, "end");
+          
+          firstRender = false;
+        }, 130);
 
       setTimeout(() => {
         setInitialScrollDone(true);
-      }, 300);
+      }, 200);
+      }
     }
-    if (loginCheck) {
-      setTimeout(() => {
-        listRef.current.scrollToItem(bulkMessages.length, "end");
-        setLoginCheck(false);
-      }, 1);
-    }
+    // if (loginCheck) {
+    //   setTimeout(() => {
+    //     console.log("koskesh");
+    //     listRef.current.scrollToItem(bulkMessages.length, "end");
+    //     setLoginCheck(false);
+    //   }, 200);
+    // }
   }, [bulkMessages]);
 
   useEffect(() => {
@@ -127,27 +139,41 @@ const Chat = () => {
         hour12: true,
       });
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          content: newMessage.content,
-          time: shortTime,
-          username: newMessage.username,
-        },
-      ]);
+      setMessages((prev) => {
+        const newMessages = [
+          ...prev,
+          {
+            content: newMessage.content,
+            time: shortTime,
+            username: newMessage.username,
+            timecode: timestamp, // اضافه کردن timecode
+          },
+        ];
 
-      setTimeout(() => {
-        listRef.current.scrollToItem(messages.length + 3, "end");
-      }, 1);
+        // اسکرول پس از به‌روزرسانی state
+        setTimeout(() => {
+          if (listRef.current) {
+            console.log("madar jende");
+            listRef.current.scrollToItem(newMessages.length + 1, "end");
+          }
+        }, 50);
+        setTimeout(() => {
+          if (listRef.current) {
+            console.log("madar jende");
+            listRef.current.scrollToItem(newMessages.length + 1, "end");
+          }
+        }, 90);
+
+        return newMessages;
+      });
     }
   }, [newMessage]);
 
   useEffect(() => {
-    if (isAtBottom && listRef.current && flag) {
-      listRef.current.scrollToItem(bulkMessages.length - 1, "start");
-
+    if (isAtBottom && listRef.current && flag && bulkMessages.length > 0) {
       console.log(bulkMessages.length - 1);
       setTimeout(() => {
+        // listRef.current.scrollToItem(bulkMessages.length - 1, "start");
         flag = false;
       }, 100);
     }
@@ -156,7 +182,6 @@ const Chat = () => {
   const sendMessage = () => {
     const timestamp = Date.now();
     const date = new Date(timestamp);
-    console.log("send shod", text)
     const shortTime = date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
@@ -166,13 +191,22 @@ const Chat = () => {
     const msg = {
       content: text,
       time: shortTime,
-      username: localStorage.getItem("username"),
+      username: localStorage.getItem("username") || "anonymous",
       timecode: timestamp,
     };
-    console.log(msg)
 
-    setLocalMessages((prev) => [...prev, msg]);
-    setMessages((prev) => [...prev, msg]);
+    setMessages((prev) => {
+      const newMessages = [...prev, msg];
+
+      setTimeout(() => {
+        if (listRef.current) {
+          console.log("از من چه انتظاری داری؟");
+          listRef.current.scrollToItem(newMessages.length - 1, "end");
+        }
+      }, 50);
+
+      return newMessages;
+    });
 
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
@@ -181,22 +215,20 @@ const Chat = () => {
       };
       socket.send(JSON.stringify(messagePayload));
     }
-    setTimeout(() => {
-      listRef.current.scrollToItem(messages.length + 3, "end");
-    }, 1);
   };
 
   // تابع اندازه‌گیری ارتفاع
   const getRowHeight = (index) => {
-  // اگر ارتفاع ذخیره شده وجود دارد، از آن استفاده کنید
-  if (rowHeights.current[index]) {
-    return rowHeights.current[index];
-  }
-  
-  // ارتفاع پیش‌فرض بر اساس اینکه آیا آواتار نمایش داده می‌شود یا نه
-  const isSameUserAsPrevious = index > 0 && messages[index - 1].username === messages[index].username;
-  return isSameUserAsPrevious ? 40 : 60; // مقادیر را بر اساس نیاز تنظیم کنید
-};
+    // اگر ارتفاع ذخیره شده وجود دارد، از آن استفاده کنید
+    if (rowHeights.current[index]) {
+      return rowHeights.current[index];
+    }
+
+    // ارتفاع پیش‌فرض بر اساس اینکه آیا آواتار نمایش داده می‌شود یا نه
+    const isSameUserAsPrevious =
+      index > 0 && messages[index - 1].username === messages[index].username;
+    return isSameUserAsPrevious ? 50 : 70; // افزایش ارتفاع برای جا دادن زمان
+  };
 
   // تابع برای تنظیم ارتفاع واقعی
   const setRowHeight = (index, height) => {
@@ -207,75 +239,76 @@ const Chat = () => {
   };
 
   const Row = ({ index, style }) => {
-  const msg = messages[index];
-  const rowRef = useRef();
+    const msg = messages[index];
+    const rowRef = useRef();
+    const isSameUserAsPrevious =
+      index > 0 && messages[index - 1].username === msg.username;
+    const showAvatar = !isSameUserAsPrevious;
 
-  // بررسی آیا پیام قبلی از همان کاربر است
-  const isSameUserAsPrevious = index > 0 && messages[index - 1].username === msg.username;
-  
-  // تعیین آیا باید آواتار نمایش داده شود
-  const showAvatar = !isSameUserAsPrevious;
+    useEffect(() => {
+      if (rowRef.current) {
+        const height = rowRef.current.getBoundingClientRect().height;
+        setRowHeight(index, height);
+      }
+    }, [index, msg.content]);
 
-  useEffect(() => {
-    if (rowRef.current) {
-      const rowElement = rowRef.current;
-      const height = rowElement.getBoundingClientRect().height;
-      setRowHeight(index, height);
-    }
-  }, [index, msg.content]);
-
-  return (
-    <div style={style}>
-      <div
-        ref={rowRef}
-        className={`flex p-2 ${isSameUserAsPrevious ? "pt-0" : ""}`}
-        style={{ minHeight: showAvatar ? "60px" : "40px" }}
-      >
-        {/* آواتار - فقط برای اولین پیام در سری نمایش داده می‌شود */}
-        {showAvatar ? (
-          <div className="flex-shrink-0">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={0.75}
-              stroke="currentColor"
-              className="size-12"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-              />
-            </svg>
-          </div>
-        ) : (
-          <div className="flex-shrink-0 w-1"></div> // فضای خالی برای حفظ تراز
-        )}
-
-        <div className="flex-1">
-          {/* نام کاربر و زمان - فقط برای اولین پیام در سری نمایش داده می‌شود */}
-          {showAvatar && (
-            <div className="flex mt-0.5">
-              <p className="mr-3 ml-1 message-username">{msg.username}</p>
-              <p className="text-xs mt-1 message-time">{msg.time}</p>
+    return (
+      <div style={style}>
+        <div
+          ref={rowRef}
+          className={`flex p-2 ${isSameUserAsPrevious ? "pt-1" : ""}`}
+          style={{ minHeight: showAvatar ? "80px" : "60px" }}
+        >
+          {/* آواتار (فقط برای اولین پیام) */}
+          {showAvatar ? (
+            <div className="flex-shrink-0 mr-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={0.75}
+                stroke="currentColor"
+                className="size-11" // کاهش سایز آواتار
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                />
+              </svg>
             </div>
+          ) : (
+            <div className="flex-shrink-0 w-10 mr-2"></div> // فضای خالی همتراز با آواتار
           )}
-          
-          {/* محتوای پیام */}
-          <p
-            className={`break-words whitespace-pre-wrap ${
-              isSameUserAsPrevious ? "ml-12" : ""
-            }`}
-            dangerouslySetInnerHTML={{
-              __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
-            }}
-          ></p>
+
+          <div className="flex-1 min-w-0">
+            {/* نام کاربر (فقط برای اولین پیام) */}
+            {showAvatar && (
+              <div className="flex items-center mb-1">
+                <span className="font-medium text-sm text-green-400 mr-2">
+                  {msg.username}
+                </span>
+              </div>
+            )}
+
+            {/* متن پیام و زمان در یک خط */}
+            <div className="flex items-baseline group">
+              <p
+                className="break-words whitespace-pre-wrap inline-block max-w-[85%]"
+                dangerouslySetInnerHTML={{
+                  __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
+                }}
+              ></p>
+              {/* opacity-0 */}
+              <span className="text-xs text-gray-400 ml-2  group-hover:opacity-100 transition-opacity">
+                {msg.time}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
   return (
     <div className="h-screen flex flex-col text-gray-300">

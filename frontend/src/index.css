@@ -74,18 +74,28 @@ textarea::-webkit-scrollbar {
   text-decoration: underline;
 }
 
-/* استایل تایم‌استمپ */
+/* استایل زمان */
 .message-time {
-  font-size: 0.75rem;
   color: #a0aec0;
-  margin-top: 4px;
+  font-size: 0.75rem;
+  opacity: 0.8;
+  white-space: nowrap;
 }
 
-/* استایل نام کاربر */
+/* استایل نام کاربری */
 .message-username {
   font-weight: bold;
-  color: #68d391dd;
-  margin-bottom: 4px;
+  color: #23b35a2f;
+  margin-bottom: 2px;
+}
+
+/* ترازبندی بهتر برای محتوا و زمان */
+.flex.items-baseline {
+  align-items: baseline;
+}
+
+.self-end {
+  align-self: flex-end;
 }
 
 .pt-0 {
@@ -95,4 +105,28 @@ textarea::-webkit-scrollbar {
 /* حفظ تراز برای پیام‌های بدون آواتار */
 .ml-12 {
   margin-left: 3rem;
+}
+
+/* استایل‌های سفارشی */
+.group:hover .message-time {
+  opacity: 1 !important;
+}
+
+/* کاهش ارتفاع پیش‌فرض ردیف‌ها */
+.min-h-40 {
+  min-height: 40px;
+}
+
+.min-h-60 {
+  min-height: 60px;
+}
+
+/* استایل متن پیام */
+.max-w-85 {
+  max-width: 85%;
+}
+
+/* ترنزیشن برای زمان */
+.transition-opacity {
+  transition: opacity 0.2s ease;
 }

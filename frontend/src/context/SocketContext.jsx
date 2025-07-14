@@ -16,7 +16,7 @@ export const SocketProvider = ({ children }) => {
 
   const [messages, setMessages] = useState([]);
 
-  const [loginCheck, setLoginCheck] = useState(false);
+  // const [loginCheck, setLoginCheck] = useState(false);
   const [sendStatus, setSendStatus] = useState(true);
 
   const connectWebSocket = () => {
@@ -142,8 +142,8 @@ export const SocketProvider = ({ children }) => {
         messages,
         setMessages,
         bulkLength,
-        setLoginCheck,
-        loginCheck,
+        // setLoginCheck,
+        // loginCheck,
       }}
     >
       {children}
