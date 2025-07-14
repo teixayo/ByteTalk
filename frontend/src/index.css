@@ -87,3 +87,12 @@ textarea::-webkit-scrollbar {
   color: #68d391dd;
   margin-bottom: 4px;
 }
+
+.pt-0 {
+  padding-top: 0.25rem;
+}
+
+/* حفظ تراز برای پیام‌های بدون آواتار */
+.ml-12 {
+  margin-left: 3rem;
+}

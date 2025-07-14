@@ -153,7 +153,7 @@ const Chat = () => {
   const sendMessage = () => {
     const timestamp = Date.now();
     const date = new Date(timestamp);
-
+    console.log("send shod", text)
     const shortTime = date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
@@ -184,8 +184,15 @@ const Chat = () => {
 
   // تابع اندازه‌گیری ارتفاع
   const getRowHeight = (index) => {
-    return rowHeights.current[index] || 80; // مقدار پیش‌فرض موقت
-  };
+  // اگر ارتفاع ذخیره شده وجود دارد، از آن استفاده کنید
+  if (rowHeights.current[index]) {
+    return rowHeights.current[index];
+  }
+  
+  // ارتفاع پیش‌فرض بر اساس اینکه آیا آواتار نمایش داده می‌شود یا نه
+  const isSameUserAsPrevious = index > 0 && messages[index - 1].username === messages[index].username;
+  return isSameUserAsPrevious ? 40 : 60; // مقادیر را بر اساس نیاز تنظیم کنید
+};
 
   // تابع برای تنظیم ارتفاع واقعی
   const setRowHeight = (index, height) => {
@@ -196,58 +203,75 @@ const Chat = () => {
   };
 
   const Row = ({ index, style }) => {
-    const msg = messages[index];
-    const rowRef = useRef();
+  const msg = messages[index];
+  const rowRef = useRef();
 
-    useEffect(() => {
-      if (rowRef.current) {
-        // محاسبه ارتفاع کل ردیف شامل حاشیه‌ها و پدینگ
-        const rowElement = rowRef.current;
-        const height = rowElement.getBoundingClientRect().height;
+  // بررسی آیا پیام قبلی از همان کاربر است
+  const isSameUserAsPrevious = index > 0 && messages[index - 1].username === msg.username;
+  
+  // تعیین آیا باید آواتار نمایش داده شود
+  const showAvatar = !isSameUserAsPrevious;
 
-        setRowHeight(index, height);
-      }
-    }, [index, msg.content]); // وابستگی به محتوای پیام
+  useEffect(() => {
+    if (rowRef.current) {
+      const rowElement = rowRef.current;
+      const height = rowElement.getBoundingClientRect().height;
+      setRowHeight(index, height);
+    }
+  }, [index, msg.content]);
 
-    return (
-      <div style={style}>
-        <div
-          ref={rowRef}
-          className="flex p-2"
-          style={{ minHeight: "80px" }} // حداقل ارتفاع
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={0.75}
-            stroke="currentColor"
-            className="size-12 "
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-            />
-          </svg>
-          {/* محتوای پیام شما */}
-          <div className="flex-shrink-0">{/* آیکون کاربر */}</div>
-          <div className="flex-1">
+  return (
+    <div style={style}>
+      <div
+        ref={rowRef}
+        className={`flex p-2 ${isSameUserAsPrevious ? "pt-0" : ""}`}
+        style={{ minHeight: showAvatar ? "60px" : "40px" }}
+      >
+        {/* آواتار - فقط برای اولین پیام در سری نمایش داده می‌شود */}
+        {showAvatar ? (
+          <div className="flex-shrink-0">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={0.75}
+              stroke="currentColor"
+              className="size-12"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+              />
+            </svg>
+          </div>
+        ) : (
+          <div className="flex-shrink-0 w-1"></div> // فضای خالی برای حفظ تراز
+        )}
+
+        <div className="flex-1">
+          {/* نام کاربر و زمان - فقط برای اولین پیام در سری نمایش داده می‌شود */}
+          {showAvatar && (
             <div className="flex mt-0.5">
               <p className="mr-3 ml-1 message-username">{msg.username}</p>
               <p className="text-xs mt-1 message-time">{msg.time}</p>
             </div>
-            <p
-              className="break-words whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{
-                __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
-              }}
-            ></p>
-          </div>
+          )}
+          
+          {/* محتوای پیام */}
+          <p
+            className={`break-words whitespace-pre-wrap ${
+              isSameUserAsPrevious ? "ml-12" : ""
+            }`}
+            dangerouslySetInnerHTML={{
+              __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
+            }}
+          ></p>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   return (
     <div className="h-screen flex flex-col text-gray-300">
