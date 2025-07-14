@@ -48,8 +48,7 @@ export const SocketProvider = ({ children }) => {
       if (data.type === "BulkMessages") {
         if (!initialLoaded) {
           data.messages.map((msg) => {
-            const timestamp = Date.now(msg.date);
-            const date = new Date(timestamp);
+            const date = new Date(msg.date);
 
             const shortTime = date.toLocaleTimeString("en-US", {
               hour: "2-digit",
@@ -79,8 +78,7 @@ export const SocketProvider = ({ children }) => {
           const newMessages = data.messages
             .filter((msg) => msg.content !== "")
             .map((msg) => {
-              const timestamp = Date.now(msg.date);
-              const date = new Date(timestamp);
+              const date = new Date(msg.date);
 
               const shortTime = date.toLocaleTimeString("en-US", {
                 hour: "2-digit",

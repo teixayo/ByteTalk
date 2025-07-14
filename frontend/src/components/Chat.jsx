@@ -99,6 +99,9 @@ const Chat = () => {
       console.log("run");
       setMessages([...bulkMessages, ...localMessages]);
 
+      console.log(bulkMessages)
+      console.log(localMessages)
+
       listRef.current.scrollToItem(bulkLength + 1, "start");
 
       setTimeout(() => {
@@ -166,6 +169,7 @@ const Chat = () => {
       username: localStorage.getItem("username"),
       timecode: timestamp,
     };
+    console.log(msg)
 
     setLocalMessages((prev) => [...prev, msg]);
     setMessages((prev) => [...prev, msg]);
