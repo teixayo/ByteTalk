@@ -3,12 +3,14 @@ package me.teixayo.bytetalk.backend.user;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.Server;
 import me.teixayo.bytetalk.backend.message.Message;
+import me.teixayo.bytetalk.backend.networking.ChannelInitializer;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
@@ -56,7 +58,8 @@ public class UserConnection {
     @SneakyThrows
     public void disconnect() {
         InetSocketAddress socketAddress = (InetSocketAddress) channel.channel().remoteAddress();
-        channel.channel().closeFuture().addListener((ChannelFutureListener) future -> {
+        channel.channel().attr(ChannelInitializer.getHandshake()).get().close(channel,new CloseWebSocketFrame())
+                .addListener((ChannelFutureListener) future -> {
             online = false;
             UserManager.getInstance().removeUser(user);
             log.info("Disconnected the {} {}", user.getName(), socketAddress);

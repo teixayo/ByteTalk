@@ -9,9 +9,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.CharsetUtil;
+import io.netty.util.concurrent.ScheduledFuture;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.Server;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacket;
@@ -27,6 +27,7 @@ import me.teixayo.bytetalk.backend.user.UserManager;
 import org.json.JSONObject;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class PacketHandler extends SimpleChannelInboundHandler<Object> {
@@ -34,6 +35,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
     private WebSocketServerHandshaker handshaker;
     private User user;
 
+    private ScheduledFuture<?> pingFuture;
     private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
         if (res.status().code() != 200) {
             ByteBuf buf = Unpooled.copiedBuffer(res.status().toString(), CharsetUtil.UTF_8);
@@ -86,17 +88,8 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
         } else {
             handshaker.handshake(ctx.channel(), req);
-        }
-    }
+            ctx.channel().attr(ChannelInitializer.getHandshake()).set(handshaker);
 
-    @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        if (evt instanceof IdleStateEvent event) {
-            if (event.state() == IdleState.WRITER_IDLE) {
-                ctx.writeAndFlush(new PingWebSocketFrame());
-            }
-        } else {
-            super.userEventTriggered(ctx, evt);
         }
     }
 
@@ -212,5 +205,22 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
         }
     }
 
+    @SneakyThrows
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) {
+        pingFuture = ctx.executor().scheduleAtFixedRate(() -> {
+                    if (!ctx.channel().isActive()) return;
+                    ctx.writeAndFlush(new PingWebSocketFrame());
+                }
+                , 0, Server.getInstance().getConfig().getMaxTimeOut() / 2, TimeUnit.SECONDS);
+        super.channelActive(ctx);
+    }
 
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        if (pingFuture != null) {
+            pingFuture.cancel(false);
+        }
+        super.channelInactive(ctx);
+    }
 }

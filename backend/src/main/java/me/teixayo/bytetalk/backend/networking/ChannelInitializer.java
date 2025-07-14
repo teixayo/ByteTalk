@@ -4,21 +4,24 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.Server;
 import me.teixayo.bytetalk.backend.protocol.client.ClientStateType;
 
 import javax.net.ssl.SSLException;
-import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class ChannelInitializer extends io.netty.channel.ChannelInitializer<Channel> {
 
     @Getter
     private static final AttributeKey<ClientStateType> state = AttributeKey.newInstance("State");
+    @Getter
+    private static final AttributeKey<WebSocketServerHandshaker> handshake = AttributeKey.newInstance("Handshake");
 
     private static SslContext sslContent = null;
 
@@ -45,7 +48,6 @@ public class ChannelInitializer extends io.netty.channel.ChannelInitializer<Chan
         }
         pipeline.addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(65536))
-                .addLast(new IdleStateHandler(0, Server.getInstance().getConfig().getMaxTimeOut() / 2, 0, TimeUnit.SECONDS))
                 .addLast(new PacketHandler());
         channel.attr(state).set(ClientStateType.IN_LOGIN);
     }
