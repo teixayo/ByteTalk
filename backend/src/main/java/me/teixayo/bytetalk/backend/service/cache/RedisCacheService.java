@@ -46,26 +46,6 @@ public class RedisCacheService implements CacheService {
         }
         return out;
     }
-
-//    @Override
-//    public Collection<Message> loadLastestMessages(long channelID) {
-//        List<Message> result = new ArrayList<>();
-//        try (Jedis jedis = jedisPool.getResource()) {
-//            List<String> ids = jedis.lrange(RedisKeys.MESSAGES_LIST.getKey(channelID), 0, -1);
-//            for (String idStr : ids) {
-//                Map<String, String> fields = jedis.hgetAll(RedisKeys.MESSAGES.getKey(channelID,idStr));
-//                if (fields == null || fields.isEmpty()) continue;
-//                long id = Long.parseLong(fields.get("id"));
-//                long userID = Long.parseLong(fields.get("userID"));
-//                String content = fields.get("content");
-//                String dateStr = fields.get("date");
-//                Date dateObj = Date.from(Instant.parse(dateStr));
-//                result.add(new Message(id, userID, content, dateObj));
-//            }
-//        }
-//        return result;
-//    }
-
     @Override
     public void addMessageToCache(long channelID,Message message) {
         addMessagesToCache(channelID,List.of(message));
