@@ -69,7 +69,7 @@ public class CacheServiceTest {
         assertEquals(lastDate,newwestMessage.getDate());
 
         if(service instanceof RedisCacheService redisCacheService) {
-            assertEquals(29, redisCacheService.getMessageById(29).getId());
+            assertEquals("HelloWorld29", redisCacheService.getMessageById(29).getContent());
         }
 
     }

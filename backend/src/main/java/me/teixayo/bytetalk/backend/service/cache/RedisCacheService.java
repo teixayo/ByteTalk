@@ -78,7 +78,7 @@ public class RedisCacheService implements CacheService {
             for (Message msg : messages) {
                 XAddParams xAddParams = new XAddParams()
                         .maxLen(maxSize)
-                        .id(msg.getId());
+                        .id(msg.getId() + "-0");
                 Map<String,String> map = Map.of(
                         "id",      String.valueOf(msg.getId()),
                         "userID",  String.valueOf(msg.getUserID()),
