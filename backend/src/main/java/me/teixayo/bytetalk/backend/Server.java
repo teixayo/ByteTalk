@@ -6,9 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import me.teixayo.bytetalk.backend.database.redis.RedisChannel;
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
+import me.teixayo.bytetalk.backend.message.Message;
 import me.teixayo.bytetalk.backend.networking.NettyHandler;
+import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
+import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
 import me.teixayo.bytetalk.backend.security.EncryptionUtils;
 import me.teixayo.bytetalk.backend.service.cache.CacheService;
+import me.teixayo.bytetalk.backend.service.cache.RedisCacheService;
 import me.teixayo.bytetalk.backend.service.message.MessageService;
 import me.teixayo.bytetalk.backend.service.message.MongoMessageService;
 import me.teixayo.bytetalk.backend.service.search.SearchService;
@@ -94,7 +98,22 @@ public final class Server implements LoopApp {
 
         if(RedisDBConnection.isConnected()) {
             RedisDBConnection.getInstance().registerConsumer(RedisChannel.SEND_MESSAGE, data -> {
+                String username = data.split(" ")[0];
+                long messageID = Long.parseLong(data.split(" ")[1]);
+                RedisCacheService redisCacheService = (RedisCacheService) cacheService;
+                Message message = redisCacheService.getMessageById(messageID);
 
+                ServerPacket sendMessagePacket = ServerPacketType.SendMessage.createPacket(
+                        "id", message.getId(),
+                        "username", username,
+                        "content", message.getContent(),
+                        "date", message.getDate().toInstant().toEpochMilli()
+                );
+
+                for (User user : UserManager.getInstance().getUsers().values()) {
+                    if (user.getName().equals(username)) continue;
+                    user.sendPacket(sendMessagePacket);
+                }
             });
         }
 

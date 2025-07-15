@@ -116,7 +116,8 @@ public class UserConnection {
                     otherUser.sendPacket(packet1);
                 }
                 if(RedisDBConnection.isConnected()) {
-                    RedisDBConnection.getInstance().publish(RedisChannel.SEND_MESSAGE, String.valueOf(message.getId()));
+                    RedisDBConnection.getInstance().publish(RedisChannel.SEND_MESSAGE,
+                            this.getUser().getName() + " " + message.getId());
                 }
                 log.info(packet1.getData().toString());
 

@@ -5,8 +5,7 @@ import me.teixayo.bytetalk.backend.Server;
 public enum RedisKeys {
 
 
-    MESSAGES("messages:%s"),
-    MESSAGES_LIST("messages_list");
+    MESSAGES("messages");
 
     private final String template;
 

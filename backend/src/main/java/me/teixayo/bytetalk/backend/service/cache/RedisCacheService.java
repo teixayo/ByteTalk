@@ -6,6 +6,9 @@ import me.teixayo.bytetalk.backend.message.Message;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.StreamEntryID;
+import redis.clients.jedis.params.XAddParams;
+import redis.clients.jedis.resps.StreamEntry;
 
 import java.time.Instant;
 import java.util.*;
@@ -26,23 +29,44 @@ public class RedisCacheService implements CacheService {
 
     @Override
     public Collection<Message> loadLastestMessages() {
-        List<Message> result = new ArrayList<>();
+        List<Message> out = new ArrayList<>();
+
         try (Jedis jedis = jedisPool.getResource()) {
-            List<String> ids = jedis.lrange(RedisKeys.MESSAGES_LIST.getKey(), 0, -1);
-            for (String idStr : ids) {
-                Map<String, String> fields = jedis.hgetAll(RedisKeys.MESSAGES.getKey(idStr));
-                if (fields == null || fields.isEmpty()) continue;
-                long id = Long.parseLong(fields.get("id"));
-                long userID = Long.parseLong(fields.get("userID"));
-                String content = fields.get("content");
-                String dateStr = fields.get("date");
-                Date dateObj = Date.from(Instant.parse(dateStr));
-                result.add(new Message(id, userID, content, dateObj));
+            List<StreamEntry> entries =
+                    jedis.xrevrange(RedisKeys.MESSAGES.getKey(), StreamEntryID.MAXIMUM_ID, StreamEntryID.MINIMUM_ID, maxSize);
+            Collections.reverse(entries);
+            for (StreamEntry entry : entries) {
+                Map<String,String> f = entry.getFields();
+                long id      = Long.parseLong(f.get("id"));
+                long userID  = Long.parseLong(f.get("userID"));
+                String content = f.get("content");
+                Instant date = Instant.parse(f.get("date"));
+                out.add(new Message(id, userID, content, Date.from(date)));
             }
         }
-        return result;
+        return out;
     }
 
+    public Message getMessageById(long messageId) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            String targetId = messageId + "-0";
+            List<StreamEntry> entries = jedis.xrange(
+                    RedisKeys.MESSAGES.getKey(),
+                    new StreamEntryID(targetId),
+                    new StreamEntryID(targetId),
+                    1
+            );
+            if (entries.isEmpty()) {
+                return null;
+            }
+            StreamEntry entry = entries.getFirst();
+            Map<String, String> f = entry.getFields();
+            long userID = Long.parseLong(f.get("userID"));
+            String content = f.get("content");
+            Instant date = Instant.parse(f.get("date"));
+            return new Message(messageId, userID, content, Date.from(date));
+        }
+    }
     @Override
     public void addMessageToCache(Message message) {
         addMessagesToCache(List.of(message));
@@ -52,30 +76,18 @@ public class RedisCacheService implements CacheService {
         try (Jedis jedis = jedisPool.getResource()) {
             Pipeline pipeline = jedis.pipelined();
             for (Message msg : messages) {
-                String idStr = String.valueOf(msg.getId());
-                Map<String, String> map = new HashMap<>();
-                map.put("id", idStr);
-                map.put("userID", String.valueOf(msg.getUserID()));
-                map.put("content", msg.getContent());
-                map.put("date", msg.getDate().toInstant().toString());
-                pipeline.hset(RedisKeys.MESSAGES.getKey(idStr), map);
-                pipeline.rpush(RedisKeys.MESSAGES_LIST.getKey(), idStr);
+                XAddParams xAddParams = new XAddParams()
+                        .maxLen(maxSize)
+                        .id(msg.getId());
+                Map<String,String> map = Map.of(
+                        "id",      String.valueOf(msg.getId()),
+                        "userID",  String.valueOf(msg.getUserID()),
+                        "content", msg.getContent(),
+                        "date",    msg.getDate().toInstant().toString()
+                );
+                pipeline.xadd(RedisKeys.MESSAGES.getKey(), map, xAddParams);
             }
             pipeline.sync();
-
-            long listLen = jedis.llen(RedisKeys.MESSAGES_LIST.getKey());
-            if (!(listLen > maxSize)) return;
-
-            long removeCount = listLen - maxSize;
-            List<String> removedIds = jedis.lrange(RedisKeys.MESSAGES_LIST.getKey(), 0, removeCount - 1);
-            jedis.ltrim(RedisKeys.MESSAGES_LIST.getKey(), removeCount, -1);
-
-            if (removedIds.isEmpty()) return;
-            Pipeline delPipeline = jedis.pipelined();
-            for (String remId : removedIds) {
-                delPipeline.del(RedisKeys.MESSAGES.getKey(remId));
-            }
-            delPipeline.sync();
         }
     }
 
