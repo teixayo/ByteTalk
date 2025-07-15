@@ -43,6 +43,7 @@ public class MongoDBConnection {
             this.userCollection = userDatabase.getCollection("User");
             userDatabase.runCommand(new Document("ping", 1));
             isConnected = true;
+            log.info("Mongo is connected successfully");
         } catch (Exception exception) {
             log.error("Failed to connect to MongoDB: ", exception);
         }

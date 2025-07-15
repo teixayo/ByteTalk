@@ -21,4 +21,5 @@ public interface CacheService {
     void addMessageToCache(Message message);
 
     void addMessagesToCache(List<Message> messageList);
+
 }

@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.Server;
+import me.teixayo.bytetalk.backend.database.redis.RedisChannel;
+import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
 import me.teixayo.bytetalk.backend.message.Message;
 import me.teixayo.bytetalk.backend.networking.ChannelInitializer;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacket;
@@ -102,18 +104,21 @@ public class UserConnection {
                 Message message = new Message(RandomGenerator.generateId(), user.getId(), content, Date.from(Instant.now()));
                 Server.getInstance().getMessageService().saveMessage(message);
                 Server.getInstance().getCacheService().addMessageToCache(message);
+                ServerPacket packet1 = ServerPacketType.SendMessage.createPacket(
+                        "id", message.getId(),
+                        "username", this.user.getName(),
+                        "content", message.getContent(),
+                        "date", message.getDate().toInstant().toEpochMilli()
+                );
+
                 for (User otherUser : UserManager.getInstance().getUsers().values()) {
                     if (otherUser.equals(this.user)) continue;
-                    ServerPacket packet1 = ServerPacketType.SendMessage.createPacket(
-
-                            "id", message.getId(),
-                            "username", this.user.getName(),
-                            "content", message.getContent(),
-                            "date", message.getDate().toInstant().toEpochMilli()
-                    );
-                    log.info(packet1.getData().toString());
                     otherUser.sendPacket(packet1);
                 }
+                if(RedisDBConnection.isConnected()) {
+                    RedisDBConnection.getInstance().publish(RedisChannel.SEND_MESSAGE, String.valueOf(message.getId()));
+                }
+                log.info(packet1.getData().toString());
 
             }
             case RequestBulkMessage -> {

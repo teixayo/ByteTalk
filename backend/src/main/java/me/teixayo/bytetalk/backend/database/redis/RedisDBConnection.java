@@ -5,11 +5,15 @@ import lombok.extern.log4j.Log4j2;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisPubSub;
 
 import java.time.Duration;
+import java.util.*;
+import java.util.function.Consumer;
 
 @Log4j2
-public class RedisDBConnection {
+@Getter
+public class RedisDBConnection extends JedisPubSub {
 
     @Getter
     private static RedisDBConnection instance;
@@ -18,8 +22,14 @@ public class RedisDBConnection {
     private static JedisPool jedisPool;
 
     @Getter
+    private static JedisPool messagingPool;
+
+
+    @Getter
     private static boolean isConnected = false;
 
+    @Getter
+    private static Map<RedisChannel, List<Consumer<String>>> channelConsumers=null;
     public RedisDBConnection(String address, int port, String password, boolean useSSL) {
 
         instance = this;
@@ -33,6 +43,7 @@ public class RedisDBConnection {
         config.setTestOnReturn(true);
         config.setTestWhileIdle(true);
         jedisPool = new JedisPool(config, address, port, 2000, password, useSSL);
+        messagingPool = new JedisPool(config, address, port, 2000, password,useSSL);
 
         try (Jedis jedis = jedisPool.getResource()) {
             String response = jedis.ping();
@@ -44,6 +55,49 @@ public class RedisDBConnection {
             }
         } catch (Exception e) {
             log.error("Failed to connect to RedisDB: ", e);
+        }
+
+
+        channelConsumers = new HashMap<>();
+        for(RedisChannel channel : RedisChannel.values()) {
+            channelConsumers.put(channel, new ArrayList<>());
+        }
+    }
+
+    private void startSubscription() {
+        new Thread(() -> {
+            try (Jedis jedis = messagingPool.getResource()) {
+                String[] channelNames = Arrays.stream(RedisChannel.values())
+                        .map(RedisChannel::getChannelName)
+                        .toArray(String[]::new);
+
+                jedis.subscribe(this, channelNames);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    public void registerConsumer(RedisChannel channel, Consumer<String> consumer) {
+        channelConsumers.get(channel).add(consumer);
+    }
+
+    public void publish(RedisChannel channel, String message) {
+        try (Jedis jedis = messagingPool.getResource()) {
+            jedis.publish(channel.getChannelName(), message);
+        }
+    }
+
+    public void onMessage(String channelName, String message) {
+        RedisChannel channel = null;
+        for (RedisChannel ch : RedisChannel.values()) {
+            if (!ch.getChannelName().equals(channelName)) continue;
+            channel = ch;
+            break;
+        }
+        if (channel == null) return;
+        for (Consumer<String> consumer : channelConsumers.get(channel)) {
+            consumer.accept(message);
         }
     }
 

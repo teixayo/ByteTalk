@@ -1,10 +1,6 @@
 plugins {
-    application
+    java
     id("com.github.johnrengelman.shadow") version "8.1.1"
-}
-
-application {
-    mainClass.set("me.teixayo.bytetalk.Main")
 }
 
 repositories {
@@ -16,9 +12,13 @@ repositories {
 
 
 tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
-    archiveClassifier.set("")
+    archiveClassifier.set("ByteTalk")
     manifest {
         attributes["Main-Class"] = "me.teixayo.bytetalk.Main"
+    }
+
+    doLast {
+        println("✅ Fat JAR created at: ${archiveFile.get().asFile.absolutePath}")
     }
 }
 dependencies {

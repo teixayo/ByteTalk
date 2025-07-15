@@ -1,10 +1,11 @@
 package me.teixayo.bytetalk.backend;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
+import me.teixayo.bytetalk.backend.database.redis.RedisChannel;
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
-import me.teixayo.bytetalk.backend.message.Message;
 import me.teixayo.bytetalk.backend.networking.NettyHandler;
 import me.teixayo.bytetalk.backend.security.EncryptionUtils;
 import me.teixayo.bytetalk.backend.service.cache.CacheService;
@@ -20,9 +21,10 @@ import me.teixayo.jegl.loop.loops.Loop;
 import me.teixayo.jegl.loop.loops.LoopType;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.time.Instant;
-import java.util.Date;
 
 @Slf4j
 @Getter
@@ -48,6 +50,7 @@ public final class Server implements LoopApp {
                 .build();
     }
 
+    @SneakyThrows
     public void start() {
 
         long start = System.currentTimeMillis();
@@ -55,7 +58,18 @@ public final class Server implements LoopApp {
 
         Yaml yaml = new Yaml();
         InputStream inputStream = Server.class.getClassLoader().getResourceAsStream("config.yml");
-        config = new Config(yaml.load(inputStream));
+        File configFile = new File("config.yml");
+        if(!configFile.exists()) {
+            try (FileOutputStream outputStream = new FileOutputStream(configFile)) {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                log.info("Config file successfully created");
+            }
+        }
+        config = new Config(yaml.load(new FileInputStream(configFile)));
 
         nettyHandler = new NettyHandler();
 
@@ -78,23 +92,19 @@ public final class Server implements LoopApp {
         cacheService = CacheService.findBestService();
         log.info("Using {} as CacheService", cacheService.getClass().getSimpleName());
 
+        if(RedisDBConnection.isConnected()) {
+            RedisDBConnection.getInstance().registerConsumer(RedisChannel.SEND_MESSAGE, data -> {
+
+            });
+        }
+
         long end = System.currentTimeMillis();
         log.info("Loaded sever on {} ms", (end - start));
 
     }
-
-    private boolean a;
     @Override
     public void update() {
         for (User user : UserManager.getInstance().getUsers().values()) {
-            if(!a) {
-                // for(int i = 0 ; i < 1000; i++) {
-                //     Message message = new Message(i,user.getId(), Integer.toString(i), Date.from(Instant.now()));
-                //     cacheService.addMessageToCache(message);
-                //     messageService.saveMessage(message);
-                // }
-                a=true;
-            }
             user.getUserConnection().checkTimeOut();
             if (!user.getUserConnection().isOnline()) {
                 UserManager.getInstance().removeUser(user);

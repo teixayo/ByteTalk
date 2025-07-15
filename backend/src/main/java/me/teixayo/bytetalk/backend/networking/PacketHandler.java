@@ -184,7 +184,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 if (Server.getInstance().getUserService().isUserExists(name)) {
                     ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.USER_EXISTS.createPacket().getData().toString()));
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                    log.info("Disconnected {} cause of using created names for signup", socketAddress.getAddress().getHostAddress());
+                    log.info("Disconnected {} cause of using created exists names for signup", socketAddress.getAddress().getHostAddress());
                     return;
                 }
                 log.info("User {} Created", name);
