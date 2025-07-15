@@ -47,24 +47,42 @@ public class RedisCacheService implements CacheService {
         return out;
     }
 
-    public Message getMessageById(long messageId) {
+    public Message getMessageById(long id) {
+        String script = """
+                local entries = redis.call('XRANGE', KEYS[1], '-', '+')
+                for _, entry in ipairs(entries) do
+                  local fields = entry[2]
+                  for i = 1, #fields, 2 do
+                    if fields[i] == 'id' and fields[i + 1] == ARGV[1] then
+                      return entry
+                    end
+                  end
+                end
+                return nil
+                """;
+
         try (Jedis jedis = jedisPool.getResource()) {
-            String targetId = messageId + "-0";
-            List<StreamEntry> entries = jedis.xrange(
-                    RedisKeys.MESSAGES.getKey(),
-                    new StreamEntryID(targetId),
-                    new StreamEntryID(targetId),
-                    1
+            @SuppressWarnings("unchecked")
+            List<Object> result = (List<Object>) jedis.eval(
+                    script,
+                    List.of(RedisKeys.MESSAGES.getKey()),
+                    List.of(String.valueOf(id))
             );
-            if (entries.isEmpty()) {
-                return null;
+
+            if (result == null || result.isEmpty()) return null;
+
+            @SuppressWarnings("unchecked")
+            List<String> fields = (List<String>) result.get(1);
+            Map<String, String> fieldMap = new HashMap<>();
+            for (int i = 0; i < fields.size(); i += 2) {
+                fieldMap.put(fields.get(i), fields.get(i + 1));
             }
-            StreamEntry entry = entries.getFirst();
-            Map<String, String> f = entry.getFields();
-            long userID = Long.parseLong(f.get("userID"));
-            String content = f.get("content");
-            Instant date = Instant.parse(f.get("date"));
-            return new Message(messageId, userID, content, Date.from(date));
+
+            long userID = Long.parseLong(fieldMap.get("userID"));
+            String content = fieldMap.get("content");
+            Instant date = Instant.parse(fieldMap.get("date"));
+
+            return new Message(id, userID, content, Date.from(date));
         }
     }
     @Override
@@ -77,8 +95,7 @@ public class RedisCacheService implements CacheService {
             Pipeline pipeline = jedis.pipelined();
             for (Message msg : messages) {
                 XAddParams xAddParams = new XAddParams()
-                        .maxLen(maxSize)
-                        .id(msg.getId() + "-0");
+                        .maxLen(maxSize);
                 Map<String,String> map = Map.of(
                         "id",      String.valueOf(msg.getId()),
                         "userID",  String.valueOf(msg.getUserID()),

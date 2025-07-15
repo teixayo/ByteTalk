@@ -12,17 +12,22 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import lombok.extern.slf4j.Slf4j;
+import me.teixayo.bytetalk.backend.protocol.client.ClientPacketType;
+import me.teixayo.bytetalk.backend.protocol.server.StatusCodes;
+import org.json.JSONObject;
 
 import java.net.URI;
+import java.util.Scanner;
 
 @Slf4j
 public class NettyWebSocketExample {
 
     public static String password;
+    public static String name;
 
     public static class NettyWebSocketClient {
         public static void main(String[] args) throws Exception {
-            URI uri = new URI("ws://141.11.45.72:9000");
+            URI uri = new URI("ws://localhost:25566");
             EventLoopGroup group = new NioEventLoopGroup();
             try {
                 final WebSocketClientHandler handler = new WebSocketClientHandler(
@@ -44,68 +49,57 @@ public class NettyWebSocketExample {
 
                 Channel ch = b.connect(uri.getHost(), uri.getPort()).sync().channel();
                 handler.handshakeFuture().sync();
-//                long start = System.currentTimeMillis();
-//                long totalBytes = 0;
-//                while (true) {
-//                    byte[] buffer = RandomGenerator.generateSecureBytes(1024*100);;
-//                    ch.writeAndFlush(new TextWebSocketFrame(new String(buffer)));
-//                    totalBytes+=buffer.length;
-//                    Thread.sleep(10);
-//                    long end = System.currentTimeMillis();
-//                    if(end-start >= 1000) {
-//                        start = end;
-//                        System.out.println(totalBytes / (1024) + " KB/s");
-//                        totalBytes=0;
-//                    }
-//                }
-//                Scanner scanner = new Scanner(System.in);
-//                if (scanner.hasNextLine()) {
-//                    if (scanner.nextLine().equals("1")) {
-//                        JSONObject jsonObject = new JSONObject();
-//
-//                        jsonObject.put("type", "CreateUser");
-//
-//                        jsonObject.put("name", "test");
-//                        jsonObject.put("password", scanner.nextLine());
-//                        password = jsonObject.getString("password");
-//                        ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
-//
-//
-//                        Thread.sleep(1000);
-//
-//
-//                        ch.writeAndFlush(new TextWebSocketFrame(
-//                                ClientPacketType.RequestBulkMessage.createPacket(
-//                                                "time", String.valueOf(System.currentTimeMillis()))
-//                                        .getData().toString()));
-//
-//                        Thread.sleep(5000);
-//                        while (scanner.hasNextLine()) {
-//                            ch.writeAndFlush(new TextWebSocketFrame(ClientPacketType.SendMessage.createPacket(
-//                                    "content", scanner.nextLine()).getData().toString()));
-//                        }
-//                    } else {
-//
-//                        JSONObject jsonObject = new JSONObject();
-//                        jsonObject.put("type", "Login");
-//                        jsonObject.put("name", "test");
-//                        jsonObject.put("token", scanner.nextLine());
-//                        ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
-//
-//                        Thread.sleep(1000);
-//                        ch.writeAndFlush(new TextWebSocketFrame(
-//                                ClientPacketType.RequestBulkMessage.createPacket(
-//                                                "time", String.valueOf(System.currentTimeMillis()))
-//                                        .getData().toString()));
-//
-//                        Thread.sleep(5000);
-//                        while (scanner.hasNextLine()) {
-//                            ch.writeAndFlush(new TextWebSocketFrame(ClientPacketType.SendMessage.createPacket(
-//                                    "content", scanner.nextLine()).getData().toString()));
-//                        }
-//
-//                    }
-//                }
+                long start = System.currentTimeMillis();
+
+                Scanner scanner = new Scanner(System.in);
+                if (scanner.hasNextLine()) {
+                    if (scanner.nextLine().equals("1")) {
+                        JSONObject jsonObject = new JSONObject();
+
+                        jsonObject.put("type", "CreateUser");
+
+                        jsonObject.put("username", scanner.nextLine());
+                        jsonObject.put("password", scanner.nextLine());
+                        password = jsonObject.getString("password");
+                        name = jsonObject.getString("username");
+                        ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
+
+
+                        Thread.sleep(1000);
+
+
+                        ch.writeAndFlush(new TextWebSocketFrame(
+                                ClientPacketType.RequestBulkMessage.createPacket(
+                                                "date", String.valueOf(System.currentTimeMillis()))
+                                        .getData().toString()));
+
+                        Thread.sleep(5000);
+                        while (scanner.hasNextLine()) {
+                            ch.writeAndFlush(new TextWebSocketFrame(ClientPacketType.SendMessage.createPacket(
+                                    "content", scanner.nextLine()).getData().toString()));
+                        }
+                    } else {
+
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("type", "Login");
+                        jsonObject.put("username", scanner.nextLine());
+                        jsonObject.put("token", scanner.nextLine());
+                        ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
+
+                        Thread.sleep(1000);
+                        ch.writeAndFlush(new TextWebSocketFrame(
+                                ClientPacketType.RequestBulkMessage.createPacket(
+                                                "date", String.valueOf(System.currentTimeMillis()))
+                                        .getData().toString()));
+
+                        Thread.sleep(5000);
+                        while (scanner.hasNextLine()) {
+                            ch.writeAndFlush(new TextWebSocketFrame(ClientPacketType.SendMessage.createPacket(
+                                    "content", scanner.nextLine()).getData().toString()));
+                        }
+
+                    }
+                }
                 ch.closeFuture().sync();
             } finally {
                 group.shutdownGracefully();
@@ -166,17 +160,17 @@ public class NettyWebSocketExample {
                 int readableBytes = frame.content().readableBytes();
                 System.out.println("Received binary frame of length: " + readableBytes + " bytes");
 
-//                System.out.println("Client received: " + ((TextWebSocketFrame) frame).text());
-//                JSONObject jsonObject = new JSONObject(((TextWebSocketFrame) frame).text());
-//                String type = jsonObject.getString("type");
-//                if (type.equals("Status") && jsonObject.getInt("code") == StatusCodes.SUCCESS_SIGNUP.getStatusCode()) {
-//                    jsonObject.put("type", "Login");
-//                    jsonObject.put("name", "test");
-//                    jsonObject.put("password", password);
-//                    ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
-//                } else {
-//                    System.out.println(jsonObject);
-//                }
+                System.out.println("Client received: " + ((TextWebSocketFrame) frame).text());
+                JSONObject jsonObject = new JSONObject(((TextWebSocketFrame) frame).text());
+                String type = jsonObject.getString("type");
+                if (type.equals("Status") && jsonObject.getInt("code") == StatusCodes.SUCCESS_SIGNUP.getStatusCode()) {
+                    jsonObject.put("type", "Login");
+                    jsonObject.put("username", name);
+                    jsonObject.put("password", password);
+                    ch.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
+                } else {
+                    System.out.println(jsonObject);
+                }
             }
         }
 

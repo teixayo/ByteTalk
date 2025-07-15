@@ -104,6 +104,7 @@ public class UserConnection {
                 Message message = new Message(RandomGenerator.generateId(), user.getId(), content, Date.from(Instant.now()));
                 Server.getInstance().getMessageService().saveMessage(message);
                 Server.getInstance().getCacheService().addMessageToCache(message);
+                log.info("A?");
                 ServerPacket packet1 = ServerPacketType.SendMessage.createPacket(
                         "id", message.getId(),
                         "username", this.user.getName(),

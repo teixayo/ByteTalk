@@ -62,6 +62,7 @@ public class RedisDBConnection extends JedisPubSub {
         for(RedisChannel channel : RedisChannel.values()) {
             channelConsumers.put(channel, new ArrayList<>());
         }
+        startSubscription();
     }
 
     private void startSubscription() {

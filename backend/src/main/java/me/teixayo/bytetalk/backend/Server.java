@@ -98,6 +98,7 @@ public final class Server implements LoopApp {
 
         if(RedisDBConnection.isConnected()) {
             RedisDBConnection.getInstance().registerConsumer(RedisChannel.SEND_MESSAGE, data -> {
+                log.info("Received Redis Message");
                 String username = data.split(" ")[0];
                 long messageID = Long.parseLong(data.split(" ")[1]);
                 RedisCacheService redisCacheService = (RedisCacheService) cacheService;
