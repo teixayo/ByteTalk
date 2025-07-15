@@ -18,6 +18,8 @@ export const SocketProvider = ({ children }) => {
 
   // const [loginCheck, setLoginCheck] = useState(false);
   const [sendStatus, setSendStatus] = useState(true);
+  
+  const [wsReady, setWsReady] = useState(false);
 
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
@@ -34,9 +36,6 @@ export const SocketProvider = ({ children }) => {
 
       if (data.type == "Status") {
         setStatus(data);
-        if (data.code == "1000") {
-          setLoginCheck(true);
-        }
       }
 
       if (data.type === "LoginToken") {
@@ -116,13 +115,12 @@ export const SocketProvider = ({ children }) => {
       reconnectTimeoutRef.current = setTimeout(() => {
         console.log("🔁 Trying to reconnect...");
         connectWebSocket();
-      }, 1000);
+      }, 800);
     };
   };
 
   useEffect(() => {
     connectWebSocket();
-
     return () => {
       clearTimeout(reconnectTimeoutRef.current);
       if (socket) socket.close();
@@ -144,6 +142,7 @@ export const SocketProvider = ({ children }) => {
         bulkLength,
         // setLoginCheck,
         // loginCheck,
+        wsReady, setWsReady
       }}
     >
       {children}
