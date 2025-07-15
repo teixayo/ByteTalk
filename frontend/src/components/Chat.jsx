@@ -102,21 +102,20 @@ const Chat = () => {
       console.log(bulkMessages);
       console.log(localMessages);
 
-      listRef.current.scrollToItem(bulkLength , "start");
+      listRef.current.scrollToItem(bulkLength, "start");
       if (firstRender) {
         setTimeout(() => {
           listRef.current.scrollToItem(bulkMessages.length, "end");
-          
         }, 100);
         setTimeout(() => {
           listRef.current.scrollToItem(bulkMessages.length, "end");
-          
+
           firstRender = false;
         }, 130);
 
-      setTimeout(() => {
-        setInitialScrollDone(true);
-      }, 200);
+        setTimeout(() => {
+          setInitialScrollDone(true);
+        }, 200);
       }
     }
     // if (loginCheck) {
@@ -150,19 +149,19 @@ const Chat = () => {
           },
         ];
 
+        if (isAtBottom) {
+          setTimeout(() => {
+            if (listRef.current) {
+              listRef.current.scrollToItem(newMessages.length + 1, "end");
+            }
+          }, 50);
+          setTimeout(() => {
+            if (listRef.current) {
+              listRef.current.scrollToItem(newMessages.length + 1, "end");
+            }
+          }, 90);
+        }
         // اسکرول پس از به‌روزرسانی state
-        setTimeout(() => {
-          if (listRef.current) {
-            console.log("madar jende");
-            listRef.current.scrollToItem(newMessages.length + 1, "end");
-          }
-        }, 50);
-        setTimeout(() => {
-          if (listRef.current) {
-            console.log("madar jende");
-            listRef.current.scrollToItem(newMessages.length + 1, "end");
-          }
-        }, 90);
 
         return newMessages;
       });
@@ -198,12 +197,16 @@ const Chat = () => {
     setMessages((prev) => {
       const newMessages = [...prev, msg];
 
+      if (listRef.current) {
       setTimeout(() => {
-        if (listRef.current) {
-          console.log("از من چه انتظاری داری؟");
-          listRef.current.scrollToItem(newMessages.length - 1, "end");
-        }
-      }, 50);
+          console.log("از من چه انتظاری داری؟", newMessages.length);
+          listRef.current.scrollToItem(newMessages.length, "end");
+        }, 50);
+        setTimeout(() => {
+          console.log("از من چه انتظاری داری؟", newMessages.length);
+          listRef.current.scrollToItem(newMessages.length, "end");
+        }, 90);
+      }
 
       return newMessages;
     });
@@ -257,7 +260,7 @@ const Chat = () => {
         <div
           ref={rowRef}
           className={`flex p-2 ${isSameUserAsPrevious ? "pt-1" : ""}`}
-          style={{ minHeight: showAvatar ? "80px" : "60px" }}
+          style={{ minHeight: showAvatar ? "75px" : "50px" }}
         >
           {/* آواتار (فقط برای اولین پیام) */}
           {showAvatar ? (
@@ -268,7 +271,7 @@ const Chat = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={0.75}
                 stroke="currentColor"
-                className="size-11" // کاهش سایز آواتار
+                className="size-12" // کاهش سایز آواتار
               >
                 <path
                   strokeLinecap="round"
@@ -278,7 +281,7 @@ const Chat = () => {
               </svg>
             </div>
           ) : (
-            <div className="flex-shrink-0 w-10 mr-2"></div> // فضای خالی همتراز با آواتار
+            <div className="flex-shrink-0 w-12 mr-2"></div> // فضای خالی همتراز با آواتار
           )}
 
           <div className="flex-1 min-w-0">
@@ -310,6 +313,22 @@ const Chat = () => {
     );
   };
 
+  const handleScroll = ({ scrollOffset, scrollUpdateWasRequested }) => {
+    setTimeout(() => {
+      if (scrollUpdateWasRequested) return;
+
+      const list = listRef.current;
+      const totalHeight = messages.reduce(
+        (sum, _, i) => sum + getRowHeight(i),
+        0
+      );
+      const distanceFromBottom =
+        totalHeight - (scrollOffset + list.props.height);
+
+      setIsAtBottom(distanceFromBottom < 50);
+      console.log(isAtBottom);
+    }, 100);
+  };
   return (
     <div className="h-screen flex flex-col text-gray-300">
       <div className="flex-1 ">
@@ -317,6 +336,7 @@ const Chat = () => {
           ref={listRef}
           height={listHeight}
           itemCount={messages.length}
+          onScroll={handleScroll}
           itemSize={getRowHeight} // استفاده از تابع اندازه‌گیری پویا
           width={"100%"}
           estimatedItemSize={120} // ارتفاع تخمینی برای محاسبه اولیه

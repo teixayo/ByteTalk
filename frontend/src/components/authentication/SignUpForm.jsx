@@ -66,8 +66,8 @@ const SignUpForm = () => {
     fildname: Yup.string()
       .min(4, "Username must be at least 4 characters")
       .matches(
-        /^[a-zA-Z0-9]+$/,
-        "Username must only contain letters and numbers"
+         /^[a-zA-Z][a-zA-Z0-9]*$/,
+        "Username must start with a letter and contain only English letters and numbers."
       )
       .max(19, "Username must be a maximum of 19 characters")
       .required("Username is required"),
@@ -88,10 +88,10 @@ const SignUpForm = () => {
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        <Form className="bg-neutral-900 rounded-2xl w-11/12 sm:10/12 md:w-7/12 xl:w-4/12 h-70 flex justify-center items-center mt-10 pb-2">
+        <Form className="bg-neutral-900 rounded-2xl w-11/12 sm:10/12 md:w-7/12 xl:w-4/12 md:h-70 flex justify-center items-center mt-10 pb-2">
           <div className="w-full">
-            <div className="flex justify-center mt-4 ">
-              <div className="w-10/12">
+            <div className="flex justify-center mt-4 pt-2">
+              <div className="w-10/12 my-2">
                 <Field
                   name="fildname"
                   type="text"
@@ -117,7 +117,7 @@ const SignUpForm = () => {
               </div>
             </div>
 
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-2 pb-2">
               <button
                 type="submit"
                 className="bg-blue-600 w-10/12 h-11 rounded-md text-white"
@@ -125,7 +125,7 @@ const SignUpForm = () => {
                 Sing Up
               </button>
             </div>
-            <p className="flex justify-center mt-1">
+            <p className="flex justify-center mt-1 pb-6">
               Already have an account?
               <Link to="/login" className="text-blue-600 underline ml-1">
                 Login
