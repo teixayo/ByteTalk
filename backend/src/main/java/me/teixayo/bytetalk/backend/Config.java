@@ -1,11 +1,17 @@
 package me.teixayo.bytetalk.backend;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.networking.TransportType;
+import me.teixayo.bytetalk.backend.security.RandomGenerator;
 import me.teixayo.bytetalk.backend.security.RateLimiter;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
 import java.util.Map;
 
 @Slf4j
@@ -52,6 +58,9 @@ public class Config {
     private int maxSendMessageSize;
     private RateLimiter bulkMessageLimiter;
 
+    private byte[] jwtSecret = null;
+
+    @SneakyThrows
     public Config(Map<String, Object> data) {
         this.data = data;
         redisToggle = (boolean) get("database.redis.toggle");
@@ -97,15 +106,6 @@ public class Config {
                 throw new IllegalArgumentException("ssl keys doesn't exists");
             }
         }
-
-        /*
-        rate-limiter:
-  send-message:
-    max-size: 2000 #character
-    time: 5
-    tokens: 10
-         */
-
         sendMessageLimiter = new RateLimiter(
                 (int) get("rate-limiter.send-message.tokens"),
                 (int) get("rate-limiter.send-message.time")
@@ -115,6 +115,17 @@ public class Config {
                 (int) get("rate-limiter.bulk-message.tokens"),
                 (int) get("rate-limiter.bulk-message.time")
         );
+
+        File jwtSecretFile = new File((String) get("jwt-secret.file"));
+        if(!jwtSecretFile.exists()) {
+            log.warn("JWT secret not found, generating a new one...");
+            jwtSecret = generateJWTSecretFile(jwtSecretFile);
+        } else {
+            String encryptedSecretKey = Files.readString(Path.of(jwtSecretFile.getPath()));
+            jwtSecret = Base64.getDecoder().decode(encryptedSecretKey);
+        }
+
+
         log.info("Config Loaded");
     }
 
@@ -133,6 +144,20 @@ public class Config {
 
         return current;
     }
+
+
+    @SneakyThrows
+    private byte[] generateJWTSecretFile(File file) {
+        byte[] secretBytes = RandomGenerator.generateSecureBytes(512);
+        String base64Key = Base64.getEncoder().encodeToString(secretBytes);
+        file.createNewFile();
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(base64Key.getBytes());
+        }
+        log.info("JWT secret key has been saved to: {}", file.getAbsolutePath());
+        return secretBytes;
+    }
+
 
 
 }

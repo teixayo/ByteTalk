@@ -1,5 +1,6 @@
 package me.teixayo.bytetalk.backend.message;
 
+import me.teixayo.bytetalk.backend.service.message.Message;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

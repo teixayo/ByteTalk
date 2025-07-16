@@ -1,7 +1,6 @@
 package me.teixayo.bytetalk.backend.service.message;
 
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
-import me.teixayo.bytetalk.backend.message.Message;
 
 import java.util.Date;
 import java.util.List;

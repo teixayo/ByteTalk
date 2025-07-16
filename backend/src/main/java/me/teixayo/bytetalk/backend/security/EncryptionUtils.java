@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.Getter;
+import me.teixayo.bytetalk.backend.Server;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -16,12 +17,14 @@ public class EncryptionUtils {
     @Getter
     private static final HashMap<String, String> tokens = new HashMap<>();
     @Getter
-    private static final Algorithm algorithm;
-    private static final JWTVerifier verifier;
+    private static Algorithm algorithm;
+    private static JWTVerifier verifier;
 
     static {
-        algorithm = Algorithm.HMAC256(RandomGenerator.generateSecureBytes(32));
-        verifier = JWT.require(algorithm).build();
+        if(Server.getInstance()!=null) {
+            algorithm = Algorithm.HMAC512(Server.getInstance().getConfig().getJwtSecret());
+            verifier = JWT.require(algorithm).build();
+        }
     }
 
     public static boolean isValidName(String name) {

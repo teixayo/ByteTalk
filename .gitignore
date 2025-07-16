@@ -79,6 +79,7 @@ hs_err_pid*
 
 # Gradle
 /bin
+/backend/bin
 
 # Other
 /frontend/node_modules/

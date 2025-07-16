@@ -1,18 +1,19 @@
 package me.teixayo.bytetalk.backend.service.cache;
 
-import me.teixayo.bytetalk.backend.message.Message;
+import me.teixayo.bytetalk.backend.service.message.Message;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class MemoryCacheService implements CacheService {
 
     private final int maxSize;
-    private final ConcurrentLinkedDeque<Message> messageCache;
+    private final HashMap<Long,ConcurrentLinkedDeque<Message>> messageCache;
 
     public MemoryCacheService(int maxSize) {
-        messageCache = new ConcurrentLinkedDeque<>();
+        messageCache = new HashMap<>();
         this.maxSize = maxSize;
     }
 
@@ -21,22 +22,28 @@ public class MemoryCacheService implements CacheService {
     }
 
     @Override
-    public Collection<Message> loadLastestMessages() {
-        return messageCache;
+    public Collection<Message> loadLastestMessages(long channelID) {
+        return messageCache.get(channelID);
     }
 
+
     @Override
-    public void addMessageToCache(Message message) {
-        while (messageCache.size() >= maxSize) {
-            messageCache.removeFirst();
+    public void addMessageToCache(long channelID, Message message) {
+        ConcurrentLinkedDeque<Message> currentCache = messageCache.get(channelID);
+        if(currentCache == null) {
+            currentCache = new ConcurrentLinkedDeque<>();
+            messageCache.put(channelID,currentCache);
         }
-        messageCache.addLast(message);
+        while (currentCache.size() >= maxSize) {
+            currentCache.removeFirst();
+        }
+        currentCache.addLast(message);
     }
 
     @Override
-    public void addMessagesToCache(List<Message> messageList) {
+    public void addMessagesToCache(long channelID, List<Message> messageList) {
         for (Message message : messageList) {
-            addMessageToCache(message);
+            addMessageToCache(channelID,message);
         }
     }
 }

@@ -7,10 +7,7 @@ public enum ServerPacketType {
     BulkMessages,
     Messaging,
     SendMessage,
-    LoginToken,
-
-    ;
-
+    LoginToken;
 
     public ServerPacket createPacket(Object... fields) {
         JSONObject jsonObject = new JSONObject();

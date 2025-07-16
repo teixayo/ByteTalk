@@ -3,7 +3,7 @@ package me.teixayo.bytetalk.backend.user;
 import lombok.Getter;
 import lombok.Setter;
 import me.teixayo.bytetalk.backend.Server;
-import me.teixayo.bytetalk.backend.message.Message;
+import me.teixayo.bytetalk.backend.service.message.Message;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
 import org.json.JSONArray;

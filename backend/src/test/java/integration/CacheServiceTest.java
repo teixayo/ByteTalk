@@ -2,7 +2,7 @@ package integration;
 
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
-import me.teixayo.bytetalk.backend.message.Message;
+import me.teixayo.bytetalk.backend.service.message.Message;
 import me.teixayo.bytetalk.backend.service.cache.CacheService;
 import me.teixayo.bytetalk.backend.service.cache.MemoryCacheService;
 import me.teixayo.bytetalk.backend.service.cache.RedisCacheService;
@@ -54,7 +54,7 @@ public class CacheServiceTest {
             lastDate = message.getDate();
             service.addMessageToCache(message);
         }
-        Message[] lastestMessages = service.loadLastestMessages().toArray(new Message[0]);
+        Message[] lastestMessages = service.loadLastestMessages(1).toArray(new Message[0]);
         List<Message> last10 = messages.stream()
                 .skip(Math.max(0, messages.size() - 10))
                 .toList();
@@ -71,6 +71,7 @@ public class CacheServiceTest {
 
 
         if(service instanceof RedisCacheService redisCacheService) {
+
             assertEquals("HelloWorld29", redisCacheService.getMessageById(29).getContent());
         }
 

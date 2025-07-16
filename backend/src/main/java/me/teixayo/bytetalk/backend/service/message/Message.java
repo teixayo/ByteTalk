@@ -1,4 +1,4 @@
-package me.teixayo.bytetalk.backend.message;
+package me.teixayo.bytetalk.backend.service.message;
 
 import lombok.Getter;
 
