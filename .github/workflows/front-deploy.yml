@@ -31,8 +31,8 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
-          context: frontend
-          file: Dockerfile
+          context: .
+          file: frontend/Dockerfile
           push: true
           tags: teixayo/bytetalk:latest
 
