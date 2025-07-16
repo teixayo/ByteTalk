@@ -28,5 +28,4 @@ jobs:
 
       - name: Trigger production webhook
         run: |
-          curl -X POST "${{ secrets.PRODUCTION_WEBHOOK_URL }}" \
-            -H "Authorization: Bearer ${{ secrets.WEBHOOK_SECRET }}"
+          curl -X POST ${{ secrets.PRODUCTION_WEBHOOK_URL }} -H "Authorization: Bearer ${{ secrets.WEBHOOK_SECRET }}"
