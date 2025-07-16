@@ -28,7 +28,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: teixayo/ByteTalk:latest
+          tags: teixayo/bytetalk:latest
 
       - name: Trigger production server to pull new image
         run: |
