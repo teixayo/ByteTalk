@@ -21,7 +21,6 @@ public class MemoryChannelService implements ChannelService {
     public void createChannel(Channel channel) {
         channels.put(channel.getId(), channel);
     }
-
     @Override
     public Channel getChannel(long channelId) {
         return channels.get(channelId);
