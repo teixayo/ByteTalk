@@ -22,7 +22,7 @@ export const SocketProvider = ({ children }) => {
   const [wsReady, setWsReady] = useState(false);
 
   const connectWebSocket = () => {
-    const ws = new WebSocket("ws://localhost:25565");
+    const ws = new WebSocket("ws://87.107.12.176:25565");
 
     ws.onopen = () => {
       console.log("✅ WebSocket connected");
