@@ -8,6 +8,7 @@ import { VariableSizeList as List } from "react-window";
 let flag = true;
 let firstRender = true;
 const convertMessage = (text) => {
+
   // تشخیص پیام‌های حاوی کد یا تگ‌های HTML
   const isCode =
     /[<>]/.test(text) ||
