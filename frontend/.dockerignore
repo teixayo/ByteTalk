@@ -1,0 +1,28 @@
+#Node
+node_modules
+npm-debug.log
+dist
+
+#Version control
+.git
+.gitignore
+
+#IDE and Editor files
+.vscode
+.idea
+*.swp
+*.swo
+
+#Envrioment files
+.env
+.env.local
+.env.*
+
+#Testing
+coverage
+*.test.js
+
+#OS Files
+.DS_STORE
+
+
