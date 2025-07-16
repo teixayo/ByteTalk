@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import me.teixayo.bytetalk.backend.database.redis.RedisChannel;
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
+import me.teixayo.bytetalk.backend.service.channel.Channel;
+import me.teixayo.bytetalk.backend.service.channel.ChannelService;
 import me.teixayo.bytetalk.backend.service.message.Message;
 import me.teixayo.bytetalk.backend.networking.NettyHandler;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
@@ -41,6 +43,7 @@ public final class Server implements LoopApp {
     private MessageService messageService;
     private SearchService searchService;
     private CacheService cacheService;
+    private ChannelService channelService;
     private NettyHandler nettyHandler;
     private Config config;
 
@@ -96,24 +99,41 @@ public final class Server implements LoopApp {
         cacheService = CacheService.findBestService();
         log.info("Using {} as CacheService", cacheService.getClass().getSimpleName());
 
+        channelService = ChannelService.findBestService();
+        log.info("Using {} as ChannelService", channelService.getClass().getSimpleName());
+
         if(RedisDBConnection.isConnected()) {
             RedisDBConnection.getInstance().registerConsumer(RedisChannel.SEND_MESSAGE, data -> {
                 log.info("Received Redis Message");
-                String username = data.split(" ")[0];
-                long messageID = Long.parseLong(data.split(" ")[1]);
+                String[] dataSplit = data.split(" ");
+
+                String username = dataSplit[0];
+                long messageID = Long.parseLong(dataSplit[1]);
+                long channelID = Long.parseLong(dataSplit[2]);
                 RedisCacheService redisCacheService = (RedisCacheService) cacheService;
-                Message message = redisCacheService.getMessageById(messageID);
+                Message message = redisCacheService.getMessageById(1,messageID);
 
                 ServerPacket sendMessagePacket = ServerPacketType.SendMessage.createPacket(
+                        "channel", username,
                         "id", message.getId(),
                         "username", username,
                         "content", message.getContent(),
                         "date", message.getDate().toInstant().toEpochMilli()
                 );
 
-                for (User user : UserManager.getInstance().getUsers().values()) {
-                    if (user.getName().equals(username)) continue;
-                    user.sendPacket(sendMessagePacket);
+                Channel channel = channelService.getChannel(channelID);
+                if(channel.isGlobal()) {
+                    for (User otherUser : UserManager.getInstance().getUsers().values()) {
+                        if (otherUser.getName().equals(username)) continue;
+                        otherUser.sendPacket(sendMessagePacket);
+                    }
+                } else {
+                    for (long userId : channel.getMembers()) {
+                        User otherUser = UserManager.getInstance().getUsers().get(userId);
+                        if (otherUser == null) continue;
+                        if (otherUser.getName().equals(username)) continue;
+                        otherUser.sendPacket(sendMessagePacket);
+                    }
                 }
             });
         }

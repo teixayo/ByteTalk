@@ -9,6 +9,7 @@ import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +29,10 @@ public class MongoChannelService implements ChannelService {
                 Indexes.compoundIndex(Indexes.ascending("channelId"), Indexes.ascending("date")),
                 new IndexOptions().background(true)
         );
+
+        if(getChannel(1)==null) {
+            createChannel(new Channel(1,"global",Date.from(Instant.now()),List.of(),true));
+        }
     }
 
     @Override

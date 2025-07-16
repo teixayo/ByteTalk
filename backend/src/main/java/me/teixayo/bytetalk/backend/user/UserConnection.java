@@ -11,13 +11,14 @@ import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.Server;
 import me.teixayo.bytetalk.backend.database.redis.RedisChannel;
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
-import me.teixayo.bytetalk.backend.service.message.Message;
 import me.teixayo.bytetalk.backend.networking.ChannelInitializer;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
 import me.teixayo.bytetalk.backend.security.RandomGenerator;
 import me.teixayo.bytetalk.backend.security.RateLimiter;
+import me.teixayo.bytetalk.backend.service.channel.Channel;
+import me.teixayo.bytetalk.backend.service.message.Message;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
@@ -97,45 +98,67 @@ public class UserConnection {
         log.info(packet.getData().toString());
         switch (packet.getPacketType()) {
             case SendMessage -> {
-                if(!sendMessageRateLimiter.allowRequest()) return;
+                if (!sendMessageRateLimiter.allowRequest()) return;
                 String content = packet.getData().getString("content");
-                if(content == null || content.isBlank() || content.length() > Server.getInstance().getConfig().getMaxSendMessageSize()) return;
+                if (content == null || content.isBlank() || content.length() > Server.getInstance().getConfig().getMaxSendMessageSize())
+                    return;
                 //TODO Code Status for these things
+                String channelString = packet.getData().getString("channel");
+                Channel channel;
+                if (!channelString.equals("global")) {
+                    User targetUser = Server.getInstance().getUserService().getUserByUserName(channelString);
+                    if(targetUser==null) return;
+                    channel = new Channel(RandomGenerator.generateId(),targetUser.getId() + "." + user.getId(),Date.from(Instant.now()),
+                            List.of(targetUser.getId(),user.getId()),false);
+                    Server.getInstance().getChannelService().createChannel(channel);
+                } else {
+                    channel = Server.getInstance().getChannelService().getChannel(1);
+                }
                 Message message = new Message(RandomGenerator.generateId(), user.getId(), content, Date.from(Instant.now()));
                 Server.getInstance().getMessageService().saveMessage(message);
-                Server.getInstance().getCacheService().addMessageToCache(message);
-                log.info("A?");
-                ServerPacket packet1 = ServerPacketType.SendMessage.createPacket(
+                Server.getInstance().getCacheService().addMessageToCache(channel.getId(),message);
+                ServerPacket sendMessagePacket = ServerPacketType.SendMessage.createPacket(
+                        "channel", user.getName(),
                         "id", message.getId(),
                         "username", this.user.getName(),
                         "content", message.getContent(),
                         "date", message.getDate().toInstant().toEpochMilli()
                 );
 
-                for (User otherUser : UserManager.getInstance().getUsers().values()) {
-                    if (otherUser.equals(this.user)) continue;
-                    otherUser.sendPacket(packet1);
+                if(channel.isGlobal()) {
+                    for (User otherUser : UserManager.getInstance().getUsers().values()) {
+                        if (otherUser.equals(user)) continue;
+                        otherUser.sendPacket(sendMessagePacket);
+                    }
+                } else {
+                    for (long userId : channel.getMembers()) {
+                        User otherUser = UserManager.getInstance().getUsers().get(userId);
+                        if (otherUser == null) continue;
+                        if (otherUser.equals(user)) continue;
+                        otherUser.sendPacket(sendMessagePacket);
+                    }
                 }
                 if(RedisDBConnection.isConnected()) {
                     RedisDBConnection.getInstance().publish(RedisChannel.SEND_MESSAGE,
-                            this.getUser().getName() + " " + message.getId());
+                            this.getUser().getName() + " " + channel.getId() + " " + message.getId());
                 }
-                log.info(packet1.getData().toString());
+                log.info(sendMessagePacket.getData().toString());
 
             }
             case RequestBulkMessage -> {
                 long time = packet.getData().getLong("date");
+                String channelString = packet.getData().getString("channel");
                 Date date = Date.from(Instant.ofEpochMilli(time));
-                sendBulkMessage(date);
+                sendBulkMessage(channelString,date);
             }
         }
     }
-    private void sendBulkMessage(Date date) {
+    private void sendBulkMessage(String channel, Date date) {
         if(!bulkMessageRateLimiter.allowRequest()) {
-            CompletableFuture.runAsync(() -> sendBulkMessage(date),CompletableFuture.delayedExecutor(bulkMessageRateLimiter.getRefillIntervalMillis(), TimeUnit.MILLISECONDS));
+            CompletableFuture.runAsync(() -> sendBulkMessage(channel,date),CompletableFuture.delayedExecutor(bulkMessageRateLimiter.getRefillIntervalMillis(), TimeUnit.MILLISECONDS));
         } else {
             List<Message> loadedMessages = Server.getInstance().getMessageService().loadMessagesBeforeDate(date, 40);
-            user.sendMessages(loadedMessages);
+            user.sendMessages(channel,loadedMessages);
         }
     }
 }

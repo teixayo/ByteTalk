@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class UserManager {
     private static UserManager instance;
 
-    private final ConcurrentHashMap<String, User> users;
+    private final ConcurrentHashMap<Long, User> users;
 
     public UserManager() {
         users = new ConcurrentHashMap<>();
@@ -22,10 +22,10 @@ public class UserManager {
     }
 
     public void addUser(User user) {
-        users.put(user.getName(), user);
+        users.put(user.getId(), user);
     }
 
     public void removeUser(User user) {
-        users.remove(user.getName());
+        users.remove(user.getId());
     }
 }

@@ -46,3 +46,6 @@ rate-limiter:
   bulk-message:
     time: 1000
     tokens: 5
+
+jwt-secret:
+  file: "secret.txt"

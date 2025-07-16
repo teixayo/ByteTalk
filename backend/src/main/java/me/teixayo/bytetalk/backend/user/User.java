@@ -33,7 +33,7 @@ public class User {
         userConnection.sendPacket(serverPacket);
     }
 
-    public void sendMessages(Collection<Message> messages) {
+    public void sendMessages(String channel,Collection<Message> messages) {
         JSONArray bulkJson = new JSONArray();
 
         HashSet<Long> userIds = new HashSet<>();
@@ -51,6 +51,7 @@ public class User {
             bulkJson.put(jsonObject);
         }
         JSONObject jsonObject = new JSONObject();
+        jsonObject.put("channel", channel);
         jsonObject.put("messages", bulkJson);
         ServerPacket bulkMessagePacket = ServerPacketType.BulkMessages.createPacket(jsonObject);
         sendPacket(bulkMessagePacket);

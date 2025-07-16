@@ -52,7 +52,7 @@ public class CacheServiceTest {
             Message message = new Message(i, i * 10, "HelloWorld" + i, Date.from(Instant.now()));
             messages.add(message);
             lastDate = message.getDate();
-            service.addMessageToCache(message);
+            service.addMessageToCache(1,message);
         }
         Message[] lastestMessages = service.loadLastestMessages(1).toArray(new Message[0]);
         List<Message> last10 = messages.stream()
@@ -71,8 +71,7 @@ public class CacheServiceTest {
 
 
         if(service instanceof RedisCacheService redisCacheService) {
-
-            assertEquals("HelloWorld29", redisCacheService.getMessageById(29).getContent());
+            assertEquals("HelloWorld29", redisCacheService.getMessageById(1,29).getContent());
         }
 
     }
