@@ -32,4 +32,4 @@ jobs:
 
       - name: Trigger production server to pull new image
         run: |
-          curl -X POST ${{ secrets.PRODUCTION_WEBHOOK_URL }}
+          curl -X POST ${{ secrets.PRODUCTION_WEBHOOK_URL }} -H "Authorization: Bearer ${{ secrets.DOCKER_PASSWORD }}"
