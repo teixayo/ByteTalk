@@ -1,8 +1,10 @@
+# .github/workflows/frontend-deploy.yml
 name: Deploy Frontend
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
     paths:
       - 'frontend/**'
 
@@ -11,31 +13,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Docker Build
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Dump workspace to debug
+      - name: Build & push image from frontend
         run: |
-          echo "Current directory: $(pwd)"
-          echo "Contents of repo:"
-          ls -R .
-      - name: Build and push image
-        uses: docker/build-push-action@v5
-        with:
-          context: frontend
-          file: Dockerfile
-          push: true
-          tags: teixayo/bytetalk:latest
+          cd frontend
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker build -t teixayo/bytetalk:latest .
+          docker push teixayo/bytetalk:latest
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Trigger production server to pull new image
+      - name: Trigger production webhook
         run: |
-          curl -X POST ${{ secrets.PRODUCTION_WEBHOOK_URL }} -H "Authorization: Bearer ${{ secrets.DOCKER_PASSWORD }}"
+          curl -X POST "${{ secrets.PRODUCTION_WEBHOOK_URL }}" \
+            -H "Authorization: Bearer ${{ secrets.WEBHOOK_SECRET }}"
