@@ -1,5 +1,5 @@
 plugins {
-    java
+    application
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -9,6 +9,10 @@ repositories {
         url = uri("https://jitpack.io")
     }
 }
+application {
+    mainClass.set("me.teixayo.bytetalk.Main")
+}
+
 
 
 tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
