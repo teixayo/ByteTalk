@@ -23,10 +23,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: List workspace
+      - name: Dump workspace to debug
         run: |
-        pwd
-        ls -R .
+          echo "Current directory: $(pwd)"
+          echo "Contents of repo:"
+          ls -R .
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
