@@ -46,7 +46,7 @@ const AuthGate = ({ children }) => {
         const data = JSON.parse(event.data);
         console.log(data);
         if (data.type == "Status" && data.code == "1002") {
-          navigate("/chat"); // توکن معتبر بود
+          navigate("/chat/global"); // توکن معتبر بود
           setChecked(true);
         } 
         if (data.type == "Status" && data.code == "1003") {

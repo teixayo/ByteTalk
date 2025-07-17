@@ -4,7 +4,7 @@ import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
 import TextareaAutosize from "react-textarea-autosize";
 import { VariableSizeList as List } from "react-window";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 let flag = true;
 let firstRender = true;
@@ -69,16 +69,18 @@ const Chat = () => {
   const [initialScrollDone, setInitialScrollDone] = useState(false);
 
   const inputRef = useRef(null);
-  const [inputHeight, setInputHeight] = useState(70); // ارتفاع پیش‌فرض
+  const [inputHeight, setInputHeight] = useState(70);
+  const [titleHeight, setTitleHight] = useState(60); // ارتفاع پیش‌فرض
   const [listHeight, setListHeight] = useState(
-    window.innerHeight - inputHeight
+    window.innerHeight - titleHeight - titleHeight
   );
-
-  const Navigate = useNavigate();
+  console.log(window.innerHeight, listHeight);
   const rowHeights = useRef({});
   const listRef = useRef();
 
   // const rowRefs = useRef([]);
+  const navigate = useNavigate();
+  const { mainchat } = useParams();
 
   const [selectedUser, setSelectedUser] = useState(null);
   const popupRef = useRef(null);
@@ -99,7 +101,8 @@ const Chat = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      setListHeight(window.innerHeight - inputHeight);
+      setListHeight(window.innerHeight - inputHeight - titleHeight);
+      console.log(window.innerHeight - inputHeight - titleHeight);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -109,7 +112,7 @@ const Chat = () => {
     if (inputRef.current) {
       const newHeight = inputRef.current.offsetHeight;
       setInputHeight(newHeight);
-      setListHeight(window.innerHeight - newHeight);
+      setListHeight(window.innerHeight - newHeight - titleHeight);
     }
   };
 
@@ -279,7 +282,7 @@ const Chat = () => {
 
     const handleUserClick = (e) => {
       e.stopPropagation();
-      console.log("mealkfdasfa")
+      console.log("mealkfdasfa");
       setSelectedUser({
         username: msg.username,
         // میتوانید اطلاعات بیشتر کاربر را اینجا اضافه کنید
@@ -379,7 +382,7 @@ const Chat = () => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="size-12"
+                  className="size-12 text-white"
                 >
                   <path
                     strokeLinecap="round"
@@ -392,12 +395,14 @@ const Chat = () => {
                 <h3 className="text-xl font-bold text-white">
                   {selectedUser.username}
                 </h3>
-                <p className="text-gray-400">عضویت از ۱۴۰۲</p>
               </div>
             </div>
 
             <div className="mt-4">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg w-full">
+              <button
+                onClick={() => navigate(`/chat/${selectedUser.username}`)}
+                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg w-full"
+              >
                 ارسال پیام خصوصی
               </button>
             </div>
@@ -405,6 +410,26 @@ const Chat = () => {
         </div>
       ) : (
         <div className="h-screen flex flex-col text-gray-300">
+          <div className="h-full flex items-center bg-neutral-700">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.25}
+              stroke="currentColor"
+              className="size-8 mx-4.25"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
+              />
+            </svg>
+            <p>
+              {/* {mainchat} */}
+            global
+            </p>
+          </div>
           <div className="flex-1 ">
             <List
               ref={listRef}
