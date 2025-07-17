@@ -85,14 +85,15 @@ const PrivetChat = () => {
 
   // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
   useEffect(() => {
-    if(socket.readyState == WebSocket.OPEN )
-    socket.send(
-      JSON.stringify({
-        type: "RequestBulkMessage",
-        date: Date.now(),
-        channel: userID,
-      })
-    );
+    if (socket.readyState == WebSocket.OPEN) {
+      socket.send(
+        JSON.stringify({
+          type: "RequestBulkMessage",
+          date: -1,
+          channel: userID,
+        })
+      );
+    }
 
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
@@ -484,7 +485,7 @@ const PrivetChat = () => {
                     socket.send(
                       JSON.stringify({
                         type: "RequestBulkMessage",
-                        date: firstMessageTimecode - 1,
+                        date: -1,
                         channel: userID,
                       })
                     );

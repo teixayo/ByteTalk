@@ -18,6 +18,9 @@ export const SocketProvider = ({ children }) => {
   const [sendStatus, setSendStatus] = useState(true);
 
   const [wsReady, setWsReady] = useState(false);
+  useEffect(() => {
+    console.log("helllllllllllllll")
+  }, [])
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
     ws.onopen = () => {
@@ -25,12 +28,39 @@ export const SocketProvider = ({ children }) => {
       setSocket(ws);
     };
 
+
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
       console.log("📨 WS received:", data);
 
       if (data.type == "Status") {
+        if(data.code == '1002') {
+          // if (!initialLoaded) {
+          //   data.messages.map((msg) => {
+          //     const date = new Date(msg.date);
+
+          //     const shortTime = date.toLocaleTimeString("en-US", {
+          //       hour: "2-digit",
+          //       minute: "2-digit",
+          //       hour12: true,
+          //     });
+
+          //     if (msg.content != "") {
+          //       setBulkMessages((prev) => [
+          //         ...prev,
+          //         {
+          //           content: msg.content,
+          //           time: shortTime,
+          //           username: msg.username,
+          //           timecode: msg.date,
+          //         },
+          //       ]);
+          //     }
+            // };
+          console.log('ldkafj')
+          // }
+        }
         setStatus(data);
       }
 
@@ -93,7 +123,7 @@ export const SocketProvider = ({ children }) => {
               });
             console.log(newMessages);
             // حالا فقط یکبار state رو آپدیت کن:
-            setBulkMessages((prev) => [...newMessages.reverse(), ...prev]);
+            setBulkMessages((prev) => [...newMessages, ...prev]);
           }
         } else {
           if (true) {
@@ -120,7 +150,6 @@ export const SocketProvider = ({ children }) => {
                 ]);
               }
             });
-            console.log(initialLoaded);
             initialLoaded = true;
           }
         }

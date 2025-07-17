@@ -85,6 +85,16 @@ const Chat = () => {
 
   // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
   useEffect(() => {
+    if (socket.readyState == WebSocket.OPEN) {
+      console.log("im in bulkmessages useEffect");
+      socket.send(
+        JSON.stringify({
+          type: "RequestBulkMessage",
+          date: -1,
+          channel: "global",
+        })
+      );
+    }
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
         setSelectedUser(null);
@@ -100,7 +110,6 @@ const Chat = () => {
   useEffect(() => {
     const handleResize = () => {
       setListHeight(window.innerHeight - inputHeight - titleHeight);
-      console.log(window.innerHeight - inputHeight - titleHeight);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -117,7 +126,6 @@ const Chat = () => {
   useEffect(() => {
     console.log("bulk", bulkMessages.length);
     if (bulkMessages?.length > 0 && listRef.current) {
-      console.log("run");
       setMessages([...bulkMessages, ...localMessages]);
 
       console.log(bulkMessages);
@@ -130,8 +138,6 @@ const Chat = () => {
         }, 100);
         setTimeout(() => {
           listRef.current.scrollToItem(bulkMessages.length, "end");
-          console.log("log bede bebinam");
-
           firstRender = false;
         }, 130);
 
@@ -191,7 +197,7 @@ const Chat = () => {
 
   useEffect(() => {
     if (isAtBottom && listRef.current && flag && bulkMessages.length > 0) {
-      console.log(bulkMessages.length - 1);
+      // console.log(bulkMessages.length - 1);
       setTimeout(() => {
         // listRef.current.scrollToItem(bulkMessages.length - 1, "start");
         flag = false;
@@ -217,14 +223,12 @@ const Chat = () => {
 
     setMessages((prev) => {
       const newMessages = [...prev, msg];
-
+      console.log(newMessages);
       if (listRef.current) {
         setTimeout(() => {
-          console.log("از من چه انتظاری داری؟", newMessages.length);
           listRef.current.scrollToItem(newMessages.length, "end");
         }, 60);
         setTimeout(() => {
-          console.log("از من چه انتظاری داری؟", newMessages.length);
           listRef.current.scrollToItem(newMessages.length, "end");
         }, 100);
       }
@@ -279,7 +283,6 @@ const Chat = () => {
 
     const handleUserClick = (e) => {
       e.stopPropagation();
-      console.log("mealkfdasfa");
       setSelectedUser({
         username: msg.username,
         // میتوانید اطلاعات بیشتر کاربر را اینجا اضافه کنید
@@ -452,9 +455,15 @@ const Chat = () => {
                     setSendStatus(true);
                   }, 1000);
 
-                  const firstMessageTimecode = messages[1]
-                    ? messages[0]?.timecode
-                    : Date.now();
+                  const firstMessageTimecode =
+                    messages[0]?.timecode || Date.now();
+                    console.log(messages[0])
+                    const rqstBulkMessagePayload = {
+                        type: "RequestBulkMessage",
+                        date: firstMessageTimecode - 1,
+                        channel: "global",
+                      }
+                    console.log(rqstBulkMessagePayload)
                   if (firstMessageTimecode) {
                     socket.send(
                       JSON.stringify({
