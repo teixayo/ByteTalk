@@ -56,6 +56,7 @@ public class UserConnection {
 
     public void sendPacket(ServerPacket serverPacket) {
         serverPackets.add(serverPacket);
+        log.info(serverPacket.getData().toString());
     }
 
     @SneakyThrows

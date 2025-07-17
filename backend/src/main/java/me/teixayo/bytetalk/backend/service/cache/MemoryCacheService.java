@@ -2,6 +2,7 @@ package me.teixayo.bytetalk.backend.service.cache;
 
 import me.teixayo.bytetalk.backend.service.message.Message;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,9 @@ public class MemoryCacheService implements CacheService {
 
     @Override
     public Collection<Message> loadLastestMessages(long channelID) {
-        return messageCache.get(channelID);
+        ConcurrentLinkedDeque<Message> messages = messageCache.get(channelID);
+        if(messages==null) return List.of();
+        return messages;
     }
 
 

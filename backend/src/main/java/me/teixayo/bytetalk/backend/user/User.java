@@ -2,6 +2,7 @@ package me.teixayo.bytetalk.backend.user;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.Server;
 import me.teixayo.bytetalk.backend.service.message.Message;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
@@ -13,6 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
+@Slf4j
 @Getter
 public class User {
     private final String name;
@@ -31,6 +33,7 @@ public class User {
 
     public void sendPacket(ServerPacket serverPacket) {
         userConnection.sendPacket(serverPacket);
+        log.info(serverPacket.toString());
     }
 
     public void sendMessages(String channel,Collection<Message> messages) {
