@@ -127,30 +127,31 @@ export const SocketProvider = ({ children }) => {
           }
         } else {
           if (true) {
-            console.log("set shode")
-            data.messages.map((msg) => {
-              const date = new Date(msg.date);
-              
-              const shortTime = date.toLocaleTimeString("en-US", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
+            console.log(data.messages.length);
+            setBulkLength(data.messages.length);
+            if (data.messages.length < 1) return;
+
+            const newMessages = data.messages
+              .filter((msg) => msg.content !== "")
+              .map((msg) => {
+                const date = new Date(msg.date);
+
+                const shortTime = date.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                });
+
+                return {
+                  content: msg.content,
+                  time: shortTime,
+                  username: msg.username,
+                  timecode: msg.date,
+                };
               });
-              
-              console.log(msg)
-              if (msg.content != "") {
-                setBulkMessages((prev) => [
-                  ...prev,
-                  {
-                    content: msg.content,
-                    time: shortTime,
-                    username: msg.username,
-                    timecode: msg.date,
-                  },
-                ]);
-              }
-            });
-            initialLoaded = true;
+            console.log(newMessages);
+            // حالا فقط یکبار state رو آپدیت کن:
+            setBulkMessages((prev) => [...newMessages, ...prev]);
           }
         }
       }
