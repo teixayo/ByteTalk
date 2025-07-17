@@ -2,6 +2,7 @@ package me.teixayo.bytetalk.backend.service.channel;
 
 import me.teixayo.bytetalk.backend.service.message.Message;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +16,10 @@ public class MemoryChannelService implements ChannelService {
     public MemoryChannelService() {
         channels = new HashMap<>();
         channelMessages = new HashMap<>();
+
+        if(getChannel(1)==null) {
+            createChannel(new Channel(1,"global",Date.from(Instant.now()),List.of(),true));
+        }
     }
 
     @Override
