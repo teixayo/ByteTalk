@@ -71,7 +71,7 @@ export const SocketProvider = ({ children }) => {
           console.log(data.messages.length);
           setBulkLength(data.messages.length);
           if (data.messages.length < 1) return;
-
+          
           const newMessages = data.messages
             .filter((msg) => msg.content !== "")
             .map((msg) => {

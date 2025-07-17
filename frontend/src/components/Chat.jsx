@@ -235,6 +235,7 @@ const Chat = () => {
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
         type: "SendMessage",
+        channel: "global",
         content: text,
       };
       socket.send(JSON.stringify(messagePayload));
