@@ -1,14 +1,11 @@
 package me.teixayo.bytetalk.backend.service.message;
 
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Sorts;
 import lombok.SneakyThrows;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -25,34 +22,6 @@ public class MongoMessageService implements MessageService {
                 .getInstance()
                 .getMessageCollection();
         this.loadingIdsPools = new ConcurrentHashMap<>();
-    }
-
-    @SneakyThrows
-    @Override
-    public List<Message> loadMessagesBeforeDate(Date date, int batchSize) {
-        return loadMessagesBeforeDateAsync(date,batchSize).get();
-    }
-
-    public CompletableFuture<List<Message>> loadMessagesBeforeDateAsync(Date date, int batchSize) {
-        Bson filter = Filters.lt("date", date);
-        Bson sort = Sorts.orderBy(Sorts.descending("date"), Sorts.descending("_id"));
-
-        FindIterable<Document> docs = messages
-                .find(filter)
-                .projection(Projections.include("_id"))
-                .sort(sort)
-                .limit(batchSize + 1);
-
-        CompletableFuture<List<Message>> future = new CompletableFuture<>();
-
-        List<Long> ids = new ArrayList<>();
-        for (Document doc : docs) {
-            ids.add(doc.getLong("_id"));
-        }
-        synchronized (loadingIdsPools) {
-            loadingIdsPools.put(future, ids);
-        }
-        return future;
     }
     public void finalizeAllMessages() {
         Map<CompletableFuture<List<Message>>, List<Long>> snapshot;
@@ -100,6 +69,17 @@ public class MongoMessageService implements MessageService {
                 .find(Filters.eq("_id", message_id))
                 .first();
         return document == null ? null : fromDocument(document);
+    }
+
+    @SneakyThrows
+    @Override
+    public List<Message> getMessage(List<Long> messages_id) {
+        CompletableFuture<List<Message>> future = new CompletableFuture<>();
+        synchronized (loadingIdsPools) {
+            loadingIdsPools.put(future, messages_id);
+        }
+
+        return future.get();
     }
 
     private Document toDocument(Message msg) {

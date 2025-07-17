@@ -14,6 +14,7 @@ public interface ChannelService {
 
     void createChannel(Channel channel);
     Channel getChannel(long channelId);
+    Channel getChannelByName(String name);
     void saveMessage(long channelId, long messageId, Date date);
 
     List<Long> loadMessagesBeforeDate(long channelId, Date date, int batchSize);

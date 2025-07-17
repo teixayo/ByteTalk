@@ -1,5 +1,6 @@
 package me.teixayo.bytetalk.backend.service.channel;
 
+import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.service.message.Message;
 
 import java.time.Instant;
@@ -8,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+@Slf4j
 public class MemoryChannelService implements ChannelService {
 
     private HashMap<Long,Channel> channels;
@@ -25,6 +27,7 @@ public class MemoryChannelService implements ChannelService {
     @Override
     public void createChannel(Channel channel) {
         channels.put(channel.getId(), channel);
+        log.info("Created channel | " + channel.getId());
     }
     @Override
     public Channel getChannel(long channelId) {
@@ -32,14 +35,24 @@ public class MemoryChannelService implements ChannelService {
     }
 
     @Override
+    public Channel getChannelByName(String name) {
+        for (Channel channel : channels.values()) {
+            if(channel.getName().equals(name)) return channel;
+        }
+        return null;
+    }
+
+    @Override
     public void saveMessage(long channelId, long messageId, Date date) {
         Channel channel = getChannel(channelId);
         if(channel==null) return;
-        List<Message> messages = channelMessages.get(channelId);
+        List<Message> messages = channelMessages.get(channel);
         if(messages==null) {
             messages = new ArrayList<>();
             channelMessages.put(channel,messages);
         }
+
+        log.info(messages.size() + " " + channelId);
         messages.add(new Message(messageId,-1,"",date));
     }
 
@@ -51,9 +64,10 @@ public class MemoryChannelService implements ChannelService {
         List<Message> messages = channelMessages.get(channel);
         if(messages==null) return List.of();
 
+        log.info(messages.size() + "S");
         List<Long> messagesBeforeDate = new ArrayList<>();
         for (Message message : messages) {
-            if (!message.getDate().before(date)) continue;
+            if (message.getDate().after(date)) continue;
             messagesBeforeDate.add(message.getId());
         }
         return messagesBeforeDate;

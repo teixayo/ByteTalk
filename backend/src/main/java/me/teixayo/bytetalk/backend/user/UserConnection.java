@@ -56,7 +56,6 @@ public class UserConnection {
 
     public void sendPacket(ServerPacket serverPacket) {
         serverPackets.add(serverPacket);
-        log.info(serverPacket.getData().toString());
     }
 
     @SneakyThrows
@@ -106,20 +105,29 @@ public class UserConnection {
                 //TODO Code Status for these things
                 String channelString = packet.getData().getString("channel");
                 Channel channel;
+                String targetName = "global";
                 if (!channelString.equals("global")) {
                     User targetUser = Server.getInstance().getUserService().getUserByUserName(channelString);
-                    if(targetUser==null) return;
-                    channel = new Channel(RandomGenerator.generateId(),targetUser.getId() + "." + user.getId(),Date.from(Instant.now()),
-                            List.of(targetUser.getId(),user.getId()),false);
-                    Server.getInstance().getChannelService().createChannel(channel);
+                    if(targetUser==null) {
+                        return;
+                    }
+                    targetName = user.getName();
+                    String channelName = getChannelName(targetUser.getId(), user.getId());
+
+                    channel = Server.getInstance().getChannelService().getChannelByName(channelName);
+                    if(channel==null) {
+                        channel = new Channel(RandomGenerator.generateId(), channelName, Date.from(Instant.now()), List.of(targetUser.getId(), user.getId()), false);
+                        Server.getInstance().getChannelService().createChannel(channel);
+                    }
                 } else {
                     channel = Server.getInstance().getChannelService().getChannel(1);
                 }
                 Message message = new Message(RandomGenerator.generateId(), user.getId(), content, Date.from(Instant.now()));
                 Server.getInstance().getMessageService().saveMessage(message);
                 Server.getInstance().getCacheService().addMessageToCache(channel.getId(),message);
+                Server.getInstance().getChannelService().saveMessage(channel.getId(),message.getId(),message.getDate());
                 ServerPacket sendMessagePacket = ServerPacketType.SendMessage.createPacket(
-                        "channel", user.getName(),
+                        "channel", targetName,
                         "id", message.getId(),
                         "username", this.user.getName(),
                         "content", message.getContent(),
@@ -143,23 +151,59 @@ public class UserConnection {
                     RedisDBConnection.getInstance().publish(RedisChannel.SEND_MESSAGE,
                             this.getUser().getName() + " " + channel.getId() + " " + message.getId());
                 }
-                log.info(sendMessagePacket.getData().toString());
+                log.info("{} Sent message packet", sendMessagePacket.getData().toString());
 
             }
             case RequestBulkMessage -> {
                 long time = packet.getData().getLong("date");
                 String channelString = packet.getData().getString("channel");
-                Date date = Date.from(Instant.ofEpochMilli(time));
+                Date date = time == -1 ? null : Date.from(Instant.ofEpochMilli(time));
                 sendBulkMessage(channelString,date);
             }
         }
     }
-    private void sendBulkMessage(String channel, Date date) {
+    private String getChannelName(long username1, long username2) {
+
+        if (username1 > username2) {
+            // swap
+            long temp = username1;
+            username1 = username2;
+            username2 = temp;
+        }
+
+        return username1 + " " + username2;
+    }
+
+    private void sendBulkMessage(String channelName, Date date) {
         if(!bulkMessageRateLimiter.allowRequest()) {
-            CompletableFuture.runAsync(() -> sendBulkMessage(channel,date),CompletableFuture.delayedExecutor(bulkMessageRateLimiter.getRefillIntervalMillis(), TimeUnit.MILLISECONDS));
+            CompletableFuture.runAsync(() -> sendBulkMessage(channelName,date),CompletableFuture.delayedExecutor(bulkMessageRateLimiter.getRefillIntervalMillis(), TimeUnit.MILLISECONDS));
         } else {
-            List<Message> loadedMessages = Server.getInstance().getMessageService().loadMessagesBeforeDate(date, 40);
-            user.sendMessages(channel,loadedMessages);
+
+            Channel channel = null;
+            if(channelName.equals("global")) {
+                channel = Server.getInstance().getChannelService().getChannelByName(channelName);
+            } else {
+                User targetUser = Server.getInstance().getUserService().getUserByUserName(channelName);
+                if (targetUser != null) {
+                    channel = Server.getInstance().getChannelService().getChannelByName(getChannelName(user.getId(), targetUser.getId()));
+                }
+            }
+
+            if(channel==null) {
+                user.sendMessages(channelName, List.of());
+                log.info("Channel is null");
+                return;
+            }
+            if(date==null) {
+                user.sendMessages(channelName, Server.getInstance().getCacheService().loadLastestMessages(channel.getId()));
+            } else {
+                log.info("{} Requested messages from {}", user.getName(), channelName);
+                List<Long> messageIds = Server.getInstance().getChannelService().loadMessagesBeforeDate(channel.getId(),Date.from(Instant.now()) , 40);
+
+                log.info("{} | {}", messageIds.size(), channel.getMembers());
+                List<Message> loadedMessages = Server.getInstance().getMessageService().getMessage(messageIds);
+                user.sendMessages(channelName, loadedMessages);
+            }
         }
     }
 }

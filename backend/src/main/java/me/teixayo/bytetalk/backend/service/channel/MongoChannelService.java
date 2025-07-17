@@ -48,6 +48,13 @@ public class MongoChannelService implements ChannelService {
     }
 
     @Override
+    public Channel getChannelByName(String name) {
+        Document document = channels.find(Filters.eq("name", name)).first();
+        if (document == null) return null;
+        return fromDocument(document);
+    }
+
+    @Override
     public void saveMessage(long channelId, long messageId, Date date) {
         Document message = new Document()
                 .append("channelId", channelId)

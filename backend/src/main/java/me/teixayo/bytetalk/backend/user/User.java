@@ -33,7 +33,7 @@ public class User {
 
     public void sendPacket(ServerPacket serverPacket) {
         userConnection.sendPacket(serverPacket);
-        log.info(serverPacket.toString());
+        log.info("{} Sent to {}", serverPacket.getData().toString(), name);
     }
 
     public void sendMessages(String channel,Collection<Message> messages) {

@@ -2,7 +2,6 @@ package me.teixayo.bytetalk.backend.service.message;
 
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 
-import java.util.Date;
 import java.util.List;
 
 public interface MessageService {
@@ -12,9 +11,10 @@ public interface MessageService {
         return new MemoryMessageService();
     }
 
-    List<Message> loadMessagesBeforeDate(Date date, int batchSize);
 
     void saveMessage(Message message);
 
     Message getMessage(long message_id);
+    List<Message> getMessage(List<Long> messages_id);
+
 }
