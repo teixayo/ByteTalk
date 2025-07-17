@@ -55,8 +55,6 @@ const Chat = () => {
     newMessage,
     sendStatus,
     setSendStatus,
-    messages,
-    setMessages,
     bulkLength,
     // setLoginCheck,
     // loginCheck,
@@ -67,6 +65,7 @@ const Chat = () => {
   const [localMessages, setLocalMessages] = useState([]);
   const debounceTimeout = useRef(null);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
+  const [messages, setMessages] = useState([]);
 
   const inputRef = useRef(null);
   const [inputHeight, setInputHeight] = useState(70);
@@ -74,13 +73,12 @@ const Chat = () => {
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
-  console.log(window.innerHeight, listHeight);
   const rowHeights = useRef({});
   const listRef = useRef();
 
   // const rowRefs = useRef([]);
   const navigate = useNavigate();
-  const { mainchat } = useParams();
+  // const { userID } = useParams();
 
   const [selectedUser, setSelectedUser] = useState(null);
   const popupRef = useRef(null);
@@ -153,9 +151,8 @@ const Chat = () => {
 
   useEffect(() => {
     if (newMessage.date) {
-      const timestamp = Date.now(newMessage.date);
-      const date = new Date(timestamp);
-
+      const timestamp = Date.now();
+      const date = new Date(newMessage.date);
       const shortTime = date.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
@@ -361,11 +358,11 @@ const Chat = () => {
       );
       const distanceFromBottom =
         totalHeight - (scrollOffset + list.props.height);
-
       setIsAtBottom(distanceFromBottom < 50);
       console.log(isAtBottom);
     }, 100);
   };
+
   return (
     <>
       {selectedUser ? (
@@ -400,7 +397,10 @@ const Chat = () => {
 
             <div className="mt-4">
               <button
-                onClick={() => navigate(`/chat/${selectedUser.username}`)}
+                onClick={() => {
+                  navigate(`/chat/${selectedUser.username}`);
+                  setSelectedUser(null);
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg w-full"
               >
                 ارسال پیام خصوصی
@@ -425,10 +425,8 @@ const Chat = () => {
                 d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
               />
             </svg>
-            <p>
-              {/* {mainchat} */}
-            global
-            </p>
+
+            <p>Global</p>
           </div>
           <div className="flex-1 ">
             <List
@@ -454,12 +452,15 @@ const Chat = () => {
                     setSendStatus(true);
                   }, 1000);
 
-                  const firstMessageTimecode = messages[0]?.timecode;
+                  const firstMessageTimecode = messages[1]
+                    ? messages[0]?.timecode
+                    : Date.now();
                   if (firstMessageTimecode) {
                     socket.send(
                       JSON.stringify({
                         type: "RequestBulkMessage",
                         date: firstMessageTimecode - 1,
+                        channel: "global",
                       })
                     );
                   }

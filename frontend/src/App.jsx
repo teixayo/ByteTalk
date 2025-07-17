@@ -12,7 +12,7 @@ const App = () => {
     <AuthGate>
       <Routes>
         <Route path="/" element={<SignUpForm />} />
-        <Route path="/chat/global" element={<Chat />} />
+        <Route path="/chat" element={<Chat />} />
         <Route path="/chat/:userID" element={<PrivetChat/>} />
         <Route path="/login" element={<LoginForm />} />
 

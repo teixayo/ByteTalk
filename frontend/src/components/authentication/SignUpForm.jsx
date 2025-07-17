@@ -38,7 +38,7 @@ const SignUpForm = () => {
         socket.send(JSON.stringify(loginPayload));
       }, 1000);
 
-      navigate("/chat/global");
+      navigate("/chat");
     }
   }, [status]);
 

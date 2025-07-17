@@ -14,11 +14,9 @@ export const SocketProvider = ({ children }) => {
   const [status, setStatus] = useState({});
   const [newMessage, setNewMessage] = useState({});
 
-  const [messages, setMessages] = useState([]);
-
   // const [loginCheck, setLoginCheck] = useState(false);
   const [sendStatus, setSendStatus] = useState(true);
-  
+
   const [wsReady, setWsReady] = useState(false);
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
@@ -43,38 +41,10 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type === "BulkMessages") {
-        if (!initialLoaded) {
-          data.messages.map((msg) => {
-            const date = new Date(msg.date);
-
-            const shortTime = date.toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-            });
-
-            if (msg.content != "") {
-              setBulkMessages((prev) => [
-                ...prev,
-                {
-                  content: msg.content,
-                  time: shortTime,
-                  username: msg.username,
-                  timecode: msg.date,
-                },
-              ]);
-            }
-          });
-          console.log(initialLoaded);
-          initialLoaded = true;
-        } else {
-          console.log(data.messages.length);
-          setBulkLength(data.messages.length);
-          if (data.messages.length < 1) return;
-          
-          const newMessages = data.messages
-            .filter((msg) => msg.content !== "")
-            .map((msg) => {
+        if (location.pathname == "/chat" && data.channel == "global") {
+          console.log("im here")
+          if (!initialLoaded) {
+            data.messages.map((msg) => {
               const date = new Date(msg.date);
 
               const shortTime = date.toLocaleTimeString("en-US", {
@@ -83,16 +53,74 @@ export const SocketProvider = ({ children }) => {
                 hour12: true,
               });
 
-              return {
-                content: msg.content,
-                time: shortTime,
-                username: msg.username,
-                timecode: msg.date,
-              };
+              if (msg.content != "") {
+                setBulkMessages((prev) => [
+                  ...prev,
+                  {
+                    content: msg.content,
+                    time: shortTime,
+                    username: msg.username,
+                    timecode: msg.date,
+                  },
+                ]);
+              }
             });
-          console.log(newMessages);
-          // حالا فقط یکبار state رو آپدیت کن:
-          setBulkMessages((prev) => [...newMessages.reverse(), ...prev]);
+            console.log(initialLoaded);
+            initialLoaded = true;
+          } else {
+            console.log(data.messages.length);
+            setBulkLength(data.messages.length);
+            if (data.messages.length < 1) return;
+
+            const newMessages = data.messages
+              .filter((msg) => msg.content !== "")
+              .map((msg) => {
+                const date = new Date(msg.date);
+
+                const shortTime = date.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                });
+
+                return {
+                  content: msg.content,
+                  time: shortTime,
+                  username: msg.username,
+                  timecode: msg.date,
+                };
+              });
+            console.log(newMessages);
+            // حالا فقط یکبار state رو آپدیت کن:
+            setBulkMessages((prev) => [...newMessages.reverse(), ...prev]);
+          }
+        }else {
+          if (!initialLoaded) {
+            data.messages.map((msg) => {
+              const date = new Date(msg.date);
+              
+              const shortTime = date.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              });
+              
+              console.log(msg)
+              if (msg.content != "") {
+                setBulkMessages((prev) => [
+                  ...prev,
+                  {
+                    content: msg.content,
+                    time: shortTime,
+                    username: msg.username,
+                    timecode: msg.date,
+                  },
+                ]);
+              }
+            });
+            console.log(initialLoaded);
+            initialLoaded = true;
+          }
         }
       }
 
@@ -135,12 +163,11 @@ export const SocketProvider = ({ children }) => {
         newMessage,
         sendStatus,
         setSendStatus,
-        messages,
-        setMessages,
         bulkLength,
         // setLoginCheck,
         // loginCheck,
-        wsReady, setWsReady
+        wsReady,
+        setWsReady,
       }}
     >
       {children}
