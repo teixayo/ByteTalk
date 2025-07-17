@@ -424,9 +424,9 @@ const PrivetChat = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth={1.5}
+                strokeWidth={0.75}
                 stroke="currentColor"
-                className="size-12 text-white"
+                className="size-12 text-white mx-1.75"
               >
                 <path
                   strokeLinecap="round"
@@ -441,7 +441,7 @@ const PrivetChat = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.25}
                 stroke="currentColor"
-                className="size-8 mx-4.25"
+                className="size-8 ز"
               >
                 <path
                   strokeLinecap="round"

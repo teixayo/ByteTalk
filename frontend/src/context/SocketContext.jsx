@@ -41,6 +41,7 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type === "BulkMessages") {
+        console.log(location.pathname == "/chat" && data.channel == "global")
         if (location.pathname == "/chat" && data.channel == "global") {
           console.log("im here")
           if (!initialLoaded) {
@@ -94,8 +95,9 @@ export const SocketProvider = ({ children }) => {
             // حالا فقط یکبار state رو آپدیت کن:
             setBulkMessages((prev) => [...newMessages.reverse(), ...prev]);
           }
-        }else {
-          if (!initialLoaded) {
+        } else {
+          if (true) {
+            console.log("set shode")
             data.messages.map((msg) => {
               const date = new Date(msg.date);
               
