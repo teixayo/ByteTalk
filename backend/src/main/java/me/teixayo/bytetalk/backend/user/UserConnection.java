@@ -165,7 +165,6 @@ public class UserConnection {
     private String getChannelName(long username1, long username2) {
 
         if (username1 > username2) {
-            // swap
             long temp = username1;
             username1 = username2;
             username2 = temp;
@@ -198,7 +197,7 @@ public class UserConnection {
                 user.sendMessages(channelName, Server.getInstance().getCacheService().loadLastestMessages(channel.getId()));
             } else {
                 log.info("{} Requested messages from {}", user.getName(), channelName);
-                List<Long> messageIds = Server.getInstance().getChannelService().loadMessagesBeforeDate(channel.getId(),Date.from(Instant.now()) , 40);
+                List<Long> messageIds = Server.getInstance().getChannelService().loadMessagesBeforeDate(channel.getId(),date , 40);
 
                 log.info("{} | {}", messageIds.size(), channel.getMembers());
                 List<Message> loadedMessages = Server.getInstance().getMessageService().getMessage(messageIds);

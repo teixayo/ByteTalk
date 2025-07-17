@@ -52,7 +52,6 @@ public class MemoryChannelService implements ChannelService {
             channelMessages.put(channel,messages);
         }
 
-        log.info(messages.size() + " " + channelId);
         messages.add(new Message(messageId,-1,"",date));
     }
 
@@ -63,8 +62,6 @@ public class MemoryChannelService implements ChannelService {
 
         List<Message> messages = channelMessages.get(channel);
         if(messages==null) return List.of();
-
-        log.info(messages.size() + "S");
         List<Long> messagesBeforeDate = new ArrayList<>();
         for (Message message : messages) {
             if (message.getDate().after(date)) continue;
