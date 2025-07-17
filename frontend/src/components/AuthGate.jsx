@@ -115,8 +115,8 @@ const AuthGate = ({ children }) => {
   // }, [wsReady]);
 
   // تا وقتی وضعیت مشخص نشده چیزی نشون نده
-  if (!checked)
-    return <p className="text-white text-center mt-10">Checking credit...</p>;
+  // if (!checked)
+  //   return <p className="text-white text-center mt-10">Checking credit...</p>;
 
   return children;
 };

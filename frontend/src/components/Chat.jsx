@@ -4,11 +4,11 @@ import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
 import TextareaAutosize from "react-textarea-autosize";
 import { VariableSizeList as List } from "react-window";
+import { useNavigate } from "react-router-dom";
 
 let flag = true;
 let firstRender = true;
 const convertMessage = (text) => {
-
   // تشخیص پیام‌های حاوی کد یا تگ‌های HTML
   const isCode =
     /[<>]/.test(text) ||
@@ -74,9 +74,28 @@ const Chat = () => {
     window.innerHeight - inputHeight
   );
 
+  const Navigate = useNavigate();
   const rowHeights = useRef({});
   const listRef = useRef();
+
   // const rowRefs = useRef([]);
+
+  const [selectedUser, setSelectedUser] = useState(null);
+  const popupRef = useRef(null);
+
+  // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setSelectedUser(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -110,6 +129,7 @@ const Chat = () => {
         }, 100);
         setTimeout(() => {
           listRef.current.scrollToItem(bulkMessages.length, "end");
+          console.log("log bede bebinam");
 
           firstRender = false;
         }, 130);
@@ -155,12 +175,12 @@ const Chat = () => {
             if (listRef.current) {
               listRef.current.scrollToItem(newMessages.length + 1, "end");
             }
-          }, 50);
+          }, 60);
           setTimeout(() => {
             if (listRef.current) {
               listRef.current.scrollToItem(newMessages.length + 1, "end");
             }
-          }, 90);
+          }, 100);
         }
         // اسکرول پس از به‌روزرسانی state
 
@@ -199,14 +219,14 @@ const Chat = () => {
       const newMessages = [...prev, msg];
 
       if (listRef.current) {
-      setTimeout(() => {
-          console.log("از من چه انتظاری داری؟", newMessages.length);
-          listRef.current.scrollToItem(newMessages.length, "end");
-        }, 50);
         setTimeout(() => {
           console.log("از من چه انتظاری داری؟", newMessages.length);
           listRef.current.scrollToItem(newMessages.length, "end");
-        }, 90);
+        }, 60);
+        setTimeout(() => {
+          console.log("از من چه انتظاری داری؟", newMessages.length);
+          listRef.current.scrollToItem(newMessages.length, "end");
+        }, 100);
       }
 
       return newMessages;
@@ -256,6 +276,15 @@ const Chat = () => {
       }
     }, [index, msg.content]);
 
+    const handleUserClick = (e) => {
+      e.stopPropagation();
+      console.log("mealkfdasfa")
+      setSelectedUser({
+        username: msg.username,
+        // میتوانید اطلاعات بیشتر کاربر را اینجا اضافه کنید
+      });
+    };
+
     return (
       <div style={style}>
         <div
@@ -289,7 +318,10 @@ const Chat = () => {
             {/* نام کاربر (فقط برای اولین پیام) */}
             {showAvatar && (
               <div className="flex items-center mb-1">
-                <span className="font-medium text-sm text-green-400 mr-2">
+                <span
+                  className="font-medium text-sm text-green-400 mr-2 cursor-pointer"
+                  onClick={handleUserClick}
+                >
                   {msg.username}
                 </span>
               </div>
@@ -331,104 +363,146 @@ const Chat = () => {
     }, 100);
   };
   return (
-    <div className="h-screen flex flex-col text-gray-300">
-      <div className="flex-1 ">
-        <List
-          ref={listRef}
-          height={listHeight}
-          itemCount={messages.length}
-          onScroll={handleScroll}
-          itemSize={getRowHeight} // استفاده از تابع اندازه‌گیری پویا
-          width={"100%"}
-          estimatedItemSize={120} // ارتفاع تخمینی برای محاسبه اولیه
-          onItemsRendered={({ visibleStartIndex }) => {
-            if (
-              visibleStartIndex === 0 &&
-              sendStatus &&
-              !debounceTimeout.current &&
-              initialScrollDone
-            ) {
-              setSendStatus(false);
-              console.log("🟡 کاربر به بالای لیست رسید");
-
-              debounceTimeout.current = setTimeout(() => {
-                debounceTimeout.current = null;
-                setSendStatus(true);
-              }, 1000);
-
-              const firstMessageTimecode = messages[0]?.timecode;
-              if (firstMessageTimecode) {
-                socket.send(
-                  JSON.stringify({
-                    type: "RequestBulkMessage",
-                    date: firstMessageTimecode - 1,
-                  })
-                );
-              }
-            }
-          }}
-        >
-          {Row}
-        </List>
-      </div>
-
-      <div className=" flex bg-neutral-700 w-full">
-        <TextareaAutosize
-          type="text"
-          ref={inputRef}
-          minRows={1}
-          maxRows={4}
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            e.target.value == "" || e.target.value.trim() == ""
-              ? setWriting(false)
-              : setWriting(true);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              if (text.trim() !== "") {
-                sendMessage();
-                setWriting(false);
-                setText("");
-              }
-            }
-          }}
-          onHeightChange={handleInputResize}
-          placeholder="Message"
-          className="w-12/12 h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-neutral-700 border-0 focus:outline-none overflow-y-auto  focus:ring-0 scrollbar-none resize-none"
-        />
-        {writing ? (
+    <>
+      {selectedUser ? (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div
-            role="button"
-            onClick={() => {
-              if (text.trim() !== "") {
-                sendMessage();
-                setWriting(false);
-                setText("");
-              }
-            }}
-            className="flex items-end cursor-pointer"
+            ref={popupRef}
+            className="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4 border border-gray-700"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-7 mx-4 mb-3.25"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
-              />
-            </svg>
+            <div className="flex items-center mb-4">
+              <div className="mr-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-12"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">
+                  {selectedUser.username}
+                </h3>
+                <p className="text-gray-400">عضویت از ۱۴۰۲</p>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg w-full">
+                ارسال پیام خصوصی
+              </button>
+            </div>
           </div>
-        ) : null}
-      </div>
-    </div>
+        </div>
+      ) : (
+        <div className="h-screen flex flex-col text-gray-300">
+          <div className="flex-1 ">
+            <List
+              ref={listRef}
+              height={listHeight}
+              itemCount={messages.length}
+              onScroll={handleScroll}
+              itemSize={getRowHeight} // استفاده از تابع اندازه‌گیری پویا
+              width={"100%"}
+              estimatedItemSize={120} // ارتفاع تخمینی برای محاسبه اولیه
+              onItemsRendered={({ visibleStartIndex }) => {
+                if (
+                  visibleStartIndex === 0 &&
+                  sendStatus &&
+                  !debounceTimeout.current &&
+                  initialScrollDone
+                ) {
+                  setSendStatus(false);
+                  console.log("🟡 کاربر به بالای لیست رسید");
+
+                  debounceTimeout.current = setTimeout(() => {
+                    debounceTimeout.current = null;
+                    setSendStatus(true);
+                  }, 1000);
+
+                  const firstMessageTimecode = messages[0]?.timecode;
+                  if (firstMessageTimecode) {
+                    socket.send(
+                      JSON.stringify({
+                        type: "RequestBulkMessage",
+                        date: firstMessageTimecode - 1,
+                      })
+                    );
+                  }
+                }
+              }}
+            >
+              {Row}
+            </List>
+          </div>
+
+          <div className=" flex bg-neutral-700 w-full">
+            <TextareaAutosize
+              type="text"
+              ref={inputRef}
+              minRows={1}
+              maxRows={4}
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+                e.target.value == "" || e.target.value.trim() == ""
+                  ? setWriting(false)
+                  : setWriting(true);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (text.trim() !== "") {
+                    sendMessage();
+                    setWriting(false);
+                    setText("");
+                  }
+                }
+              }}
+              onHeightChange={handleInputResize}
+              placeholder="Message"
+              className="w-12/12 h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-neutral-700 border-0 focus:outline-none overflow-y-auto  focus:ring-0 scrollbar-none resize-none"
+            />
+            {writing ? (
+              <div
+                role="button"
+                onClick={() => {
+                  if (text.trim() !== "") {
+                    sendMessage();
+                    setWriting(false);
+                    setText("");
+                  }
+                }}
+                className="flex items-end cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-7 mx-4 mb-3.25"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
+                  />
+                </svg>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

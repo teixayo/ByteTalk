@@ -20,9 +20,8 @@ export const SocketProvider = ({ children }) => {
   const [sendStatus, setSendStatus] = useState(true);
   
   const [wsReady, setWsReady] = useState(false);
-
   const connectWebSocket = () => {
-    const ws = new WebSocket("ws://87.107.12.176:25565");
+    const ws = new WebSocket("ws://localhost:25565");
     ws.onopen = () => {
       console.log("✅ WebSocket connected");
       setSocket(ws);
@@ -114,7 +113,7 @@ export const SocketProvider = ({ children }) => {
       reconnectTimeoutRef.current = setTimeout(() => {
         console.log("🔁 Trying to reconnect...");
         connectWebSocket();
-      }, 800);
+      }, 600);
     };
   };
 

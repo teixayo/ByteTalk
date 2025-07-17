@@ -130,3 +130,14 @@ textarea::-webkit-scrollbar {
 .transition-opacity {
   transition: opacity 0.2s ease;
 }
+
+/* اگر از CSS جداگانه استفاده می‌کنید */
+.profile-popup {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
