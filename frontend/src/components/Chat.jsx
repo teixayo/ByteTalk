@@ -60,6 +60,7 @@ const Chat = () => {
     bulkLength,
     // setLoginCheck,
     // loginCheck,
+    activeChat
   } = useSocket();
 
   const [writing, setWriting] = useState(false);
@@ -164,8 +165,8 @@ const Chat = () => {
   useEffect(() => {
     if (newMessage.date) {
       if (
-        location.pathname == `/chat/${newMessage.channel}` ||
-        location.pathname == `/chat`
+        activeChat == `/chat/${newMessage.channel}` ||
+        activeChat == `/chat`
       ) {
         const timestamp = Date.now();
 
