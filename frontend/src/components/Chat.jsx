@@ -157,42 +157,44 @@ const Chat = () => {
 
   useEffect(() => {
     if (newMessage.date) {
-      const timestamp = Date.now();
+      if (location.pathname == `/chat/${newMessage.channel}` || location.pathname == `/chat`) {
+        const timestamp = Date.now();
 
-      const date = new Date(newMessage.date);
-      const shortTime = date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
+        const date = new Date(newMessage.date);
+        const shortTime = date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
 
-      setMessages((prev) => {
-        const newMessages = [
-          ...prev,
-          {
-            content: newMessage.content,
-            time: shortTime,
-            username: newMessage.username,
-            timecode: timestamp, // اضافه کردن timecode
-          },
-        ];
+        setMessages((prev) => {
+          const newMessages = [
+            ...prev,
+            {
+              content: newMessage.content,
+              time: shortTime,
+              username: newMessage.username,
+              timecode: timestamp, // اضافه کردن timecode
+            },
+          ];
 
-        if (isAtBottom) {
-          setTimeout(() => {
-            if (listRef.current) {
-              listRef.current.scrollToItem(newMessages.length + 1, "end");
-            }
-          }, 60);
-          setTimeout(() => {
-            if (listRef.current) {
-              listRef.current.scrollToItem(newMessages.length + 1, "end");
-            }
-          }, 100);
-        }
-        // اسکرول پس از به‌روزرسانی state
+          if (isAtBottom) {
+            setTimeout(() => {
+              if (listRef.current) {
+                listRef.current.scrollToItem(newMessages.length + 1, "end");
+              }
+            }, 60);
+            setTimeout(() => {
+              if (listRef.current) {
+                listRef.current.scrollToItem(newMessages.length + 1, "end");
+              }
+            }, 100);
+          }
+          // اسکرول پس از به‌روزرسانی state
 
-        return newMessages;
-      });
+          return newMessages;
+        });
+      }
     }
   }, [newMessage]);
 
