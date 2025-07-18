@@ -127,7 +127,6 @@ const PrivetChat = () => {
   useEffect(() => {
     console.log("bulk", bulkMessages.length);
     if (bulkMessages?.length > 0 && listRef.current) {
-      console.log("run");
       setMessages([...bulkMessages, ...localMessages]);
 
       console.log(bulkMessages);
@@ -140,7 +139,6 @@ const PrivetChat = () => {
         }, 100);
         setTimeout(() => {
           listRef.current.scrollToItem(bulkMessages.length, "end");
-          console.log("log bede bebinam");
 
           firstRender = false;
         }, 130);
@@ -152,7 +150,6 @@ const PrivetChat = () => {
     }
     // if (loginCheck) {
     //   setTimeout(() => {
-    //     console.log("koskesh");
     //     listRef.current.scrollToItem(bulkMessages.length, "end");
     //     setLoginCheck(false);
     //   }, 200);
@@ -201,7 +198,6 @@ const PrivetChat = () => {
 
   useEffect(() => {
     if (isAtBottom && listRef.current && flag && bulkMessages.length > 0) {
-      console.log(bulkMessages.length - 1);
       setTimeout(() => {
         // listRef.current.scrollToItem(bulkMessages.length - 1, "start");
         flag = false;

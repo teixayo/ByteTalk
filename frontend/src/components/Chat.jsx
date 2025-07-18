@@ -158,7 +158,6 @@ const Chat = () => {
   useEffect(() => {
     if (newMessage.date) {
       const timestamp = Date.now();
-      
 
       const date = new Date(newMessage.date);
       const shortTime = date.toLocaleTimeString("en-US", {
@@ -210,8 +209,7 @@ const Chat = () => {
   const sendMessage = () => {
     const timestamp = Date.now();
     const date = new Date(timestamp);
-    console.log(timestamp)
-      console.log(newMessage.date)
+    console.log(timestamp);
     const shortTime = date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
@@ -461,13 +459,13 @@ const Chat = () => {
 
                   const firstMessageTimecode =
                     messages[0]?.timecode || Date.now();
-                    console.log(messages[0])
-                    const rqstBulkMessagePayload = {
-                        type: "RequestBulkMessage",
-                        date: firstMessageTimecode - 1,
-                        channel: "global",
-                      }
-                    console.log(rqstBulkMessagePayload)
+                  console.log(messages[0]);
+                  const rqstBulkMessagePayload = {
+                    type: "RequestBulkMessage",
+                    date: firstMessageTimecode - 1,
+                    channel: "global",
+                  };
+                  console.log(rqstBulkMessagePayload);
                   if (firstMessageTimecode) {
                     socket.send(
                       JSON.stringify({

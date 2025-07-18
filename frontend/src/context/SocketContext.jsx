@@ -4,6 +4,7 @@ const SocketContext = createContext();
 
 let initialLoaded = false;
 let firstTime = false;
+
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const reconnectTimeoutRef = useRef(null);
@@ -19,10 +20,6 @@ export const SocketProvider = ({ children }) => {
 
   const [wsReady, setWsReady] = useState(false);
 
-  const {userID} = useParams()
-  useEffect(() => {
-    console.log("helllllllllllllll");
-  }, []);
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
     ws.onopen = () => {
@@ -40,13 +37,11 @@ export const SocketProvider = ({ children }) => {
           // if (!initialLoaded) {
           //   data.messages.map((msg) => {
           //     const date = new Date(msg.date);
-
           //     const shortTime = date.toLocaleTimeString("en-US", {
           //       hour: "2-digit",
           //       minute: "2-digit",
           //       hour12: true,
           //     });
-
           //     if (msg.content != "") {
           //       setBulkMessages((prev) => [
           //         ...prev,
@@ -59,7 +54,6 @@ export const SocketProvider = ({ children }) => {
           //       ]);
           //     }
           // };
-          console.log("ldkafj");
           // }
         }
         setStatus(data);
@@ -73,7 +67,6 @@ export const SocketProvider = ({ children }) => {
 
       if (data.type === "BulkMessages") {
         if (location.pathname == "/chat" && data.channel == "global") {
-          console.log("im here");
           if (!initialLoaded) {
             data.messages.map((msg) => {
               const date = new Date(msg.date);
@@ -121,15 +114,15 @@ export const SocketProvider = ({ children }) => {
                   timecode: msg.date,
                 };
               });
-            console.log(newMessages);
-            // حالا فقط یکبار state رو آپدیت کن:
-            setBulkMessages((prev) => [...newMessages, ...prev]);
-          }
-        } else {
-          if (location.pathname == `/chat/${data.channel}`) {
-            setBulkLength(data.messages.length);
-            if (data.messages.length < 1) return;
-
+              // حالا فقط یکبار state رو آپدیت کن:
+              setBulkMessages((prev) => [...newMessages, ...prev]);
+            }
+          } else {
+            if (location.pathname == `/chat/${data.channel}`) {
+              console.log("میای تو؟")
+              setBulkLength(data.messages.length);
+              // if (data.messages.length < 1) return;
+              
             const newMessages = data.messages
               .filter((msg) => msg.content !== "")
               .map((msg) => {
@@ -148,13 +141,17 @@ export const SocketProvider = ({ children }) => {
                   timecode: msg.date,
                 };
               });
+              console.log("میرسی به اینجا؟")
             // حالا فقط یکبار state رو آپدیت کن:
             setBulkMessages((prev) => {
               if (firstTime) {
+              console.log(" کسکش میای تو؟")
+
                 return [...newMessages, ...prev];
               } else {
                 firstTime = true;
-                return [...newMessages];
+                console.log(newMessages);
+                return [...newMessages || "null"];
               }
             });
           }
