@@ -47,6 +47,7 @@ const convertMessage = (text) => {
   });
 };
 
+let flag2 = false;
 const PrivetChat = () => {
   const [text, setText] = useState("");
   const {
@@ -126,27 +127,32 @@ const PrivetChat = () => {
 
   useEffect(() => {
     console.log("bulk", bulkMessages.length);
-    if (bulkMessages?.length > 0 && listRef.current) {
-      setMessages([...bulkMessages, ...localMessages]);
+    if (flag2) {
+      if (bulkMessages?.length > 0 && listRef.current) {
+        setMessages([...bulkMessages, ...localMessages]);
 
-      console.log(bulkMessages);
-      console.log(localMessages);
+        console.log(bulkMessages);
+        console.log(localMessages);
 
-      listRef.current.scrollToItem(bulkLength, "start");
-      if (firstRender) {
-        setTimeout(() => {
-          listRef.current.scrollToItem(bulkMessages.length, "end");
-        }, 100);
-        setTimeout(() => {
-          listRef.current.scrollToItem(bulkMessages.length, "end");
+        listRef.current.scrollToItem(bulkLength, "start");
+        if (firstRender) {
+          setTimeout(() => {
+            listRef.current.scrollToItem(bulkMessages.length, "end");
+          }, 100);
+          setTimeout(() => {
+            listRef.current.scrollToItem(bulkMessages.length, "end");
 
-          firstRender = false;
-        }, 130);
+            firstRender = false;
+          }, 130);
 
-        setTimeout(() => {
-          setInitialScrollDone(true);
-        }, 200);
+          setTimeout(() => {
+            setInitialScrollDone(true);
+          }, 200);
+        }
       }
+    } else {
+      flag2 = true
+      setMessages([]);
     }
     // if (loginCheck) {
     //   setTimeout(() => {
@@ -158,41 +164,43 @@ const PrivetChat = () => {
 
   useEffect(() => {
     if (newMessage.date) {
-      const timestamp = Date.now();
-      const date = new Date(newMessage.date);
-      const shortTime = date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
+      if (location.pathname == `/chat/${newMessage.channel}`) {
+        const timestamp = Date.now();
+        const date = new Date(newMessage.date);
+        const shortTime = date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
 
-      setMessages((prev) => {
-        const newMessages = [
-          ...prev,
-          {
-            content: newMessage.content,
-            time: shortTime,
-            username: newMessage.username,
-            timecode: timestamp, // اضافه کردن timecode
-          },
-        ];
+        setMessages((prev) => {
+          const newMessages = [
+            ...prev,
+            {
+              content: newMessage.content,
+              time: shortTime,
+              username: newMessage.username,
+              timecode: timestamp, // اضافه کردن timecode
+            },
+          ];
 
-        if (isAtBottom) {
-          setTimeout(() => {
-            if (listRef.current) {
-              listRef.current.scrollToItem(newMessages.length + 1, "end");
-            }
-          }, 60);
-          setTimeout(() => {
-            if (listRef.current) {
-              listRef.current.scrollToItem(newMessages.length + 1, "end");
-            }
-          }, 100);
-        }
-        // اسکرول پس از به‌روزرسانی state
+          if (isAtBottom) {
+            setTimeout(() => {
+              if (listRef.current) {
+                listRef.current.scrollToItem(newMessages.length + 1, "end");
+              }
+            }, 60);
+            setTimeout(() => {
+              if (listRef.current) {
+                listRef.current.scrollToItem(newMessages.length + 1, "end");
+              }
+            }, 100);
+          }
+          // اسکرول پس از به‌روزرسانی state
 
-        return newMessages;
-      });
+          return newMessages;
+        });
+      }
     }
   }, [newMessage]);
 

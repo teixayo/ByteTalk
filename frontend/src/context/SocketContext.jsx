@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 const SocketContext = createContext();
 
 let initialLoaded = false;
@@ -67,6 +66,8 @@ export const SocketProvider = ({ children }) => {
 
       if (data.type === "BulkMessages") {
         if (location.pathname == "/chat" && data.channel == "global") {
+          console.log("میای تو اینجا کسکش؟");
+
           if (!initialLoaded) {
             data.messages.map((msg) => {
               const date = new Date(msg.date);
@@ -114,15 +115,15 @@ export const SocketProvider = ({ children }) => {
                   timecode: msg.date,
                 };
               });
-              // حالا فقط یکبار state رو آپدیت کن:
-              setBulkMessages((prev) => [...newMessages, ...prev]);
-            }
-          } else {
-            if (location.pathname == `/chat/${data.channel}`) {
-              console.log("میای تو؟")
-              setBulkLength(data.messages.length);
-              // if (data.messages.length < 1) return;
-              
+            // حالا فقط یکبار state رو آپدیت کن:
+            setBulkMessages((prev) => [...newMessages, ...prev]);
+          }
+        } else {
+          if (location.pathname == `/chat/${data.channel}`) {
+            console.log("میای تو؟");
+            setBulkLength(data.messages.length);
+            if (data.messages.length < 1) return;
+
             const newMessages = data.messages
               .filter((msg) => msg.content !== "")
               .map((msg) => {
@@ -141,17 +142,17 @@ export const SocketProvider = ({ children }) => {
                   timecode: msg.date,
                 };
               });
-              console.log("میرسی به اینجا؟")
+            console.log("میرسی به اینجا؟");
             // حالا فقط یکبار state رو آپدیت کن:
             setBulkMessages((prev) => {
               if (firstTime) {
-              console.log(" کسکش میای تو؟")
+                console.log(" کسکش میای تو؟");
 
                 return [...newMessages, ...prev];
               } else {
                 firstTime = true;
                 console.log(newMessages);
-                return [...newMessages || "null"];
+                return [...newMessages];
               }
             });
           }
