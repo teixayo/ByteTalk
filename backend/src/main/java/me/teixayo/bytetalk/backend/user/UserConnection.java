@@ -19,14 +19,11 @@ import me.teixayo.bytetalk.backend.security.RandomGenerator;
 import me.teixayo.bytetalk.backend.security.RateLimiter;
 import me.teixayo.bytetalk.backend.service.channel.Channel;
 import me.teixayo.bytetalk.backend.service.message.Message;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -51,21 +48,6 @@ public class UserConnection {
         if(Server.getInstance()!=null) {
             this.sendMessageRateLimiter = Server.getInstance().getConfig().getSendMessageLimiter().copy();
             this.bulkMessageRateLimiter = Server.getInstance().getConfig().getBulkMessageLimiter().copy();
-            JSONArray usersArray = new JSONArray();
-            for (Channel privateChannel : Server.getInstance().getChannelService().getUserPrivateChannels(user.getId())) {
-                JSONObject jsonObject = new JSONObject();
-
-                Optional<Long> targetUserID = privateChannel.getMembers().stream().filter(id -> id != user.getId()).findFirst();
-                if(targetUserID.isEmpty()) continue;
-
-                User targetUser = Server.getInstance().getUserService().getUserById(targetUserID.get());
-
-                jsonObject.put("name", targetUser.getName());
-                jsonObject.put("members", privateChannel.getMembers());
-                jsonObject.put("creationDate", privateChannel.getCreationDate());
-                usersArray.put(jsonObject);
-            }
-            user.sendPacket(ServerPacketType.UserPrivateChannels.createPacket(new JSONObject(usersArray)));
         }
     }
 

@@ -21,12 +21,15 @@ import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
 import me.teixayo.bytetalk.backend.protocol.server.StatusCodes;
 import me.teixayo.bytetalk.backend.security.Crypto;
 import me.teixayo.bytetalk.backend.security.EncryptionUtils;
+import me.teixayo.bytetalk.backend.service.channel.Channel;
 import me.teixayo.bytetalk.backend.user.User;
 import me.teixayo.bytetalk.backend.user.UserConnection;
 import me.teixayo.bytetalk.backend.user.UserManager;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.InetSocketAddress;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -162,6 +165,26 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                             EncryptionUtils.createLoginJWT(name)));
                     log.info("Created token for {}", name);
                 }
+
+
+                JSONArray usersArray = new JSONArray();
+                for (Channel privateChannel : Server.getInstance().getChannelService().getUserPrivateChannels(user.getId())) {
+                    jsonObject = new JSONObject();
+
+                    Optional<Long> targetUserID = privateChannel.getMembers().stream().filter(id -> id != user.getId()).findFirst();
+                    if(targetUserID.isEmpty()) continue;
+
+                    User targetUser = Server.getInstance().getUserService().getUserById(targetUserID.get());
+
+                    jsonObject.put("name", targetUser.getName());
+                    jsonObject.put("creationDate", privateChannel.getCreationDate());
+                    usersArray.put(jsonObject);
+                }
+                JSONObject jsonObject1 = new JSONObject();
+
+                jsonObject1.put("channels", usersArray);
+                user.sendPacket(ServerPacketType.UserPrivateChannels.createPacket(jsonObject1));
+
 
                 log.info("User {} logged in", name);
                 return;
