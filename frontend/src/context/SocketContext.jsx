@@ -19,6 +19,8 @@ export const SocketProvider = ({ children }) => {
 
   const [wsReady, setWsReady] = useState(false);
 
+  const [privetChannels, setPrivetChannels] = useState([]);
+
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
     ws.onopen = () => {
@@ -66,8 +68,6 @@ export const SocketProvider = ({ children }) => {
 
       if (data.type === "BulkMessages") {
         if (location.pathname == "/chat" && data.channel == "global") {
-          console.log("میای تو اینجا کسکش؟");
-
           if (!initialLoaded) {
             data.messages.map((msg) => {
               const date = new Date(msg.date);
@@ -120,7 +120,6 @@ export const SocketProvider = ({ children }) => {
           }
         } else {
           if (location.pathname == `/chat/${data.channel}`) {
-            console.log("میای تو؟");
             setBulkLength(data.messages.length);
             if (data.messages.length < 1) return;
 
@@ -142,12 +141,9 @@ export const SocketProvider = ({ children }) => {
                   timecode: msg.date,
                 };
               });
-            console.log("میرسی به اینجا؟");
             // حالا فقط یکبار state رو آپدیت کن:
             setBulkMessages((prev) => {
               if (firstTime) {
-                console.log(" کسکش میای تو؟");
-
                 return [...newMessages, ...prev];
               } else {
                 firstTime = true;
@@ -161,6 +157,12 @@ export const SocketProvider = ({ children }) => {
 
       if (data.type == "SendMessage") {
         setNewMessage(data);
+      }
+
+      if (data.type == "UserPrivateChannels") {
+        const allChannels = data.channels;
+        console.log(allChannels);
+        setPrivetChannels(allChannels);
       }
     };
 
@@ -203,6 +205,7 @@ export const SocketProvider = ({ children }) => {
         // loginCheck,
         wsReady,
         setWsReady,
+        privetChannels,
       }}
     >
       {children}

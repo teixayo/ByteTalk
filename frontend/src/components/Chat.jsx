@@ -6,6 +6,8 @@ import TextareaAutosize from "react-textarea-autosize";
 import { VariableSizeList as List } from "react-window";
 import { useNavigate, useParams } from "react-router-dom";
 
+import Sidebar from "./Sidebar";
+
 let flag = true;
 let firstRender = true;
 const convertMessage = (text) => {
@@ -83,6 +85,10 @@ const Chat = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const popupRef = useRef(null);
 
+  const handleSelectUser = (user) => {
+    navigate(`/chat/${user.username}`);
+  };
+
   // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
   useEffect(() => {
     if (socket.readyState == WebSocket.OPEN) {
@@ -157,7 +163,10 @@ const Chat = () => {
 
   useEffect(() => {
     if (newMessage.date) {
-      if (location.pathname == `/chat/${newMessage.channel}` || location.pathname == `/chat`) {
+      if (
+        location.pathname == `/chat/${newMessage.channel}` ||
+        location.pathname == `/chat`
+      ) {
         const timestamp = Date.now();
 
         const date = new Date(newMessage.date);
@@ -416,129 +425,134 @@ const Chat = () => {
           </div>
         </div>
       ) : (
-        <div className="h-screen flex flex-col text-gray-300">
-          <div className="h-full flex items-center bg-neutral-700">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.25}
-              stroke="currentColor"
-              className="size-8 mx-4.25"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
-              />
-            </svg>
-
-            <p>Global</p>
-          </div>
-          <div className="flex-1 ">
-            <List
-              ref={listRef}
-              height={listHeight}
-              itemCount={messages.length}
-              onScroll={handleScroll}
-              itemSize={getRowHeight} // استفاده از تابع اندازه‌گیری پویا
-              width={"100%"}
-              estimatedItemSize={120} // ارتفاع تخمینی برای محاسبه اولیه
-              onItemsRendered={({ visibleStartIndex }) => {
-                if (
-                  visibleStartIndex === 0 &&
-                  sendStatus &&
-                  !debounceTimeout.current &&
-                  initialScrollDone
-                ) {
-                  setSendStatus(false);
-                  console.log("🟡 کاربر به بالای لیست رسید");
-
-                  debounceTimeout.current = setTimeout(() => {
-                    debounceTimeout.current = null;
-                    setSendStatus(true);
-                  }, 1000);
-
-                  const firstMessageTimecode =
-                    messages[0]?.timecode || Date.now();
-                  console.log(messages[0]);
-                  const rqstBulkMessagePayload = {
-                    type: "RequestBulkMessage",
-                    date: firstMessageTimecode - 1,
-                    channel: "global",
-                  };
-                  console.log(rqstBulkMessagePayload);
-                  if (firstMessageTimecode) {
-                    socket.send(
-                      JSON.stringify({
-                        type: "RequestBulkMessage",
-                        date: firstMessageTimecode - 1,
-                        channel: "global",
-                      })
-                    );
-                  }
-                }
-              }}
-            >
-              {Row}
-            </List>
-          </div>
-
-          <div className=" flex bg-neutral-700 w-full">
-            <TextareaAutosize
-              type="text"
-              ref={inputRef}
-              minRows={1}
-              maxRows={4}
-              value={text}
-              onChange={(e) => {
-                setText(e.target.value);
-                e.target.value == "" || e.target.value.trim() == ""
-                  ? setWriting(false)
-                  : setWriting(true);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  if (text.trim() !== "") {
-                    sendMessage();
-                    setWriting(false);
-                    setText("");
-                  }
-                }
-              }}
-              onHeightChange={handleInputResize}
-              placeholder="Message"
-              className="w-12/12 h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-neutral-700 border-0 focus:outline-none overflow-y-auto  focus:ring-0 scrollbar-none resize-none"
-            />
-            {writing ? (
-              <div
-                role="button"
-                onClick={() => {
-                  if (text.trim() !== "") {
-                    sendMessage();
-                    setWriting(false);
-                    setText("");
-                  }
-                }}
-                className="flex items-end cursor-pointer"
-              >
+        <div className="h-screen grid grid-cols-7 xl:grid-cols-5 text-gray-300">
+          {/* پنل کناری جدید */}
+          <Sidebar />
+          <div className="grid col-span-5 xl:col-span-4">
+            <div className="flex-1 flex flex-col">
+              <div className="h-14 flex items-center bg-neutral-700 px-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  strokeWidth={1.5}
+                  strokeWidth={1.25}
                   stroke="currentColor"
-                  className="size-7 mx-4 mb-3.25"
+                  className="size-8 mx-4.25"
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
+                    d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
                   />
                 </svg>
+                <p>Global</p>
               </div>
-            ) : null}
+              <div className="flex-1 ">
+                <List
+                  ref={listRef}
+                  height={listHeight}
+                  itemCount={messages.length}
+                  onScroll={handleScroll}
+                  itemSize={getRowHeight} // استفاده از تابع اندازه‌گیری پویا
+                  width={"100%"}
+                  estimatedItemSize={120} // ارتفاع تخمینی برای محاسبه اولیه
+                  onItemsRendered={({ visibleStartIndex }) => {
+                    if (
+                      visibleStartIndex === 0 &&
+                      sendStatus &&
+                      !debounceTimeout.current &&
+                      initialScrollDone
+                    ) {
+                      setSendStatus(false);
+                      console.log("🟡 کاربر به بالای لیست رسید");
+
+                      debounceTimeout.current = setTimeout(() => {
+                        debounceTimeout.current = null;
+                        setSendStatus(true);
+                      }, 1000);
+
+                      const firstMessageTimecode =
+                        messages[0]?.timecode || Date.now();
+                      console.log(messages[0]);
+                      const rqstBulkMessagePayload = {
+                        type: "RequestBulkMessage",
+                        date: firstMessageTimecode - 1,
+                        channel: "global",
+                      };
+                      console.log(rqstBulkMessagePayload);
+                      if (firstMessageTimecode) {
+                        socket.send(
+                          JSON.stringify({
+                            type: "RequestBulkMessage",
+                            date: firstMessageTimecode - 1,
+                            channel: "global",
+                          })
+                        );
+                      }
+                    }
+                  }}
+                >
+                  {Row}
+                </List>
+              </div>
+
+              <div className=" flex bg-neutral-700 w-full">
+                <TextareaAutosize
+                  type="text"
+                  ref={inputRef}
+                  minRows={1}
+                  maxRows={4}
+                  value={text}
+                  onChange={(e) => {
+                    setText(e.target.value);
+                    e.target.value == "" || e.target.value.trim() == ""
+                      ? setWriting(false)
+                      : setWriting(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      if (text.trim() !== "") {
+                        sendMessage();
+                        setWriting(false);
+                        setText("");
+                      }
+                    }
+                  }}
+                  onHeightChange={handleInputResize}
+                  placeholder="Message"
+                  className="w-12/12 h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-neutral-700 border-0 focus:outline-none overflow-y-auto  focus:ring-0 scrollbar-none resize-none"
+                />
+                {writing ? (
+                  <div
+                    role="button"
+                    onClick={() => {
+                      if (text.trim() !== "") {
+                        sendMessage();
+                        setWriting(false);
+                        setText("");
+                      }
+                    }}
+                    className="flex items-end cursor-pointer"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="size-7 mx-4 mb-3.25"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
+                      />
+                    </svg>
+                  </div>
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
       )}
