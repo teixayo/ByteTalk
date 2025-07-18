@@ -367,7 +367,7 @@ const Chat = () => {
         totalHeight - (scrollOffset + list.props.height);
       setIsAtBottom(distanceFromBottom < 50);
       console.log(isAtBottom);
-    }, 100);
+    }, 1000);
   };
 
   return (
