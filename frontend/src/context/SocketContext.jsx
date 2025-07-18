@@ -20,6 +20,7 @@ export const SocketProvider = ({ children }) => {
   const [wsReady, setWsReady] = useState(false);
 
   const [privetChannels, setPrivetChannels] = useState([]);
+  const [activeChat, setActiveChat] = useState(null)
 
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
@@ -206,6 +207,8 @@ export const SocketProvider = ({ children }) => {
         wsReady,
         setWsReady,
         privetChannels,
+        setActiveChat,
+        activeChat
       }}
     >
       {children}

@@ -2,7 +2,7 @@ import { useSocket } from "../context/SocketContext";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 const Sidebar = () => {
-  const { privetChannels } = useSocket();
+  const { privetChannels, setActiveChat, activeChat } = useSocket();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -12,26 +12,37 @@ const Sidebar = () => {
 
     console.log(privetChannels[0]);
   }, [privetChannels]);
+
+  useEffect(() => {
+    setActiveChat(location.pathname)
+  }, [])
   return (
     <div className="grid col-span-2 xl:col-span-1">
       <div className="bg-neutral-700 border-r border-stone-600 h-full p-4">
-        <h2 className="text-lg font-semibold text-white mb-4">چت‌های خصوصی</h2>
+        <h2 className="text-lg font-semibold text-white mb-4">Private chats</h2>
         <div className="space-y-2">
           {/* لیست کاربران - بعداً تکمیل می‌شود */}
           <div
-                className="p-2 hover:bg-neutral-600 rounded cursor-pointer"
-                onClick={() => {
-                  navigate(`/chat`);
-                }}
-              >
-                <p className="text-white">Global</p>
-              </div>
+            className={`p-2 ${
+              activeChat == "/chat" ? "bg-neutral-600" : "hover:bg-neutral-600"
+            } rounded cursor-pointer`}
+            onClick={() => {
+              navigate(`/chat`);
+            }}
+          >
+            <p className="text-white">Global</p>
+          </div>
           {privetChannels.map((channel, index) => {
             return (
               <div
                 key={index}
-                className="p-2 hover:bg-neutral-600 rounded cursor-pointer"
+                className={`p-2 ${
+                  `/chat/${channel.name}` == location.pathname
+                    ? "bg-neutral-600"
+                    : "hover:bg-neutral-600"
+                }  rounded cursor-pointer`}
                 onClick={() => {
+                  setActiveChat(channel.name);
                   navigate(`/chat/${channel.name}`);
                 }}
               >
