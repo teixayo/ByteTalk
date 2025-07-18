@@ -7,6 +7,7 @@ public enum ServerPacketType {
     BulkMessages,
     Messaging,
     SendMessage,
+    UserPrivateChannels,
     LoginToken;
 
     public ServerPacket createPacket(Object... fields) {

@@ -162,6 +162,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                             EncryptionUtils.createLoginJWT(name)));
                     log.info("Created token for {}", name);
                 }
+
                 log.info("User {} logged in", name);
                 return;
             }
