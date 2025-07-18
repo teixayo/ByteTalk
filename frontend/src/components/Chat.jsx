@@ -158,6 +158,8 @@ const Chat = () => {
   useEffect(() => {
     if (newMessage.date) {
       const timestamp = Date.now();
+      
+
       const date = new Date(newMessage.date);
       const shortTime = date.toLocaleTimeString("en-US", {
         hour: "2-digit",
@@ -208,6 +210,8 @@ const Chat = () => {
   const sendMessage = () => {
     const timestamp = Date.now();
     const date = new Date(timestamp);
+    console.log(timestamp)
+      console.log(newMessage.date)
     const shortTime = date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
@@ -363,7 +367,7 @@ const Chat = () => {
         totalHeight - (scrollOffset + list.props.height);
       setIsAtBottom(distanceFromBottom < 50);
       console.log(isAtBottom);
-    }, 100);
+    }, 1000);
   };
 
   return (

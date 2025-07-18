@@ -478,14 +478,13 @@ const PrivetChat = () => {
                     setSendStatus(true);
                   }, 1000);
 
-                  const firstMessageTimecode = messages[1]
-                    ? messages[0]?.timecode
-                    : Date.now();
+                  const firstMessageTimecode =
+                    messages[0]?.timecode || Date.now();
                   if (firstMessageTimecode) {
                     socket.send(
                       JSON.stringify({
                         type: "RequestBulkMessage",
-                        date: -1,
+                        date: firstMessageTimecode - 1,
                         channel: userID,
                       })
                     );

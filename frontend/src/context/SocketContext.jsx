@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-
+import { useParams } from "react-router-dom";
 const SocketContext = createContext();
 
 let initialLoaded = false;
-
+let firstTime = false;
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const reconnectTimeoutRef = useRef(null);
@@ -18,9 +18,11 @@ export const SocketProvider = ({ children }) => {
   const [sendStatus, setSendStatus] = useState(true);
 
   const [wsReady, setWsReady] = useState(false);
+
+  const {userID} = useParams()
   useEffect(() => {
-    console.log("helllllllllllllll")
-  }, [])
+    console.log("helllllllllllllll");
+  }, []);
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
     ws.onopen = () => {
@@ -28,14 +30,13 @@ export const SocketProvider = ({ children }) => {
       setSocket(ws);
     };
 
-
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
       console.log("📨 WS received:", data);
 
       if (data.type == "Status") {
-        if(data.code == '1002') {
+        if (data.code == "1002") {
           // if (!initialLoaded) {
           //   data.messages.map((msg) => {
           //     const date = new Date(msg.date);
@@ -57,8 +58,8 @@ export const SocketProvider = ({ children }) => {
           //         },
           //       ]);
           //     }
-            // };
-          console.log('ldkafj')
+          // };
+          console.log("ldkafj");
           // }
         }
         setStatus(data);
@@ -71,9 +72,8 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type === "BulkMessages") {
-        console.log(location.pathname == "/chat" && data.channel == "global")
         if (location.pathname == "/chat" && data.channel == "global") {
-          console.log("im here")
+          console.log("im here");
           if (!initialLoaded) {
             data.messages.map((msg) => {
               const date = new Date(msg.date);
@@ -126,31 +126,37 @@ export const SocketProvider = ({ children }) => {
             setBulkMessages((prev) => [...newMessages, ...prev]);
           }
         } else {
-          if (true) {
-            console.log("set shode")
-            data.messages.map((msg) => {
-              const date = new Date(msg.date);
-              
-              const shortTime = date.toLocaleTimeString("en-US", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
+          if (location.pathname == `/chat/${data.channel}`) {
+            setBulkLength(data.messages.length);
+            if (data.messages.length < 1) return;
+
+            const newMessages = data.messages
+              .filter((msg) => msg.content !== "")
+              .map((msg) => {
+                const date = new Date(msg.date);
+
+                const shortTime = date.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                });
+
+                return {
+                  content: msg.content,
+                  time: shortTime,
+                  username: msg.username,
+                  timecode: msg.date,
+                };
               });
-              
-              console.log(msg)
-              if (msg.content != "") {
-                setBulkMessages((prev) => [
-                  ...prev,
-                  {
-                    content: msg.content,
-                    time: shortTime,
-                    username: msg.username,
-                    timecode: msg.date,
-                  },
-                ]);
+            // حالا فقط یکبار state رو آپدیت کن:
+            setBulkMessages((prev) => {
+              if (firstTime) {
+                return [...newMessages, ...prev];
+              } else {
+                firstTime = true;
+                return [...newMessages];
               }
             });
-            initialLoaded = true;
           }
         }
       }

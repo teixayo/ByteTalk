@@ -13,18 +13,11 @@ const statusMessages = {
   1006: "❌ Invalid username format",
   1007: "❌ Invalid password format",
 };
-
 const SignUpForm = () => {
   const navigate = useNavigate();
   const { socket, status } = useSocket();
 
   useEffect(() => {
-    if (status.code == "1004") {
-      alert(statusMessages[status.code]);
-    } else if (status.code == "1005") {
-      alert(statusMessages[status.code]);
-    }
-
     if (status.type == "Status" && status.code == "1004") {
       setTimeout(() => {
         localStorage.setItem("username", localUserName);
@@ -36,9 +29,16 @@ const SignUpForm = () => {
         console.log("📨 Sending login:", loginPayload);
         console.log("WS readyState:", socket.readyState);
         socket.send(JSON.stringify(loginPayload));
-      }, 1000);
-
-      navigate("/chat");
+      }, 800);
+      if (status.code == "1004") {
+        alert(statusMessages[status.code]);
+        console.log("alert kiri");
+      } else if (status.code == "1005") {
+        alert(statusMessages[status.code]);
+      }
+      setTimeout(() => {
+        navigate("/chat");
+      }, 600);
     }
   }, [status]);
 
@@ -66,7 +66,7 @@ const SignUpForm = () => {
     fildname: Yup.string()
       .min(4, "Username must be at least 4 characters")
       .matches(
-         /^[a-zA-Z][a-zA-Z0-9]*$/,
+        /^[a-zA-Z][a-zA-Z0-9]*$/,
         "Username must start with a letter and contain only English letters and numbers."
       )
       .max(19, "Username must be a maximum of 19 characters")
