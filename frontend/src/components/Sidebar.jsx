@@ -6,16 +6,16 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(privetChannels[0]);
-
     if (!privetChannels[0]) return;
 
     console.log(privetChannels[0]);
   }, [privetChannels]);
 
   useEffect(() => {
-    setActiveChat(location.pathname)
-  }, [])
+    const path = location.pathname.split("/")[2] || "chat";
+    setActiveChat(path);
+  }, []);
+
   return (
     <div className="grid col-span-2 xl:col-span-1">
       <div className="bg-neutral-700 border-r border-stone-600 h-full p-4">
@@ -24,10 +24,12 @@ const Sidebar = () => {
           {/* لیست کاربران - بعداً تکمیل می‌شود */}
           <div
             className={`p-2 ${
-              activeChat == "/chat" ? "bg-neutral-600" : "hover:bg-neutral-600"
+              activeChat == "chat" ? "bg-neutral-600" : "hover:bg-neutral-600"
             } rounded cursor-pointer`}
             onClick={() => {
+              setActiveChat("chat");
               navigate(`/chat`);
+              window.location.reload();
             }}
           >
             <p className="text-white">Global</p>
@@ -44,6 +46,7 @@ const Sidebar = () => {
                 onClick={() => {
                   setActiveChat(channel.name);
                   navigate(`/chat/${channel.name}`);
+                  window.location.reload();
                 }}
               >
                 <p className="text-white">{channel.name}</p>

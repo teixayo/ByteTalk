@@ -61,6 +61,7 @@ const PrivetChat = () => {
     bulkLength,
     // setLoginCheck,
     // loginCheck,
+    activeChat
   } = useSocket();
 
   const [writing, setWriting] = useState(false);
@@ -111,6 +112,10 @@ const PrivetChat = () => {
   }, []);
 
   useEffect(() => {
+    console.log("active chat: ",activeChat)
+  }, [activeChat])
+
+  useEffect(() => {
     const handleResize = () => {
       setListHeight(window.innerHeight - inputHeight - titleHeight);
       console.log(window.innerHeight - inputHeight - titleHeight);
@@ -156,6 +161,7 @@ const PrivetChat = () => {
       flag2 = true;
       setMessages([]);
     }
+
     // if (loginCheck) {
     //   setTimeout(() => {
     //     listRef.current.scrollToItem(bulkMessages.length, "end");
