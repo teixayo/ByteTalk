@@ -165,8 +165,7 @@ const Chat = () => {
   useEffect(() => {
     if (newMessage.date) {
       if (
-        activeChat == `/chat/${newMessage.channel}` ||
-        activeChat == `/chat`
+        newMessage.channel == "global"
       ) {
         const timestamp = Date.now();
 

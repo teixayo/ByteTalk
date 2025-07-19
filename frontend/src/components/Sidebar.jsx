@@ -1,6 +1,6 @@
 import { useSocket } from "../context/SocketContext";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 const Sidebar = () => {
   const { privetChannels, setActiveChat, activeChat } = useSocket();
   const navigate = useNavigate();
@@ -29,7 +29,8 @@ const Sidebar = () => {
             onClick={() => {
               setActiveChat("chat");
               navigate(`/chat`);
-              window.location.reload();
+              // window.location.reload();
+              navigate(0);
             }}
           >
             <p className="text-white">Global</p>
@@ -46,7 +47,8 @@ const Sidebar = () => {
                 onClick={() => {
                   setActiveChat(channel.name);
                   navigate(`/chat/${channel.name}`);
-                  window.location.reload();
+                  // window.location.reload();
+                  navigate(0);
                 }}
               >
                 <p className="text-white">{channel.name}</p>
