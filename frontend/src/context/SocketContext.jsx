@@ -35,6 +35,7 @@ export const SocketProvider = ({ children }) => {
 
       console.log("📨 WS received:", data);
 
+      
       if (data.type == "Status") {
         if (data.code == "1002") {
           // if (!initialLoaded) {
