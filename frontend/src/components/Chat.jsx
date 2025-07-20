@@ -136,7 +136,12 @@ const Chat = () => {
   useEffect(() => {
     console.log("bulk", bulkMessages.length);
     if (bulkMessages?.length > 0 && listRef.current) {
-      setMessages([...bulkMessages, ...localMessages]);
+      console.log(localMessages);
+      
+        setMessages(() => {
+          return [...bulkMessages, ...localMessages];
+        });
+      
 
       console.log(bulkMessages);
       console.log("localMessages", localMessages);
@@ -205,11 +210,13 @@ const Chat = () => {
           return newMessages;
         });
 
+        console.log(localMessages);
+
         setLocalMessages((prev) => {
           console.log(...prev);
           console.log(msg);
 
-          return [...prev];
+          return [...prev, msg];
         });
       } else {
         console.log("newMessage", newMessage);
@@ -265,13 +272,14 @@ const Chat = () => {
 
     //   return newMessages;
     // });
+    console.log(localMessages);
 
-    setLocalMessages((prev) => {
-      console.log(prev);
-      console.log(msg);
+    // setLocalMessages((prev) => {
+    //   console.log(prev);
+    //   console.log(msg);
 
-      return [...prev, msg];
-    });
+    //   return [...prev, msg];
+    // });
 
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
