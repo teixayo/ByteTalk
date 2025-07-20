@@ -58,10 +58,12 @@ const Chat = () => {
     sendStatus,
     setSendStatus,
     bulkLength,
+    setBulkMessages,
     // setLoginCheck,
     // loginCheck,
     activeChat,
-    setPrivetChannels
+    setPrivetChannels,
+    privetChannels,
   } = useSocket();
 
   const [writing, setWriting] = useState(false);
@@ -137,9 +139,9 @@ const Chat = () => {
       setMessages([...bulkMessages, ...localMessages]);
 
       console.log(bulkMessages);
-      console.log(localMessages);
+      console.log("localMessages", localMessages);
 
-      listRef.current.scrollToItem(bulkLength, "start");
+      listRef.current.scrollToItem(bulkLength - 1, "start");
       if (firstRender) {
         setTimeout(() => {
           listRef.current.scrollToItem(bulkMessages.length, "end");
@@ -175,16 +177,15 @@ const Chat = () => {
           hour12: true,
         });
 
+        const msg = {
+          content: newMessage.content,
+          time: shortTime,
+          username: newMessage.username,
+          timecode: timestamp, // اضافه کردن timecode
+        };
+
         setMessages((prev) => {
-          const newMessages = [
-            ...prev,
-            {
-              content: newMessage.content,
-              time: shortTime,
-              username: newMessage.username,
-              timecode: timestamp, // اضافه کردن timecode
-            },
-          ];
+          const newMessages = [...prev, msg];
 
           if (isAtBottom) {
             setTimeout(() => {
@@ -199,12 +200,21 @@ const Chat = () => {
             }, 100);
           }
           // اسکرول پس از به‌روزرسانی state
-
+          console.log("messages:", messages);
+          console.log("NewMessages:", newMessages);
           return newMessages;
         });
+
+        setLocalMessages((prev) => [...prev, newMessage]);
       } else {
-        console.log(newMessage);
-        setPrivetChannels((prev) => [{ name: newMessage.channel }, ...prev]);
+        console.log("newMessage", newMessage);
+        console.log("privetChannels", privetChannels);
+
+        // const isRepetitive = privetChannels.find((item) => {
+        //   return item.name == newMessage.channel;
+        // });
+        // if (!isRepetitive)
+          setPrivetChannels((prev) => [{ name: newMessage.channel }, ...prev]);
       }
     }
   }, [newMessage]);
@@ -250,6 +260,8 @@ const Chat = () => {
 
       return newMessages;
     });
+
+    setLocalMessages((prev) => [...prev, msg]);
 
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
@@ -377,7 +389,6 @@ const Chat = () => {
       const distanceFromBottom =
         totalHeight - (scrollOffset + list.props.height);
       setIsAtBottom(distanceFromBottom < 50);
-      console.log(isAtBottom);
     }, 1000);
   };
 

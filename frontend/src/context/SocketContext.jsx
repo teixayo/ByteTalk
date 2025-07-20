@@ -22,6 +22,7 @@ export const SocketProvider = ({ children }) => {
   const [privetChannels, setPrivetChannels] = useState([]);
   const [activeChat, setActiveChat] = useState(null)
 
+
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
     ws.onopen = () => {
@@ -91,10 +92,10 @@ export const SocketProvider = ({ children }) => {
                 ]);
               }
             });
-            console.log(initialLoaded);
             initialLoaded = true;
           } else {
-            console.log(data.messages.length);
+            console.log("data.messages.length",data.messages.length);
+
             setBulkLength(data.messages.length);
             if (data.messages.length < 1) return;
 
@@ -102,7 +103,6 @@ export const SocketProvider = ({ children }) => {
               .filter((msg) => msg.content !== "")
               .map((msg) => {
                 const date = new Date(msg.date);
-
                 const shortTime = date.toLocaleTimeString("en-US", {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -161,9 +161,7 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type == "UserPrivateChannels") {
-        const allChannels = data.channels;
-        console.log(allChannels);
-        setPrivetChannels(allChannels);
+        setPrivetChannels(data.channels);
       }
     };
 
@@ -195,6 +193,7 @@ export const SocketProvider = ({ children }) => {
     <SocketContext.Provider
       value={{
         socket,
+        setBulkMessages,
         bulkMessages,
         loginToken,
         status,
@@ -209,7 +208,7 @@ export const SocketProvider = ({ children }) => {
         privetChannels,
         setPrivetChannels,
         setActiveChat,
-        activeChat
+        activeChat,
       }}
     >
       {children}
