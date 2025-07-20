@@ -15,6 +15,7 @@ import me.teixayo.bytetalk.backend.networking.ChannelInitializer;
 import me.teixayo.bytetalk.backend.protocol.client.ClientPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
+import me.teixayo.bytetalk.backend.protocol.server.StatusCodes;
 import me.teixayo.bytetalk.backend.security.RandomGenerator;
 import me.teixayo.bytetalk.backend.security.RateLimiter;
 import me.teixayo.bytetalk.backend.service.channel.Channel;
@@ -96,11 +97,15 @@ public class UserConnection {
         log.info(packet.getData().toString());
         switch (packet.getPacketType()) {
             case SendMessage -> {
-                if (!sendMessageRateLimiter.allowRequest()) return;
-                String content = packet.getData().getString("content");
-                if (content == null || content.isBlank() || content.length() > Server.getInstance().getConfig().getMaxSendMessageSize())
+                if (!sendMessageRateLimiter.allowRequest()) {
+                    sendPacket(StatusCodes.SENT_TOO_MESSAGES.createPacket());
                     return;
-                //TODO Code Status for these things
+                }
+                String content = packet.getData().getString("content");
+                if (content == null || content.isBlank() || content.length() > Server.getInstance().getConfig().getMaxSendMessageSize()) {
+                    sendPacket(StatusCodes.TO_LONG_MESSAGE.createPacket());
+                    return;
+                }
                 String channelString = packet.getData().getString("channel");
                 Channel channel;
                 String targetName = "global";

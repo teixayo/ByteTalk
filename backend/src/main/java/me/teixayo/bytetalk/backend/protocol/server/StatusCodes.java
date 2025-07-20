@@ -11,6 +11,10 @@ public enum StatusCodes {
     USER_EXISTS(1005),
     INVALID_USER(1006),
     INVALID_PASSWORD(1007),
+
+    SENT_TOO_MESSAGES(1008),
+    TO_LONG_MESSAGE(1009),
+
     ;
 
 
