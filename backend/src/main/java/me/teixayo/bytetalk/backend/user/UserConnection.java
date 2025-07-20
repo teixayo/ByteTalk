@@ -139,14 +139,12 @@ public class UserConnection {
 
                 if(channel.isGlobal()) {
                     for (User otherUser : UserManager.getInstance().getUsers().values()) {
-                        if (otherUser.equals(user)) continue;
                         otherUser.sendPacket(sendMessagePacket);
                     }
                 } else {
                     for (long userId : channel.getMembers()) {
                         User otherUser = UserManager.getInstance().getUsers().get(userId);
                         if (otherUser == null) continue;
-                        if (otherUser.equals(user)) continue;
                         otherUser.sendPacket(sendMessagePacket);
                     }
                 }

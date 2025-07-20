@@ -124,14 +124,12 @@ public final class Server implements LoopApp {
                 Channel channel = channelService.getChannel(channelID);
                 if(channel.isGlobal()) {
                     for (User otherUser : UserManager.getInstance().getUsers().values()) {
-                        if (otherUser.getName().equals(username)) continue;
                         otherUser.sendPacket(sendMessagePacket);
                     }
                 } else {
                     for (long userId : channel.getMembers()) {
                         User otherUser = UserManager.getInstance().getUsers().get(userId);
                         if (otherUser == null) continue;
-                        if (otherUser.getName().equals(username)) continue;
                         otherUser.sendPacket(sendMessagePacket);
                     }
                 }
