@@ -184,16 +184,15 @@ const PrivetChat = () => {
           hour12: true,
         });
 
+        const msg = {
+          content: text,
+          time: shortTime,
+          username: localStorage.getItem("username") || "anonymous",
+          timecode: timestamp,
+        };
+
         setMessages((prev) => {
-          const newMessages = [
-            ...prev,
-            {
-              content: newMessage.content,
-              time: shortTime,
-              username: newMessage.username,
-              timecode: timestamp, // اضافه کردن timecode
-            },
-          ];
+          const newMessages = [...prev, msg];
 
           if (isAtBottom) {
             setTimeout(() => {
@@ -217,6 +216,8 @@ const PrivetChat = () => {
 
           return newMessages;
         });
+
+        setLocalMessages((prev) => [...prev, msg]);
       } else {
         if (newMessage.channel == "global") return;
         console.log(newMessage);
@@ -264,6 +265,8 @@ const PrivetChat = () => {
 
       return newMessages;
     });
+
+    setLocalMessages((prev) => [...prev, msg]);
 
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
