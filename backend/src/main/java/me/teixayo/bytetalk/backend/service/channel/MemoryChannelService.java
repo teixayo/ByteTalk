@@ -94,6 +94,6 @@ public class MemoryChannelService implements ChannelService {
             if (message.getDate().after(date)) continue;
             messagesBeforeDate.add(message.getId());
         }
-        return messagesBeforeDate;
+        return messagesBeforeDate.subList(Math.max(messagesBeforeDate.size()-batchSize,0),messagesBeforeDate.size());
     }
 }

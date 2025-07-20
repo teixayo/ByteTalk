@@ -16,10 +16,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @Testcontainers
@@ -48,13 +51,12 @@ public class MessagesServiceTest {
     }
 
     public void testMessageService(MessageService service) {
-        List<Message> messages = new ArrayList<>();
+        HashMap<Long,Message> messages = new HashMap<>();
         for(int i = 0; i < 100; i++) {
             Message message = new Message(i, i * 10, "HelloWorld" + i, Date.from(Instant.now()));
             service.saveMessage(message);
-            messages.add(message);
+            messages.put(message.getId(),message);
         }
-        messages = messages.reversed();
 
         try {
             Thread.sleep(10);
@@ -67,13 +69,13 @@ public class MessagesServiceTest {
             ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
             scheduledExecutorService.schedule(mongoMessageService::finalizeAllMessages,1, TimeUnit.SECONDS);
         }
-//        List<Message> loadedMessages = service.loadMessagesBeforeDate(Date.from(Instant.now()), 100);
-//        for(int i = 0; i < 100; i++) {
-//            Message loadedMessage = loadedMessages.get(i);
-//            Message expectedMessage = messages.get(i);
-//            assertEquals(expectedMessage,loadedMessage);
-//            loadedMessage = service.getMessage(loadedMessage.getId());
-//            assertEquals(expectedMessage,loadedMessage);
-//        }
+        List<Message> loadedMessages = service.getMessage(new ArrayList<>(messages.keySet()));
+        for(int i = 0; i < 100; i++) {
+            Message loadedMessage = loadedMessages.get(i);
+            Message expectedMessage = messages.get((long)i);
+            assertEquals(expectedMessage,loadedMessage);
+            loadedMessage = service.getMessage(loadedMessage.getId());
+            assertEquals(expectedMessage,loadedMessage);
+        }
     }
 }

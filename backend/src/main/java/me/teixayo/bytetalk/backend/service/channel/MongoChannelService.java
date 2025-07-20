@@ -12,6 +12,7 @@ import org.bson.conversions.Bson;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -72,19 +73,21 @@ public class MongoChannelService implements ChannelService {
     public List<Long> loadMessagesBeforeDate(long channelId, Date date, int batchSize) {
         Bson filter = Filters.and(
                 Filters.eq("channelId", channelId),
-                Filters.lt("date", date)
+                Filters.lte("date", date)
         );
+        long total = messages.countDocuments(filter);
+        int skip = (int)Math.max(0, total - batchSize);
         List<Long> ids = new ArrayList<>();
         messages.find(filter)
-                .sort(Sorts.ascending("date"))
+                .skip(skip)
                 .limit(batchSize)
+                .sort(Sorts.orderBy(Sorts.ascending("date")))
                 .forEach(doc -> ids.add(doc.getLong("messageId")));
         return ids;
     }
 
     public List<Channel> getUserPrivateChannels(long userId) {
         Bson filter = Filters.in("members", userId);
-
         List<Pair<Channel,Date>> result = new ArrayList<>();
         channels.find(filter).forEach(doc -> {
             List<Long> members = doc.getList("members", Long.class);
@@ -94,11 +97,14 @@ public class MongoChannelService implements ChannelService {
                         .sort(Sorts.descending("date"))
                         .limit(1)
                         .first();
-                if(lastMsg==null) return;
-                result.add(Pair.of(channel,lastMsg.getDate("date")));
+                if(lastMsg!=null) {
+                    result.add(Pair.of(channel, lastMsg.getDate("date")));
+                } else {
+                    result.add(Pair.of(channel, doc.getDate("createdAt")));
+                }
             }
         });
-        result.sort((a, b) -> b.getSecond().compareTo(a.getSecond()));
+        result.sort(Comparator.comparing(Pair::getSecond));
         List<Channel> sorted = new ArrayList<>();
         for (Pair<Channel,Date> entry : result) {
             sorted.add(entry.getFirst());
