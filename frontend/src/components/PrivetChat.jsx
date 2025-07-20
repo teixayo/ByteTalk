@@ -185,12 +185,12 @@ const PrivetChat = () => {
         });
 
         const msg = {
-          content: text,
+          content: newMessage.content,
           time: shortTime,
-          username: localStorage.getItem("username") || "anonymous",
+          username: newMessage.username || "anonymous",
           timecode: timestamp,
         };
-
+        console.log(msg)
         setMessages((prev) => {
           const newMessages = [...prev, msg];
 
@@ -219,7 +219,8 @@ const PrivetChat = () => {
 
         setLocalMessages((prev) => [...prev, msg]);
       } else {
-        if (newMessage.channel == "global") return;
+        const username = localStorage.getItem("username")
+        if (newMessage.channel == "global" || newMessage.channel == username) return;
         console.log(newMessage);
         setPrivetChannels((prev) => [{ name: newMessage.channel }, ...prev]);
       }
@@ -274,6 +275,7 @@ const PrivetChat = () => {
         channel: userID,
         content: text,
       };
+      console.log("messagePayload", messagePayload)
       socket.send(JSON.stringify(messagePayload));
     }
     if (!messages[0]) {

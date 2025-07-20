@@ -136,7 +136,12 @@ const Chat = () => {
   useEffect(() => {
     console.log("bulk", bulkMessages.length);
     if (bulkMessages?.length > 0 && listRef.current) {
-      setMessages([...bulkMessages, ...localMessages]);
+      console.log(localMessages);
+      
+        setMessages(() => {
+          return [...bulkMessages, ...localMessages];
+        });
+      
 
       console.log(bulkMessages);
       console.log("localMessages", localMessages);
@@ -205,7 +210,14 @@ const Chat = () => {
           return newMessages;
         });
 
-        setLocalMessages((prev) => [...prev, newMessage]);
+        console.log(localMessages);
+
+        setLocalMessages((prev) => {
+          console.log(...prev);
+          console.log(msg);
+
+          return [...prev, msg];
+        });
       } else {
         console.log("newMessage", newMessage);
         console.log("privetChannels", privetChannels);
@@ -246,22 +258,28 @@ const Chat = () => {
       timecode: timestamp,
     };
 
-    setMessages((prev) => {
-      const newMessages = [...prev, msg];
-      console.log(newMessages);
-      if (listRef.current) {
-        setTimeout(() => {
-          listRef.current.scrollToItem(newMessages.length, "end");
-        }, 60);
-        setTimeout(() => {
-          listRef.current.scrollToItem(newMessages.length, "end");
-        }, 100);
-      }
+    // setMessages((prev) => {
+    //   const newMessages = [...prev, msg];
+    //   console.log(newMessages);
+    //   if (listRef.current) {
+    //     setTimeout(() => {
+    //       listRef.current.scrollToItem(newMessages.length, "end");
+    //     }, 60);
+    //     setTimeout(() => {
+    //       listRef.current.scrollToItem(newMessages.length, "end");
+    //     }, 100);
+    //   }
 
-      return newMessages;
-    });
+    //   return newMessages;
+    // });
+    console.log(localMessages);
 
-    setLocalMessages((prev) => [...prev, msg]);
+    // setLocalMessages((prev) => {
+    //   console.log(prev);
+    //   console.log(msg);
+
+    //   return [...prev, msg];
+    // });
 
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
