@@ -38,8 +38,8 @@ const AuthGate = ({ children }) => {
         const data = JSON.parse(event.data);
         if (data.type == "Status" && data.code == "1002") {
           // حفظ مسیر قبلی یا رفتن به چت عمومی
-          const returnPath = location.pathname.startsWith("/chat") 
-            ? location.pathname 
+          const returnPath = location.pathname.startsWith("/chat")
+            ? location.pathname
             : "/chat";
           navigate(returnPath);
           setChecked(true);
@@ -61,8 +61,7 @@ const AuthGate = ({ children }) => {
     return () => socket.removeEventListener("open", handleOpen);
   }, [socket, wsReady, location.pathname]);
 
-  if (!checked)
-    return <p className="text-white text-center mt-10">Checking credit...</p>;
+  if (!checked) return null;
 
   return children;
 };
