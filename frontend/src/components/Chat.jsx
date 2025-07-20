@@ -60,7 +60,8 @@ const Chat = () => {
     bulkLength,
     // setLoginCheck,
     // loginCheck,
-    activeChat
+    activeChat,
+    setPrivetChannels
   } = useSocket();
 
   const [writing, setWriting] = useState(false);
@@ -164,9 +165,7 @@ const Chat = () => {
 
   useEffect(() => {
     if (newMessage.date) {
-      if (
-        newMessage.channel == "global"
-      ) {
+      if (newMessage.channel == "global") {
         const timestamp = Date.now();
 
         const date = new Date(newMessage.date);
@@ -203,6 +202,9 @@ const Chat = () => {
 
           return newMessages;
         });
+      } else {
+        console.log(newMessage);
+        setPrivetChannels((prev) => [{ name: newMessage.channel }, ...prev]);
       }
     }
   }, [newMessage]);

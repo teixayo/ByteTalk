@@ -61,7 +61,8 @@ const PrivetChat = () => {
     bulkLength,
     // setLoginCheck,
     // loginCheck,
-    activeChat
+    activeChat,
+    setPrivetChannels,
   } = useSocket();
 
   const [writing, setWriting] = useState(false);
@@ -112,8 +113,8 @@ const PrivetChat = () => {
   }, []);
 
   useEffect(() => {
-    console.log("active chat: ",activeChat)
-  }, [activeChat])
+    console.log("active chat: ", activeChat);
+  }, [activeChat]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -171,6 +172,8 @@ const PrivetChat = () => {
   }, [bulkMessages]);
 
   useEffect(() => {
+    console.log(newMessage);
+
     if (newMessage.date) {
       if (location.pathname == `/chat/${newMessage.channel}`) {
         const timestamp = Date.now();
@@ -205,9 +208,19 @@ const PrivetChat = () => {
             }, 100);
           }
           // اسکرول پس از به‌روزرسانی state
+          if (!messages[0]) {
+            setPrivetChannels((prev) => [
+              { name: newMessage.channel },
+              ...prev,
+            ]);
+          }
 
           return newMessages;
         });
+      } else {
+        if (newMessage.channel == "global") return;
+        console.log(newMessage);
+        setPrivetChannels((prev) => [{ name: newMessage.channel }, ...prev]);
       }
     }
   }, [newMessage]);
@@ -259,6 +272,9 @@ const PrivetChat = () => {
         content: text,
       };
       socket.send(JSON.stringify(messagePayload));
+    }
+    if (!messages[0]) {
+      setPrivetChannels((prev) => [{ name: userID }, ...prev]);
     }
   };
 

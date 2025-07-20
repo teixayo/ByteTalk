@@ -6,6 +6,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log(privetChannels)
     if (!privetChannels[0]) return;
 
     console.log(privetChannels[0]);

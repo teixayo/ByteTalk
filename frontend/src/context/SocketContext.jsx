@@ -207,6 +207,7 @@ export const SocketProvider = ({ children }) => {
         wsReady,
         setWsReady,
         privetChannels,
+        setPrivetChannels,
         setActiveChat,
         activeChat
       }}
