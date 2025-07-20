@@ -210,10 +210,10 @@ const Chat = () => {
         console.log("newMessage", newMessage);
         console.log("privetChannels", privetChannels);
 
-        // const isRepetitive = privetChannels.find((item) => {
-        //   return item.name == newMessage.channel;
-        // });
-        // if (!isRepetitive)
+        const isRepetitive = privetChannels.find((item) => {
+          return item.name == newMessage.channel;
+        });
+        if (!isRepetitive)
           setPrivetChannels((prev) => [{ name: newMessage.channel }, ...prev]);
       }
     }
