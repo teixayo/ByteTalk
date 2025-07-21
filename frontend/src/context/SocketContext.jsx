@@ -65,8 +65,10 @@ export const SocketProvider = ({ children }) => {
 
       if (data.type === "LoginToken") {
         console.log("login token::::::::::::::", data.token);
-        localStorage.setItem("token", data.token);
-        setLoginToken(data.token);
+        document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
+
+        // localStorage.setItem("token", data.token);
+        // setLoginToken(data.token);
       }
 
       if (data.type === "BulkMessages") {

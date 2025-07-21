@@ -99,7 +99,7 @@ const PrivetChat = () => {
         })
       );
     }
-
+    
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
         setSelectedUser(null);

@@ -3,12 +3,13 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate, Link } from "react-router-dom";
 import { useSocket } from "../../context/SocketContext";
+import toast from "react-hot-toast";
 
 let localUserName = "";
 let localUserPassword = "";
 
 const statusMessages = {
-  1004: "✅ Success",
+  1004: "Sign-up was successful",
   1005: "❌ This username is already taken",
   1006: "❌ Invalid username format",
   1007: "❌ Invalid password format",
@@ -32,8 +33,9 @@ const SignUpForm = () => {
       }, 800);
       if (status.code == "1004") {
         alert(statusMessages[status.code]);
-        console.log("alert kiri");
+        // toast.success(statusMessages[status.code]);
       } else if (status.code == "1005") {
+        // toast.error(statusMessages[status.code]);
         alert(statusMessages[status.code]);
       }
       setTimeout(() => {
