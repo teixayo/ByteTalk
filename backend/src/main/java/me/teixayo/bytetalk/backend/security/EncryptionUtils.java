@@ -56,8 +56,12 @@ public class EncryptionUtils {
         return jwt;
     }
     public static DecodedJWT decryptToken(String token) {
-        DecodedJWT jwt = verifier.verify(token);
-        if (jwt.getExpiresAt().toInstant().isBefore(Instant.now())) return null;
-        return jwt;
+        try {
+            DecodedJWT jwt = verifier.verify(token);
+            if (jwt.getExpiresAt().toInstant().isBefore(Instant.now())) return null;
+            return jwt;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

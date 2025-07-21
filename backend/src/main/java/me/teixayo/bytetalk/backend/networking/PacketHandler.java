@@ -84,11 +84,18 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
             return;
         }
 
+
         String jwtToken = req.headers().get(HttpHeaderNames.COOKIE);
         User user = null;
         if (jwtToken != null) {
+            jwtToken = jwtToken.replace("token=","");
             DecodedJWT jwt = EncryptionUtils.decryptToken(jwtToken);
-            if (jwt == null) return;
+            if (jwt == null) {
+                sendHttpResponse(ctx, req, new DefaultFullHttpResponse(
+                        HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED));
+                log.info("Disconnected {} cause of invalid token", socketAddress.getAddress().getHostAddress());
+                return;
+            }
             String name = jwt.getSubject();
             if (name == null) {
                 sendHttpResponse(ctx, req, new DefaultFullHttpResponse(
