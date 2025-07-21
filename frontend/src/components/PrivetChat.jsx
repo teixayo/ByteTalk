@@ -5,7 +5,7 @@ import DOMPurify from "dompurify";
 import TextareaAutosize from "react-textarea-autosize";
 import { VariableSizeList as List } from "react-window";
 import { useNavigate, useParams } from "react-router-dom";
-
+import toast from "react-hot-toast";
 import Sidebar from "./Sidebar";
 
 let flag = true;
@@ -545,6 +545,12 @@ const PrivetChat = () => {
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
+                    if (text.length > 2000) {
+                        console.log(text.length);
+                        e.preventDefault();
+                        toast.error("The message should not exceed 2000 characters.");
+                        return;
+                      }
                     e.preventDefault();
                     if (text.trim() !== "") {
                       sendMessage();
@@ -562,6 +568,11 @@ const PrivetChat = () => {
                   role="button"
                   onClick={() => {
                     if (text.trim() !== "") {
+                      if (text.length > 2000) {
+                        console.log(text.length);
+                        toast.error("The message should not exceed 2000 characters.");
+                        return;
+                      }
                       sendMessage();
                       setWriting(false);
                       setText("");

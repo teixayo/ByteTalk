@@ -544,13 +544,13 @@ const Chat = () => {
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
-                      // if (text.length > 2000) {
-                      //   console.log(text.length);
-                      //   e.preventDefault();
+                      if (text.length > 2000) {
+                        console.log(text.length);
+                        e.preventDefault();
 
-                      //   toast.error("The message should not exceed 2000 characters.");
-                      //   return;
-                      // }
+                        toast.error("The message should not exceed 2000 characters.");
+                        return;
+                      }
                       console.log(text.length);
 
                       e.preventDefault();
@@ -569,11 +569,11 @@ const Chat = () => {
                   <div
                     role="button"
                     onClick={() => {
-                      // if (text.length > 2000) {
-                      //   console.log(text.length);
-                      //   toast.error("The message should not exceed 2000 characters.");
-                      //   return;
-                      // }
+                      if (text.length > 2000) {
+                        console.log(text.length);
+                        toast.error("The message should not exceed 2000 characters.");
+                        return;
+                      }
                       if (text.trim() !== "") {
                         sendMessage();
                         setWriting(false);
