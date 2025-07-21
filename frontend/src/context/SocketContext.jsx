@@ -60,6 +60,7 @@ export const SocketProvider = ({ children }) => {
           // };
           // }
         }
+        console.log(data)
         setStatus(data);
       }
 

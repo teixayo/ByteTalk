@@ -18,6 +18,8 @@ const SignUpForm = () => {
   const navigate = useNavigate();
   const { socket, status } = useSocket();
 
+  
+
   useEffect(() => {
     if (status.type == "Status" && status.code == "1004") {
       setTimeout(() => {
