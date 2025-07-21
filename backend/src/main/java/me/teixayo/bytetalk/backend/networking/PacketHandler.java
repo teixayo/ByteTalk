@@ -77,23 +77,46 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     public void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req) {
-
+        InetSocketAddress socketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
         if (!req.decoderResult().isSuccess() || (!"websocket".equals(req.headers().get("Upgrade")))) {
             sendHttpResponse(ctx, req, new DefaultFullHttpResponse(
                     HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
             return;
         }
 
+        String jwtToken = req.headers().get(HttpHeaderNames.COOKIE);
+        User user = null;
+        if (jwtToken != null) {
+            DecodedJWT jwt = EncryptionUtils.decryptToken(jwtToken);
+            if (jwt == null) return;
+            String name = jwt.getSubject();
+            if (name == null) {
+                sendHttpResponse(ctx, req, new DefaultFullHttpResponse(
+                        HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED));
+                return;
+            }
+            user = Server.getInstance().getUserService().getUserByUserName(name);
+            if (user == null) {
+                sendHttpResponse(ctx, req, new DefaultFullHttpResponse(
+                        HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED));
+                log.info("Disconnected {} cause of invalid user", socketAddress.getAddress().getHostAddress());
+                return;
+            }
+        }
         WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
                 getWebSocketLocation(req), null, true);
         handshaker = wsFactory.newHandshaker(req);
         if (handshaker == null) {
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
-        } else {
-            handshaker.handshake(ctx.channel(), req);
-            ctx.channel().attr(ChannelInitializer.getHandshake()).set(handshaker);
-
+            return;
         }
+        handshaker.handshake(ctx.channel(), req);
+        ctx.channel().attr(ChannelInitializer.getHandshake()).set(handshaker);
+
+        if(user!=null) {
+            loggedIn(ctx, true, user);
+        }
+
     }
 
     public void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
@@ -117,77 +140,21 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
         if (ctx.channel().attr(ChannelInitializer.getState()).get() == ClientStateType.IN_LOGIN) {
             if (type.equals("Login")) {
                 String name = jsonObject.getString("username");
-
                 User user = Server.getInstance().getUserService().getUserByUserName(name);
-                boolean useToken = jsonObject.has("token");
-
                 if (user == null) {
-
-                    if (useToken) {
-                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_TOKEN.createPacket().getData().toString()));
-                    } else {
-                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
-                    }
+                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
                     handshaker.close(ctx.channel(), new CloseWebSocketFrame());
                     log.info("Disconnected {} cause of invalid user", socketAddress.getAddress().getHostAddress());
                     return;
                 }
-                if (useToken) {
-                    String token = jsonObject.getString("token");
-                    DecodedJWT jwt = EncryptionUtils.getJWT(name);
-                    if (jwt == null || !jwt.getToken().equals(token)) {
-                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_TOKEN.createPacket().getData().toString()));
-                        handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                        log.info("Disconnected {} cause of invalid token", socketAddress.getAddress().getHostAddress());
-                        return;
-                    }
-                } else {
-                    String password = Crypto.encryptSHA256(jsonObject.getString("password"));
-                    if (!user.getPassword().equals(password)) {
-                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
-                        handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                        log.info("Disconnected {} cause of invalid password", socketAddress.getAddress().getHostAddress());
-                        return;
-                    }
+                String password = Crypto.encryptSHA256(jsonObject.getString("password"));
+                if (!user.getPassword().equals(password)) {
+                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
+                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                    log.info("Disconnected {} cause of invalid password", socketAddress.getAddress().getHostAddress());
+                    return;
                 }
-                ctx.channel().attr(ChannelInitializer.getState()).set(ClientStateType.AFTER_LOGIN);
-
-                user.setUserConnection(new UserConnection(ctx, user));
-                this.user = user;
-                UserManager.getInstance().addUser(user);
-                if (useToken) {
-                    user.sendPacket(StatusCodes.SUCCESS_LOGIN_WITH_TOKEN.createPacket());
-                } else {
-                    user.sendPacket(StatusCodes.SUCCESS_LOGIN_WITH_PASSWORD.createPacket());
-                }
-                if (EncryptionUtils.getJWT(name) == null) {
-                    user.sendPacket(ServerPacketType.LoginToken.createPacket("token",
-                            EncryptionUtils.createLoginJWT(name)));
-                    log.info("Created token for {}", name);
-                }
-
-
-                JSONArray usersArray = new JSONArray();
-                for (Channel privateChannel : Server.getInstance().getChannelService().getUserPrivateChannels(user.getId())) {
-                    jsonObject = new JSONObject();
-
-                    Optional<Long> targetUserID = privateChannel.getMembers().stream().filter(id -> id != user.getId()).findFirst();
-                    if(targetUserID.isEmpty()) continue;
-
-                    User targetUser = Server.getInstance().getUserService().getUserById(targetUserID.get());
-
-                    jsonObject.put("name", targetUser.getName());
-                    jsonObject.put("creationDate", privateChannel.getCreationDate());
-                    usersArray.put(jsonObject);
-                }
-                JSONObject jsonObject1 = new JSONObject();
-
-                jsonObject1.put("channels", usersArray);
-                user.sendPacket(ServerPacketType.UserPrivateChannels.createPacket(jsonObject1));
-
-
-                log.info("User {} logged in", name);
-                return;
+                loggedIn(ctx, false, user);
             }
             if (type.equals("CreateUser")) {
                 String name = jsonObject.getString("username");
@@ -226,6 +193,43 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
             ClientPacket packet = packetType.createPacket(jsonObject);
             user.getUserConnection().handleClientPacket(packet);
         }
+    }
+
+    private void loggedIn(ChannelHandlerContext ctx, boolean useToken, User user) {
+        ctx.channel().attr(ChannelInitializer.getState()).set(ClientStateType.AFTER_LOGIN);
+
+        user.setUserConnection(new UserConnection(ctx, user));
+        this.user = user;
+        UserManager.getInstance().addUser(user);
+        if (useToken) {
+            user.sendPacket(StatusCodes.SUCCESS_LOGIN_WITH_TOKEN.createPacket());
+        } else {
+            user.sendPacket(StatusCodes.SUCCESS_LOGIN_WITH_PASSWORD.createPacket());
+        }
+        if (EncryptionUtils.getJWT(user.getName()) == null) {
+            user.sendPacket(ServerPacketType.LoginToken.createPacket("token",
+                    EncryptionUtils.createLoginJWT(user.getName())));
+            log.info("Created token for {}", user.getName());
+        }
+        JSONArray usersArray = new JSONArray();
+        for (Channel privateChannel : Server.getInstance().getChannelService().getUserPrivateChannels(user.getId())) {
+            JSONObject jsonObject = new JSONObject();
+
+            Optional<Long> targetUserID = privateChannel.getMembers().stream().filter(id -> id != user.getId()).findFirst();
+            if(targetUserID.isEmpty()) continue;
+
+            User targetUser = Server.getInstance().getUserService().getUserById(targetUserID.get());
+
+            jsonObject.put("name", targetUser.getName());
+            jsonObject.put("creationDate", privateChannel.getCreationDate());
+            usersArray.put(jsonObject);
+        }
+        JSONObject jsonObject1 = new JSONObject();
+
+        jsonObject1.put("channels", usersArray);
+        user.sendPacket(ServerPacketType.UserPrivateChannels.createPacket(jsonObject1));
+
+        log.info("User {} logged in", user.getName());
     }
 
     @SneakyThrows
