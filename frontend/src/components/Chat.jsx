@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { useSocket } from "../context/SocketContext";
+import { useNavigate, useParams } from "react-router-dom";
+import { VariableSizeList as List } from "react-window";
+
 import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
+import toast from "react-hot-toast";
 import TextareaAutosize from "react-textarea-autosize";
-import { VariableSizeList as List } from "react-window";
-import { useNavigate, useParams } from "react-router-dom";
 
+import { useSocket } from "../context/SocketContext";
 import Sidebar from "./Sidebar";
+
 
 let flag = true;
 let firstRender = true;
@@ -137,11 +140,10 @@ const Chat = () => {
     console.log("bulk", bulkMessages.length);
     if (bulkMessages?.length > 0 && listRef.current) {
       console.log(localMessages);
-      
-        setMessages(() => {
-          return [...bulkMessages, ...localMessages];
-        });
-      
+
+      setMessages(() => {
+        return [...bulkMessages, ...localMessages];
+      });
 
       console.log(bulkMessages);
       console.log("localMessages", localMessages);
@@ -242,21 +244,21 @@ const Chat = () => {
   }, [messages]);
 
   const sendMessage = () => {
-    const timestamp = Date.now();
-    const date = new Date(timestamp);
-    console.log(timestamp);
-    const shortTime = date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    // const timestamp = Date.now();
+    // const date = new Date(timestamp);
+    // console.log(timestamp);
+    // const shortTime = date.toLocaleTimeString("en-US", {
+    //   hour: "2-digit",
+    //   minute: "2-digit",
+    //   hour12: true,
+    // });
 
-    const msg = {
-      content: text,
-      time: shortTime,
-      username: localStorage.getItem("username") || "anonymous",
-      timecode: timestamp,
-    };
+    // const msg = {
+    //   content: text,
+    //   time: shortTime,
+    //   username: localStorage.getItem("username") || "anonymous",
+    //   timecode: timestamp,
+    // };
 
     // setMessages((prev) => {
     //   const newMessages = [...prev, msg];
@@ -368,7 +370,7 @@ const Chat = () => {
             {showAvatar && (
               <div className="flex items-center mb-1">
                 <span
-                  className="font-medium text-sm text-green-400 mr-2 cursor-pointer"
+                  className="pt-1 text-sm text-white mr-2 cursor-pointer"
                   onClick={handleUserClick}
                 >
                   {msg.username}
@@ -542,6 +544,15 @@ const Chat = () => {
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
+                      // if (text.length > 2000) {
+                      //   console.log(text.length);
+                      //   e.preventDefault();
+
+                      //   toast.error("The message should not exceed 2000 characters.");
+                      //   return;
+                      // }
+                      console.log(text.length);
+
                       e.preventDefault();
                       if (text.trim() !== "") {
                         sendMessage();
@@ -558,6 +569,11 @@ const Chat = () => {
                   <div
                     role="button"
                     onClick={() => {
+                      // if (text.length > 2000) {
+                      //   console.log(text.length);
+                      //   toast.error("The message should not exceed 2000 characters.");
+                      //   return;
+                      // }
                       if (text.trim() !== "") {
                         sendMessage();
                         setWriting(false);
