@@ -601,7 +601,13 @@ const Chat = () => {
                     }}
                     onHeightChange={handleInputResize}
                     placeholder="Message"
-                    className={`${writing? "sm:ml-1 md:ml-2 rounded-l-xl" : "sm:mx-1 md:mx-2 rounded-xl"} w-12/12 h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-[#222327] focus:outline-none overflow-y-auto box-border border border-transparent focus:border-[#303135]  scrollbar-none resize-none`}
+                    className={`${
+                      writing
+                        ? "sm:ml-1 md:ml-2 rounded-l-xl"
+                        : "sm:mx-1 md:mx-2 rounded-xl"
+                    } w-12/12 h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-[#222327] focus:outline-none overflow-y-auto 
+                    scrollbar-none resize-none`}
+                    // box-border border border-transparent focus:border-[#303135]
                   />
                   {writing ? (
                     <div

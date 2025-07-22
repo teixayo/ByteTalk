@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 const SocketContext = createContext();
 
 let initialLoaded = false;
@@ -22,8 +23,7 @@ export const SocketProvider = ({ children }) => {
   const [privetChannels, setPrivetChannels] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
 
-  const [canMessage, setCanMessage] = useState(null)
-
+  const [canMessage, setCanMessage] = useState(null);
 
   const connectWebSocket = () => {
     const ws = new WebSocket(import.meta.env.VITE_APP_WEBSOCKET_URL);
@@ -38,6 +38,15 @@ export const SocketProvider = ({ children }) => {
       console.log("📨 WS received:", data);
 
       if (data.type == "Status") {
+        if (data.code === "1004") {
+          toast.success("Sign up was successful");
+        } else if (data.code === "1005") {
+          toast.error("This username is already taken");
+        } else if (data.code === "1006") {
+          toast.error("Invalid username format");
+        } else if (data.code === "1007") {
+          toast.error("Invalid password format");
+        }
         if (data.code == "1002") {
           // if (!initialLoaded) {
           //   data.messages.map((msg) => {
@@ -169,8 +178,8 @@ export const SocketProvider = ({ children }) => {
         setPrivetChannels(data.channels);
       }
 
-      if(data.type == 'CanSendMessage') {
-        setCanMessage(data)
+      if (data.type == "CanSendMessage") {
+        setCanMessage(data);
       }
     };
 
@@ -221,7 +230,7 @@ export const SocketProvider = ({ children }) => {
         setPrivetChannels,
         setActiveChat,
         activeChat,
-        canMessage
+        canMessage,
       }}
     >
       {children}

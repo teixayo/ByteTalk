@@ -31,18 +31,11 @@ const SignUpForm = () => {
         console.log("📨 Sending login:", loginPayload);
         console.log("WS readyState:", socket.readyState);
         socket.send(JSON.stringify(loginPayload));
-      }, 800);
-      if (status.code == "1004") {
-        alert(statusMessages[status.code]);
-        toast.success(statusMessages[status.code]);
-      } else if (status.code == "1005") {
-        toast.error(statusMessages[status.code]);
-        // alert(statusMessages[status.code]);
-      }
+      }, 100);
       setTimeout(() => {
 
         navigate("/chat");
-      }, 600);
+      }, 300);
     }
   }, [status]);
 
