@@ -335,6 +335,8 @@ const Chat = () => {
 
     const handleUserClick = (e) => {
       e.stopPropagation();
+      console.log({type: "CanSendMessag", channel: msg.username})
+      socket.send(JSON.stringify({type: "CanSendMessag", channel: msg.username}))
       setSelectedUser({
         username: msg.username,
         // میتوانید اطلاعات بیشتر کاربر را اینجا اضافه کنید

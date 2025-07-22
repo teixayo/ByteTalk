@@ -34,12 +34,13 @@ const SignUpForm = () => {
       }, 800);
       if (status.code == "1004") {
         alert(statusMessages[status.code]);
-        // toast.success(statusMessages[status.code]);
+        toast.success(statusMessages[status.code]);
       } else if (status.code == "1005") {
-        // toast.error(statusMessages[status.code]);
-        alert(statusMessages[status.code]);
+        toast.error(statusMessages[status.code]);
+        // alert(statusMessages[status.code]);
       }
       setTimeout(() => {
+
         navigate("/chat");
       }, 600);
     }
