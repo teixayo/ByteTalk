@@ -65,6 +65,7 @@ const Chat = () => {
     // setLoginCheck,
     // loginCheck,
     activeChat,
+    status,
     setPrivetChannels,
     privetChannels,
   } = useSocket();
@@ -119,6 +120,10 @@ const Chat = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    console.log("ldfkjas")
+  }, [status])
 
   useEffect(() => {
     const handleResize = () => {

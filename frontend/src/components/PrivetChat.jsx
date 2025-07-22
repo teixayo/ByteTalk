@@ -99,7 +99,7 @@ const PrivetChat = () => {
         })
       );
     }
-    
+
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
         setSelectedUser(null);
@@ -190,7 +190,7 @@ const PrivetChat = () => {
           username: newMessage.username || "anonymous",
           timecode: timestamp,
         };
-        console.log(msg)
+        console.log(msg);
         setMessages((prev) => {
           const newMessages = [...prev, msg];
 
@@ -219,10 +219,22 @@ const PrivetChat = () => {
 
         setLocalMessages((prev) => [...prev, msg]);
       } else {
-        const username = localStorage.getItem("username")
-        if (newMessage.channel == "global" || newMessage.channel == username) return;
+        const username = localStorage.getItem("username");
+        if (newMessage.channel == "global" || newMessage.channel == username)
+          return;
         console.log(newMessage);
-        setPrivetChannels((prev) => [{ name: newMessage.channel }, ...prev]);
+        setPrivetChannels((prev) => {
+          const prevChannels = prev;
+          console.log(prevChannels);
+          const isRepetitive = prevChannels.find((item) => {
+            return item.name == newMessage.channel;
+          });
+          if (!isRepetitive) {
+            return [{ name: newMessage.channel }, ...prev];
+          } else {
+            return [...prev];
+          }
+        });
       }
     }
   }, [newMessage]);
@@ -275,7 +287,7 @@ const PrivetChat = () => {
         channel: userID,
         content: text,
       };
-      console.log("messagePayload", messagePayload)
+      console.log("messagePayload", messagePayload);
       socket.send(JSON.stringify(messagePayload));
     }
     if (!messages[0]) {
@@ -546,11 +558,13 @@ const PrivetChat = () => {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     if (text.length > 2000) {
-                        console.log(text.length);
-                        e.preventDefault();
-                        toast.error("The message should not exceed 2000 characters.");
-                        return;
-                      }
+                      console.log(text.length);
+                      e.preventDefault();
+                      toast.error(
+                        "The message should not exceed 2000 characters."
+                      );
+                      return;
+                    }
                     e.preventDefault();
                     if (text.trim() !== "") {
                       sendMessage();
@@ -570,7 +584,9 @@ const PrivetChat = () => {
                     if (text.trim() !== "") {
                       if (text.length > 2000) {
                         console.log(text.length);
-                        toast.error("The message should not exceed 2000 characters.");
+                        toast.error(
+                          "The message should not exceed 2000 characters."
+                        );
                         return;
                       }
                       sendMessage();

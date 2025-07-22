@@ -20,8 +20,7 @@ export const SocketProvider = ({ children }) => {
   const [wsReady, setWsReady] = useState(false);
 
   const [privetChannels, setPrivetChannels] = useState([]);
-  const [activeChat, setActiveChat] = useState(null)
-
+  const [activeChat, setActiveChat] = useState(null);
 
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
@@ -35,7 +34,6 @@ export const SocketProvider = ({ children }) => {
 
       console.log("📨 WS received:", data);
 
-      
       if (data.type == "Status") {
         if (data.code == "1002") {
           // if (!initialLoaded) {
@@ -60,6 +58,7 @@ export const SocketProvider = ({ children }) => {
           // };
           // }
         }
+        console.log(data);
         setStatus(data);
       }
 
@@ -97,7 +96,7 @@ export const SocketProvider = ({ children }) => {
             });
             initialLoaded = true;
           } else {
-            console.log("data.messages.length",data.messages.length);
+            console.log("data.messages.length", data.messages.length);
 
             setBulkLength(data.messages.length);
             if (data.messages.length < 1) return;
@@ -170,6 +169,8 @@ export const SocketProvider = ({ children }) => {
 
     ws.onerror = (err) => {
       console.error("❌ WebSocket error:", err);
+      document.cookie =
+        "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
     };
 
     ws.onclose = (event) => {
@@ -179,6 +180,7 @@ export const SocketProvider = ({ children }) => {
 
       reconnectTimeoutRef.current = setTimeout(() => {
         console.log("🔁 Trying to reconnect...");
+
         connectWebSocket();
       }, 600);
     };

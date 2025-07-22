@@ -3,7 +3,7 @@ import { useSocket } from "../context/SocketContext";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const AuthGate = ({ children }) => {
-  const { socket, wsReady, setWsReady } = useSocket();
+  const { socket, wsReady, setWsReady, status } = useSocket();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -11,55 +11,52 @@ const AuthGate = ({ children }) => {
   const [loginAgain, setLoginAgain] = useState(false);
 
   useEffect(() => {
-    if (!socket) return;
-    if (loginAgain) return;
+    if (!socket || loginAgain) return;
 
     const handleOpen = () => setWsReady(true);
 
     if (socket.readyState === WebSocket.OPEN) {
-      const username = localStorage.getItem("username");
-      const token = localStorage.getItem("token");
 
-      if (!username || !token) {
-        navigate("/");
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+      }
+      const token = getCookie("token");
+
+      if (token != undefined) {
+        if (status.type == "Status") {
+          if (status.code === "1002") {
+            const returnPath = location.pathname.startsWith("/chat")
+              ? location.pathname
+              : "/chat";
+            navigate(returnPath);
+            setChecked(true);
+          } else if (status.code === "1003") {
+            setLoginAgain(true);
+            setChecked(true);
+            navigate("/")
+          }
+        }
+      } else {
         setChecked(true);
-        return;
+        navigate("/");
       }
 
-      const loginTokenPayload = {
-        type: "Login",
-        username: username,
-        token,
-      };
-
-      socket.send(JSON.stringify(loginTokenPayload));
-
-      const handler = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type == "Status" && data.code == "1002") {
-          // حفظ مسیر قبلی یا رفتن به چت عمومی
-          const returnPath = location.pathname.startsWith("/chat")
-            ? location.pathname
-            : "/chat";
-          navigate(returnPath);
-          setChecked(true);
-        }
-        if (data.type == "Status" && data.code == "1003") {
-          navigate("/");
-          setLoginAgain(true);
-          setChecked(true);
-        }
-
-        socket.removeEventListener("message", handler);
-      };
-
-      socket.addEventListener("message", handler);
     } else {
       socket.addEventListener("open", handleOpen);
     }
 
-    return () => socket.removeEventListener("open", handleOpen);
-  }, [socket, wsReady, location.pathname]);
+    return () => {
+      socket.removeEventListener("open", handleOpen);
+    };
+  }, [
+    socket,
+    wsReady,
+    location.pathname,
+    setWsReady,
+    status,
+  ]);
 
   if (!checked) return null;
 
