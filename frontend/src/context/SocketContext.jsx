@@ -47,7 +47,7 @@ export const SocketProvider = ({ children }) => {
         } else if (data.code === "1007") {
           toast.error("Invalid password format");
         }
-        if (data.code == "1002") {
+        // if (data.code == "1002") {
           // if (!initialLoaded) {
           //   data.messages.map((msg) => {
           //     const date = new Date(msg.date);
@@ -69,7 +69,7 @@ export const SocketProvider = ({ children }) => {
           //     }
           // };
           // }
-        }
+        // }
         console.log(data);
         setStatus(data);
       }

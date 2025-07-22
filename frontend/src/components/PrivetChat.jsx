@@ -74,8 +74,8 @@ const PrivetChat = () => {
   const [messages, setMessages] = useState([]);
 
   const inputRef = useRef(null);
-  const [inputHeight, setInputHeight] = useState(70);
-  const [titleHeight, setTitleHight] = useState(60); // ارتفاع پیش‌فرض
+  const [inputHeight, setInputHeight] = useState(56);
+  const [titleHeight, setTitleHight] = useState(63); // ارتفاع پیش‌فرض
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -90,14 +90,7 @@ const PrivetChat = () => {
   const popupRef = useRef(null);
 
   const [validUser, setValidUser] = useState(true);
-
-  // useEffect(() => {
-  //   console.log(validUser)
-  //     if (!validUser) {
-  //       // اگر داده‌ای وجود نداشت، برگشت به صفحه‌ی قبلی
-  //       navigate(-1); // یا navigate("/some-path") برای مسیر مشخص
-  //     }
-  //   }, [validUser]);
+  const [isFocused, setIsFocused] = useState(false);
 
   // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
   useEffect(() => {
@@ -372,7 +365,7 @@ const PrivetChat = () => {
         <div
           ref={rowRef}
           className={`flex p-2 ${isSameUserAsPrevious ? "pt-1" : ""}`}
-          style={{ minHeight: showAvatar ? "75px" : "50px" }}
+          style={{ minHeight: showAvatar ? "60px" : "40px" }}
         >
           {/* آواتار (فقط برای اولین پیام) */}
           {showAvatar ? (
@@ -383,7 +376,7 @@ const PrivetChat = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={0.75}
                 stroke="currentColor"
-                className="size-12" // کاهش سایز آواتار
+                className="size-11" // کاهش سایز آواتار
               >
                 <path
                   strokeLinecap="round"
@@ -401,7 +394,7 @@ const PrivetChat = () => {
             {showAvatar && (
               <div className="flex items-center mb-1">
                 <span
-                  className="font-medium text-sm text-green-400 mr-2 cursor-pointer"
+                  className="font-medium text-sm mr-2 cursor-pointer"
                   onClick={handleUserClick}
                 >
                   {msg.username}
@@ -447,7 +440,7 @@ const PrivetChat = () => {
 
   if (!validUser) {
     console.log(validUser);
-    
+
     navigate(-1);
     return null;
   }
@@ -466,9 +459,9 @@ const PrivetChat = () => {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  strokeWidth={1.5}
+                  strokeWidth={0.75}
                   stroke="currentColor"
-                  className="size-12 text-white"
+                  className="size-11 text-white"
                 >
                   <path
                     strokeLinecap="round"
@@ -501,7 +494,7 @@ const PrivetChat = () => {
         <div className="h-screen grid grid-cols-7 xl:grid-cols-5 text-gray-300">
           <Sidebar />
           <div className="grid col-span-5 xl:col-span-4">
-            <div className="h-full flex items-center bg-neutral-700">
+            <div className="h-14 flex items-center bg-[#1a1a1e] border-b border-[#29292d]">
               {userID ? (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -509,7 +502,7 @@ const PrivetChat = () => {
                   viewBox="0 0 24 24"
                   strokeWidth={0.75}
                   stroke="currentColor"
-                  className="size-12 text-white mx-1.75"
+                  className="size-11 text-white ml-2 mr-2.5"
                 >
                   <path
                     strokeLinecap="round"
@@ -524,7 +517,7 @@ const PrivetChat = () => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.25}
                   stroke="currentColor"
-                  className="size-8 ز"
+                  className="size-8"
                 >
                   <path
                     strokeLinecap="round"
@@ -544,6 +537,7 @@ const PrivetChat = () => {
                 onScroll={handleScroll}
                 itemSize={getRowHeight} // استفاده از تابع اندازه‌گیری پویا
                 width={"100%"}
+                className="scrollbar-custom"
                 estimatedItemSize={120} // ارتفاع تخمینی برای محاسبه اولیه
                 onItemsRendered={({ visibleStartIndex }) => {
                   if (
@@ -577,76 +571,83 @@ const PrivetChat = () => {
                 {Row}
               </List>
             </div>
-            <div className=" flex bg-neutral-700 w-full">
-              <TextareaAutosize
-                type="text"
+            <div className="bg-[#1a1a1e] w-full pb-2 sm:px-1 md:px-2">
+              <div
                 ref={inputRef}
-                minRows={1}
-                maxRows={4}
-                value={text}
-                onChange={(e) => {
-                  setText(e.target.value);
-                  e.target.value == "" || e.target.value.trim() == ""
-                    ? setWriting(false)
-                    : setWriting(true);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    if (text.length > 2000) {
-                      console.log(text.length);
+                className={`w-full flex transition-colors duration-200 ${
+                  isFocused
+                    ? "border border-[#303135]"
+                    : "border border-transparent"
+                } rounded-lg`}
+              >
+                <TextareaAutosize
+                  type="text"
+                  minRows={1}
+                  maxRows={4}
+                  value={text}
+                  onChange={(e) => {
+                    setText(e.target.value);
+                    setWriting(e.target.value.trim() !== "");
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
-                      toast.error(
-                        "The message should not exceed 2000 characters."
-                      );
-                      return;
-                    }
-                    e.preventDefault();
-                    if (text.trim() !== "") {
-                      sendMessage();
-                      setWriting(false);
-                      setText("");
-                    }
-                  }
-                }}
-                onHeightChange={handleInputResize}
-                placeholder="Message"
-                className="w-12/12 h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-neutral-700 border-0 focus:outline-none overflow-y-auto  focus:ring-0 scrollbar-none resize-none"
-              />
-              {writing ? (
-                <div
-                  role="button"
-                  onClick={() => {
-                    if (text.trim() !== "") {
                       if (text.length > 2000) {
-                        console.log(text.length);
                         toast.error(
                           "The message should not exceed 2000 characters."
                         );
                         return;
                       }
-                      sendMessage();
-                      setWriting(false);
-                      setText("");
+                      if (text.trim() !== "") {
+                        sendMessage();
+                        setWriting(false);
+                        setText("");
+                      }
                     }
                   }}
-                  className="flex items-end cursor-pointer"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="size-7 mx-4 mb-3.25"
+                  onHeightChange={handleInputResize}
+                  placeholder="Message"
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  className={`${
+                    writing ? "rounded-l-lg" : "rounded-lg"
+                  } w-full h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-[#222327] focus:outline-none overflow-y-auto resize-none`}
+                />
+                {writing && (
+                  <div
+                    role="button"
+                    onClick={() => {
+                      if (text.length > 2000) {
+                        toast.error(
+                          "The message should not exceed 2000 characters."
+                        );
+                        return;
+                      }
+                      if (text.trim() !== "") {
+                        sendMessage();
+                        setWriting(false);
+                        setText("");
+                      }
+                    }}
+                    className="flex items-end pb-0.5 cursor-pointer rounded-r-lg bg-[#222327]"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
-                    />
-                  </svg>
-                </div>
-              ) : null}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="size-7 mx-4 mb-3.25"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

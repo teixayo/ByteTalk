@@ -79,17 +79,15 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
 
   const inputRef = useRef(null);
-  const [inputHeight, setInputHeight] = useState(80);
-  const [titleHeight, setTitleHight] = useState(60); // ارتفاع پیش‌فرض
+  const [inputHeight, setInputHeight] = useState(56);
+  const [titleHeight, setTitleHight] = useState(63); // ارتفاع پیش‌فرض
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
   const rowHeights = useRef({});
   const listRef = useRef();
-
-  // const rowRefs = useRef([]);
+  const [isFocused, setIsFocused] = useState(false);
   const navigate = useNavigate();
-  // const { userID } = useParams();
 
   const [selectedUser, setSelectedUser] = useState(null);
   const popupRef = useRef(null);
@@ -158,7 +156,7 @@ const Chat = () => {
       console.log(bulkMessages);
       console.log("localMessages", localMessages);
 
-      listRef.current.scrollToItem(bulkLength - 1, "start");
+      listRef.current.scrollToItem(bulkLength, "start");
       if (firstRender) {
         setTimeout(() => {
           listRef.current.scrollToItem(bulkMessages.length, "end");
@@ -365,7 +363,7 @@ const Chat = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={0.75}
                 stroke="currentColor"
-                className="size-12" // کاهش سایز آواتار
+                className="size-11" // کاهش سایز آواتار
               >
                 <path
                   strokeLinecap="round"
@@ -463,7 +461,7 @@ const Chat = () => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="size-12 text-white"
+                  className="size-11 text-white"
                 >
                   <path
                     strokeLinecap="round"
@@ -498,14 +496,14 @@ const Chat = () => {
           <Sidebar />
           <div className="grid col-span-5 xl:col-span-4">
             <div className="flex-1 flex flex-col">
-              <div className="h-14 flex items-center bg-[#1a1a1e] px-4 border-b border-[#29292d]">
+              <div className="h-14 flex items-center bg-[#1a1a1e] border-b border-[#29292d]">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.25}
                   stroke="currentColor"
-                  className="size-8 mx-3"
+                  className="size-8 ml-4 mr-3.5"
                 >
                   <path
                     strokeLinecap="round"
@@ -515,6 +513,7 @@ const Chat = () => {
                 </svg>
                 <p>Global</p>
               </div>
+
               <div className="flex-1 ">
                 <List
                   ref={listRef}
@@ -565,8 +564,15 @@ const Chat = () => {
                 </List>
               </div>
 
-              <div className="flex bg-[#1a1a1e] w-full">
-                <div ref={inputRef} className="w-full flex">
+              <div className="bg-[#1a1a1e] w-full pb-2 sm:px-1 md:px-2">
+                <div
+                  ref={inputRef}
+                  className={`w-full flex transition-colors duration-200 ${
+                    isFocused
+                      ? "border border-[#303135]"
+                      : "border border-transparent"
+                  } rounded-lg`}
+                >
                   <TextareaAutosize
                     type="text"
                     minRows={1}
@@ -574,24 +580,17 @@ const Chat = () => {
                     value={text}
                     onChange={(e) => {
                       setText(e.target.value);
-                      e.target.value == "" || e.target.value.trim() == ""
-                        ? setWriting(false)
-                        : setWriting(true);
+                      setWriting(e.target.value.trim() !== "");
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
                         if (text.length > 2000) {
-                          console.log(text.length);
-                          e.preventDefault();
-
                           toast.error(
                             "The message should not exceed 2000 characters."
                           );
                           return;
                         }
-                        console.log(text.length);
-
-                        e.preventDefault();
                         if (text.trim() !== "") {
                           sendMessage();
                           setWriting(false);
@@ -601,20 +600,19 @@ const Chat = () => {
                     }}
                     onHeightChange={handleInputResize}
                     placeholder="Message"
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
                     className={`${
                       writing
-                        ? "sm:ml-1 md:ml-2 rounded-l-xl"
-                        : "sm:mx-1 md:mx-2 rounded-xl"
-                    } w-12/12 h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-[#222327] focus:outline-none overflow-y-auto 
-                    scrollbar-none resize-none`}
-                    // box-border border border-transparent focus:border-[#303135]
+                        ? "rounded-l-lg"
+                        : "rounded-lg"
+                    } w-full h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-[#222327] focus:outline-none overflow-y-auto resize-none`}
                   />
-                  {writing ? (
+                  {writing && (
                     <div
                       role="button"
                       onClick={() => {
                         if (text.length > 2000) {
-                          console.log(text.length);
                           toast.error(
                             "The message should not exceed 2000 characters."
                           );
@@ -626,7 +624,7 @@ const Chat = () => {
                           setText("");
                         }
                       }}
-                      className="flex items-end cursor-pointer rounded-r-xl sm:mr-1 md:mr-2 bg-[#222327]"
+                      className="flex items-end pb-0.5 cursor-pointer rounded-r-lg bg-[#222327]"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -643,7 +641,7 @@ const Chat = () => {
                         />
                       </svg>
                     </div>
-                  ) : null}
+                  )}
                 </div>
               </div>
             </div>
