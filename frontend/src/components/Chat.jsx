@@ -79,7 +79,7 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
 
   const inputRef = useRef(null);
-  const [inputHeight, setInputHeight] = useState(70);
+  const [inputHeight, setInputHeight] = useState(80);
   const [titleHeight, setTitleHight] = useState(60); // ارتفاع پیش‌فرض
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
@@ -314,18 +314,17 @@ const Chat = () => {
   };
 
   useEffect(() => {
-    if(!canMessage)return
-  const timeout = setTimeout(() => {
-    if (canMessage?.status && typeof canMessage.channel === "string") {
-      setSelectedUser({
-        username: canMessage.channel,
-      });
-    }
-  }, 20);
+    if (!canMessage) return;
+    const timeout = setTimeout(() => {
+      if (canMessage?.status && typeof canMessage.channel === "string") {
+        setSelectedUser({
+          username: canMessage.channel,
+        });
+      }
+    }, 20);
 
-  return () => clearTimeout(timeout);
-}, [canMessage]);
-
+    return () => clearTimeout(timeout);
+  }, [canMessage]);
 
   const Row = ({ index, style }) => {
     const msg = messages[index];
@@ -355,7 +354,7 @@ const Chat = () => {
         <div
           ref={rowRef}
           className={`flex p-2 ${isSameUserAsPrevious ? "pt-1" : ""}`}
-          style={{ minHeight: showAvatar ? "75px" : "50px" }}
+          style={{ minHeight: showAvatar ? "60px" : "40px" }}
         >
           {/* آواتار (فقط برای اولین پیام) */}
           {showAvatar ? (
@@ -441,8 +440,7 @@ const Chat = () => {
 
   return (
     <>
-      {
-      selectedUser?.username ? (
+      {selectedUser?.username ? (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           onClick={(e) => {
@@ -500,14 +498,14 @@ const Chat = () => {
           <Sidebar />
           <div className="grid col-span-5 xl:col-span-4">
             <div className="flex-1 flex flex-col">
-              <div className="h-14 flex items-center bg-neutral-700 px-4">
+              <div className="h-14 flex items-center bg-[#1a1a1e] px-4 border-b border-[#29292d]">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.25}
                   stroke="currentColor"
-                  className="size-8 mx-4.25"
+                  className="size-8 mx-3"
                 >
                   <path
                     strokeLinecap="round"
@@ -522,6 +520,7 @@ const Chat = () => {
                   ref={listRef}
                   height={listHeight}
                   itemCount={messages.length}
+                  className="scrollbar-custom"
                   onScroll={handleScroll}
                   itemSize={getRowHeight} // استفاده از تابع اندازه‌گیری پویا
                   width={"100%"}
@@ -566,86 +565,85 @@ const Chat = () => {
                 </List>
               </div>
 
-              <div className=" flex bg-neutral-700 w-full">
-                <TextareaAutosize
-                  type="text"
-                  ref={inputRef}
-                  minRows={1}
-                  maxRows={4}
-                  value={text}
-                  onChange={(e) => {
-                    setText(e.target.value);
-                    e.target.value == "" || e.target.value.trim() == ""
-                      ? setWriting(false)
-                      : setWriting(true);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      if (text.length > 2000) {
+              <div className="flex bg-[#1a1a1e] w-full">
+                <div ref={inputRef} className="w-full flex">
+                  <TextareaAutosize
+                    type="text"
+                    minRows={1}
+                    maxRows={4}
+                    value={text}
+                    onChange={(e) => {
+                      setText(e.target.value);
+                      e.target.value == "" || e.target.value.trim() == ""
+                        ? setWriting(false)
+                        : setWriting(true);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        if (text.length > 2000) {
+                          console.log(text.length);
+                          e.preventDefault();
+
+                          toast.error(
+                            "The message should not exceed 2000 characters."
+                          );
+                          return;
+                        }
                         console.log(text.length);
+
                         e.preventDefault();
-
-                        toast.error(
-                          "The message should not exceed 2000 characters."
-                        );
-                        return;
-                      }
-                      console.log(text.length);
-
-                      e.preventDefault();
-                      if (text.trim() !== "") {
-                        sendMessage();
-                        setWriting(false);
-                        setText("");
-                      }
-                    }
-                  }}
-                  onHeightChange={handleInputResize}
-                  placeholder="Message"
-                  className="w-12/12 h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-neutral-700 border-0 focus:outline-none overflow-y-auto  focus:ring-0 scrollbar-none resize-none"
-                />
-                {writing ? (
-                  <div
-                    role="button"
-                    onClick={() => {
-                      if (text.length > 2000) {
-                        console.log(text.length);
-                        toast.error(
-                          "The message should not exceed 2000 characters."
-                        );
-                        return;
-                      }
-                      if (text.trim() !== "") {
-                        sendMessage();
-                        setWriting(false);
-                        setText("");
+                        if (text.trim() !== "") {
+                          sendMessage();
+                          setWriting(false);
+                          setText("");
+                        }
                       }
                     }}
-                    className="flex items-end cursor-pointer"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-7 mx-4 mb-3.25"
+                    onHeightChange={handleInputResize}
+                    placeholder="Message"
+                    className={`${writing? "sm:ml-1 md:ml-2 rounded-l-xl" : "sm:mx-1 md:mx-2 rounded-xl"} w-12/12 h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-[#222327] focus:outline-none overflow-y-auto box-border border border-transparent focus:border-[#303135]  scrollbar-none resize-none`}
+                  />
+                  {writing ? (
+                    <div
+                      role="button"
+                      onClick={() => {
+                        if (text.length > 2000) {
+                          console.log(text.length);
+                          toast.error(
+                            "The message should not exceed 2000 characters."
+                          );
+                          return;
+                        }
+                        if (text.trim() !== "") {
+                          sendMessage();
+                          setWriting(false);
+                          setText("");
+                        }
+                      }}
+                      className="flex items-end cursor-pointer rounded-r-xl sm:mr-1 md:mr-2 bg-[#222327]"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
-                      />
-                    </svg>
-                  </div>
-                ) : null}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="size-7 mx-4 mb-3.25"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
+                        />
+                      </svg>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      )
-    
-    }
+      )}
     </>
   );
 };

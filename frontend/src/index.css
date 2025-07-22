@@ -6,7 +6,7 @@
   font-weight: 400;
   color-scheme: light dark;
   color: black;
-  background-color: #262626c8;
+  background-color: #1a1a1e;
 
   
 
@@ -17,19 +17,19 @@
 }
 
 a {
-  color: #3b82f6; /* رنگ آبی (مثل Tailwind blue-500) */
+  color: #3b82f6; 
   text-decoration: underline;
-  word-break: break-word; /* برای شکستن لینک‌های طولانی */
+  word-break: break-word; 
 }
 
 textarea {
   overflow-y: auto;
-  max-height: 8rem; /* یا مثلاً 6 خط */
-  scrollbar-width: none; /* برای فایرفاکس */
+  max-height: 8rem; 
+  scrollbar-width: none; 
 }
 
 textarea::-webkit-scrollbar {
-  display: none; /* برای کروم */
+  display: none; 
 }
 
 .break-words {
@@ -37,7 +37,6 @@ textarea::-webkit-scrollbar {
   overflow-wrap: anywhere;
 }
 
-/* استایل عمومی پیام‌ها */
 .message-container {
   padding: 10px 15px;
   margin: 5px 0;
@@ -47,14 +46,12 @@ textarea::-webkit-scrollbar {
   line-height: 1.4;
 }
 
-/* پیام‌های عادی */
 .message-normal {
   background-color: #2d3748;
   color: #e2e8f0;
   align-self: flex-start;
 }
 
-/* پیام‌های حاوی کد */
 .message-code {
   background-color: #1a202c;
   color: #81e6d9;
@@ -68,13 +65,11 @@ textarea::-webkit-scrollbar {
   overflow-x: auto;
 }
 
-/* استایل لینک‌های داخل پیام‌های کد */
 .message-code a {
   color: #63b3ed;
   text-decoration: underline;
 }
 
-/* استایل زمان */
 .message-time {
   color: #a0aec0;
   font-size: 0.75rem;
@@ -82,14 +77,12 @@ textarea::-webkit-scrollbar {
   white-space: nowrap;
 }
 
-/* استایل نام کاربری */
 .message-username {
   font-weight: bold;
   color: #23b35a2f;
   margin-bottom: 2px;
 }
 
-/* ترازبندی بهتر برای محتوا و زمان */
 .flex.items-baseline {
   align-items: baseline;
 }
@@ -102,17 +95,14 @@ textarea::-webkit-scrollbar {
   padding-top: 0.25rem;
 }
 
-/* حفظ تراز برای پیام‌های بدون آواتار */
 .ml-12 {
   margin-left: 3rem;
 }
 
-/* استایل‌های سفارشی */
 .group:hover .message-time {
   opacity: 1 !important;
 }
 
-/* کاهش ارتفاع پیش‌فرض ردیف‌ها */
 .min-h-40 {
   min-height: 40px;
 }
@@ -121,17 +111,14 @@ textarea::-webkit-scrollbar {
   min-height: 60px;
 }
 
-/* استایل متن پیام */
 .max-w-85 {
   max-width: 85%;
 }
 
-/* ترنزیشن برای زمان */
 .transition-opacity {
   transition: opacity 0.2s ease;
 }
 
-/* اگر از CSS جداگانه استفاده می‌کنید */
 .profile-popup {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
   animation: fadeIn 0.2s ease-out;
@@ -140,4 +127,26 @@ textarea::-webkit-scrollbar {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 7px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color:#666771;
+  border-radius: 12px;
+  transition: background-color 0.3s ease, opacity 0.5s ease;
+  opacity: 1;
+}
+
+.scrollbar-hidden.hide-scrollbar::-webkit-scrollbar-thumb {
+  opacity: 0;
+}
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background-color: #777;
 }

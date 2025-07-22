@@ -18,13 +18,13 @@ const Sidebar = () => {
 
   return (
     <div className="grid col-span-2 xl:col-span-1">
-      <div className="bg-neutral-700 border-r border-stone-600 h-full p-4">
+      <div className="bg-[#121214] h-full p-4">
         <h2 className="text-lg font-semibold text-white mb-4">Private chats</h2>
         <div className="space-y-2">
           {/* لیست کاربران - بعداً تکمیل می‌شود */}
           <div
-            className={`p-2 ${
-              activeChat == "chat" ? "bg-neutral-600" : "hover:bg-neutral-600"
+            className={`p-2 opacity-50 ${
+              activeChat == "chat" ? "bg-[#2c2c30] opacity-100" : "hover:bg-[#1d1d1e] hover:opacity-100"
             } rounded cursor-pointer`}
             onClick={() => {
               setActiveChat("chat");
@@ -39,11 +39,11 @@ const Sidebar = () => {
             return (
               <div
                 key={index}
-                className={`p-2 ${
+                className={`p-2 opacity-50 ${
                   `/chat/${channel.name}` == location.pathname
-                    ? "bg-neutral-600"
-                    : "hover:bg-neutral-600"
-                }  rounded cursor-pointer`}
+                    ? "bg-[#2c2c30] opacity-100"
+                    : "hover:bg-[#1d1d1e] hover:opacity-100"
+                } rounded cursor-pointer`}
                 onClick={() => {
                   setActiveChat(channel.name);
                   navigate(`/chat/${channel.name}`);
@@ -51,7 +51,11 @@ const Sidebar = () => {
                   navigate(0);
                 }}
               >
-                <p className="text-white">{channel.name}</p>
+                <p
+                  className={`text-white `}
+                >
+                  {channel.name}
+                </p>
               </div>
             );
           })}
