@@ -199,6 +199,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
             }
             ClientPacket packet = packetType.createPacket(jsonObject);
             user.getUserConnection().handleClientPacket(packet);
+            log.info("Disconnected {} cause of using bad packets", socketAddress.getAddress().getHostAddress());
         }
     }
 

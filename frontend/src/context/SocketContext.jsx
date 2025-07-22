@@ -26,7 +26,7 @@ export const SocketProvider = ({ children }) => {
 
 
   const connectWebSocket = () => {
-    const ws = new WebSocket("ws://localhost:25565");
+    const ws = new WebSocket(import.meta.env.VITE_APP_WEBSOCKET_URL);
     ws.onopen = () => {
       console.log("✅ WebSocket connected");
       setSocket(ws);
