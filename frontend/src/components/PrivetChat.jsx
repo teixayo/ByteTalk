@@ -63,6 +63,7 @@ const PrivetChat = () => {
     // loginCheck,
     activeChat,
     setPrivetChannels,
+    canMessage,
   } = useSocket();
 
   const [writing, setWriting] = useState(false);
@@ -88,6 +89,16 @@ const PrivetChat = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const popupRef = useRef(null);
 
+  const [validUser, setValidUser] = useState(true);
+
+  // useEffect(() => {
+  //   console.log(validUser)
+  //     if (!validUser) {
+  //       // اگر داده‌ای وجود نداشت، برگشت به صفحه‌ی قبلی
+  //       navigate(-1); // یا navigate("/some-path") برای مسیر مشخص
+  //     }
+  //   }, [validUser]);
+
   // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
   useEffect(() => {
     if (socket.readyState == WebSocket.OPEN) {
@@ -95,6 +106,13 @@ const PrivetChat = () => {
         JSON.stringify({
           type: "RequestBulkMessage",
           date: -1,
+          channel: userID,
+        })
+      );
+
+      socket.send(
+        JSON.stringify({
+          type: "CanSendMessage",
           channel: userID,
         })
       );
@@ -111,6 +129,16 @@ const PrivetChat = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    console.log(canMessage);
+    if (!canMessage) return;
+    if (canMessage.status) {
+      setValidUser(true);
+    } else {
+      setValidUser(false);
+    }
+  }, [canMessage]);
 
   useEffect(() => {
     console.log("active chat: ", activeChat);
@@ -416,6 +444,13 @@ const PrivetChat = () => {
       console.log(isAtBottom);
     }, 100);
   };
+
+  if (!validUser) {
+    console.log(validUser);
+    
+    navigate(-1);
+    return null;
+  }
 
   return (
     <>

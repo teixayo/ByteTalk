@@ -22,6 +22,9 @@ export const SocketProvider = ({ children }) => {
   const [privetChannels, setPrivetChannels] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
 
+  const [canMessage, setCanMessage] = useState(null)
+
+
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:25565");
     ws.onopen = () => {
@@ -165,6 +168,10 @@ export const SocketProvider = ({ children }) => {
       if (data.type == "UserPrivateChannels") {
         setPrivetChannels(data.channels);
       }
+
+      if(data.type == 'CanSendMessage') {
+        setCanMessage(data)
+      }
     };
 
     ws.onerror = (err) => {
@@ -214,6 +221,7 @@ export const SocketProvider = ({ children }) => {
         setPrivetChannels,
         setActiveChat,
         activeChat,
+        canMessage
       }}
     >
       {children}

@@ -10,9 +10,9 @@ import TextareaAutosize from "react-textarea-autosize";
 import { useSocket } from "../context/SocketContext";
 import Sidebar from "./Sidebar";
 
-
 let flag = true;
 let firstRender = true;
+
 const convertMessage = (text) => {
   // تشخیص پیام‌های حاوی کد یا تگ‌های HTML
   const isCode =
@@ -68,6 +68,7 @@ const Chat = () => {
     status,
     setPrivetChannels,
     privetChannels,
+    canMessage,
   } = useSocket();
 
   const [writing, setWriting] = useState(false);
@@ -99,6 +100,8 @@ const Chat = () => {
 
   // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
   useEffect(() => {
+    setSelectedUser(null);
+
     if (socket.readyState == WebSocket.OPEN) {
       console.log("im in bulkmessages useEffect");
       socket.send(
@@ -110,6 +113,7 @@ const Chat = () => {
       );
     }
     const handleClickOutside = (event) => {
+      console.log(popupRef.current && !popupRef.current.contains(event.target));
       if (popupRef.current && !popupRef.current.contains(event.target)) {
         setSelectedUser(null);
       }
@@ -121,9 +125,10 @@ const Chat = () => {
     };
   }, []);
 
-  useEffect(() => {
-    console.log("ldfkjas")
-  }, [status])
+  // useEffect(() => {}, [canMessage]);
+
+  // useEffect(() => {
+  // }, [status]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -212,23 +217,13 @@ const Chat = () => {
             }, 100);
           }
           // اسکرول پس از به‌روزرسانی state
-          console.log("messages:", messages);
-          console.log("NewMessages:", newMessages);
           return newMessages;
         });
 
-        console.log(localMessages);
-
         setLocalMessages((prev) => {
-          console.log(...prev);
-          console.log(msg);
-
           return [...prev, msg];
         });
       } else {
-        console.log("newMessage", newMessage);
-        console.log("privetChannels", privetChannels);
-
         const isRepetitive = privetChannels.find((item) => {
           return item.name == newMessage.channel;
         });
@@ -279,7 +274,6 @@ const Chat = () => {
 
     //   return newMessages;
     // });
-    console.log(localMessages);
 
     // setLocalMessages((prev) => {
     //   console.log(prev);
@@ -319,6 +313,20 @@ const Chat = () => {
     }
   };
 
+  useEffect(() => {
+    if(!canMessage)return
+  const timeout = setTimeout(() => {
+    if (canMessage?.status && typeof canMessage.channel === "string") {
+      setSelectedUser({
+        username: canMessage.channel,
+      });
+    }
+  }, 20);
+
+  return () => clearTimeout(timeout);
+}, [canMessage]);
+
+
   const Row = ({ index, style }) => {
     const msg = messages[index];
     const rowRef = useRef();
@@ -333,15 +341,14 @@ const Chat = () => {
       }
     }, [index, msg.content]);
 
-    const handleUserClick = (e) => {
-      e.stopPropagation();
-      console.log({type: "CanSendMessag", channel: msg.username})
-      socket.send(JSON.stringify({type: "CanSendMessag", channel: msg.username}))
-      setSelectedUser({
-        username: msg.username,
-        // میتوانید اطلاعات بیشتر کاربر را اینجا اضافه کنید
-      });
-    };
+    // const handleUserClick = (e) => {
+    //   e.stopPropagation();
+    //   console.log({ type: "CanSendMessag", channel: msg.username });
+
+    //   socket.send(
+    //     JSON.stringify({ type: "CanSendMessage", channel: msg.username })
+    //   );
+    // };
 
     return (
       <div style={style}>
@@ -378,7 +385,20 @@ const Chat = () => {
               <div className="flex items-center mb-1">
                 <span
                   className="pt-1 text-sm text-white mr-2 cursor-pointer"
-                  onClick={handleUserClick}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log({
+                      type: "CanSendMessag",
+                      channel: msg.username,
+                    });
+
+                    socket.send(
+                      JSON.stringify({
+                        type: "CanSendMessage",
+                        channel: msg.username,
+                      })
+                    );
+                  }}
                 >
                   {msg.username}
                 </span>
@@ -421,11 +441,21 @@ const Chat = () => {
 
   return (
     <>
-      {selectedUser ? (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {
+      selectedUser?.username ? (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={(e) => {
+            // بستن پنل اگر کلیک روی بک‌دراپ (background) باشد
+            if (e.target === e.currentTarget) {
+              setSelectedUser(null);
+            }
+          }}
+        >
           <div
             ref={popupRef}
             className="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4 border border-gray-700"
+            onClick={(e) => e.stopPropagation()} // جلوگیری از بستن وقتی روی خود پنل کلیک می‌شود
           >
             <div className="flex items-center mb-4">
               <div className="mr-4">
@@ -555,7 +585,9 @@ const Chat = () => {
                         console.log(text.length);
                         e.preventDefault();
 
-                        toast.error("The message should not exceed 2000 characters.");
+                        toast.error(
+                          "The message should not exceed 2000 characters."
+                        );
                         return;
                       }
                       console.log(text.length);
@@ -578,7 +610,9 @@ const Chat = () => {
                     onClick={() => {
                       if (text.length > 2000) {
                         console.log(text.length);
-                        toast.error("The message should not exceed 2000 characters.");
+                        toast.error(
+                          "The message should not exceed 2000 characters."
+                        );
                         return;
                       }
                       if (text.trim() !== "") {
@@ -609,7 +643,9 @@ const Chat = () => {
             </div>
           </div>
         </div>
-      )}
+      )
+    
+    }
     </>
   );
 };

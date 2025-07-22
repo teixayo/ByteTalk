@@ -10,11 +10,11 @@ const AuthGate = ({ children }) => {
   const [checked, setChecked] = useState(false);
   const [loginAgain, setLoginAgain] = useState(false);
 
+
   useEffect(() => {
     if (!socket || loginAgain) return;
 
     const handleOpen = () => setWsReady(true);
-
     if (socket.readyState === WebSocket.OPEN) {
 
       function getCookie(name) {
