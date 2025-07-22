@@ -5,7 +5,8 @@ import org.json.JSONObject;
 public enum ServerPacketType {
     Status,
     BulkMessages,
-    Messaging,
+    Typing,
+    CanSendMessage,
     SendMessage,
     UserPrivateChannels,
     LoginToken;

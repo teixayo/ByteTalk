@@ -91,11 +91,29 @@ public class UserConnection {
             online = false;
             log.info("Disconnected the {} (Timed Out)", user.getName());
         }
+
     }
 
     public void handleClientPacket(ClientPacket packet) {
         log.info(packet.getData().toString());
         switch (packet.getPacketType()) {
+            case CanSendMessage -> {
+                String channelString = packet.getData().getString("channel");
+                boolean canSendMessage = false;
+                if (!channelString.equals("global")) {
+                    User targetUser = Server.getInstance().getUserService().getUserByUserName(channelString);
+                    if(targetUser!=null && !targetUser.getName().equals(user.getName())) {
+                        canSendMessage = true;
+                    }
+                } else {
+                    canSendMessage = true;
+                }
+                sendPacket(ServerPacketType.CanSendMessage.createPacket(
+                        "status", canSendMessage,
+                        "channel",channelString
+                ));
+
+            }
             case SendMessage -> {
                 if (!sendMessageRateLimiter.allowRequest()) {
                     sendPacket(StatusCodes.SENT_TOO_MESSAGES.createPacket());

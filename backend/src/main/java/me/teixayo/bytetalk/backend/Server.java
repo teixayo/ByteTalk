@@ -6,15 +6,15 @@ import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.database.mongo.MongoDBConnection;
 import me.teixayo.bytetalk.backend.database.redis.RedisChannel;
 import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
-import me.teixayo.bytetalk.backend.service.channel.Channel;
-import me.teixayo.bytetalk.backend.service.channel.ChannelService;
-import me.teixayo.bytetalk.backend.service.message.Message;
 import me.teixayo.bytetalk.backend.networking.NettyHandler;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
 import me.teixayo.bytetalk.backend.security.EncryptionUtils;
 import me.teixayo.bytetalk.backend.service.cache.CacheService;
 import me.teixayo.bytetalk.backend.service.cache.RedisCacheService;
+import me.teixayo.bytetalk.backend.service.channel.Channel;
+import me.teixayo.bytetalk.backend.service.channel.ChannelService;
+import me.teixayo.bytetalk.backend.service.message.Message;
 import me.teixayo.bytetalk.backend.service.message.MessageService;
 import me.teixayo.bytetalk.backend.service.message.MongoMessageService;
 import me.teixayo.bytetalk.backend.service.search.SearchService;
@@ -148,6 +148,7 @@ public final class Server implements LoopApp {
                 UserManager.getInstance().removeUser(user);
                 continue;
             }
+
             user.getUserConnection().processPackets();
         }
         if (loop.getUpdates() % 10000 == 0) {
