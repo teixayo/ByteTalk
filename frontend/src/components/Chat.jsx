@@ -503,7 +503,7 @@ const Chat = () => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.25}
                   stroke="currentColor"
-                  className="size-8 ml-4 mr-3.5"
+                  className="size-8 ml-3.5 mr-3.5"
                 >
                   <path
                     strokeLinecap="round"
