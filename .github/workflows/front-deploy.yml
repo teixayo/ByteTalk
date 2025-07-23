@@ -19,7 +19,9 @@ jobs:
         run: |
           cd frontend
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          docker build -t teixayo/bytetalk-frontend:latest .
+          docker build \
+            --build-arg SERVER_WEBSOCKET_URL=${{ secrets.SERVER_WEBSOCKET_URL }} \
+            -t teixayo/bytetalk-frontend:latest .
           docker push teixayo/bytetalk-frontend:latest
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}

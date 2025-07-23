@@ -3,6 +3,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+ARG VITE_WEBSOCKET_URL
+ENV VITE_WEBSOCKET_URL=$VITE_WEBSOCKET_URL
 RUN npm run build
 
 FROM nginx:alpine
