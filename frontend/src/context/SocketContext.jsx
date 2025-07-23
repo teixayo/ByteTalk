@@ -26,7 +26,7 @@ export const SocketProvider = ({ children }) => {
   const [canMessage, setCanMessage] = useState(null);
 
   const connectWebSocket = () => {
-    const ws = new WebSocket(import.meta.env.VITE_APP_WEBSOCKET_URL);
+    const ws = new WebSocket(import.meta.env.VITE_SERVER_WEBSOCKET_URL);
     ws.onopen = () => {
       console.log("✅ WebSocket connected");
       setSocket(ws);
