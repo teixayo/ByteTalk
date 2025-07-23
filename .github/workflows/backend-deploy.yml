@@ -1,11 +1,11 @@
-name: Deploy Frontend
+name: Deploy Backend
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'frontend/**'
+      - 'backend/**'
 
 jobs:
   build-and-deploy:
@@ -17,10 +17,9 @@ jobs:
 
       - name: Build & push image from frontend
         run: |
-          cd frontend
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          docker build -t teixayo/bytetalk-frontend:latest .
-          docker push teixayo/bytetalk-frontend:latest
+          docker build -t teixayo/bytetalk-backend:latest .
+          docker push teixayo/bytetalk-bacekend:latest
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
