@@ -369,7 +369,7 @@ const Chat = () => {
               </svg>
             </div>
           ) : (
-            <div className="flex-shrink-0 w-12 mr-2"></div> // فضای خالی همتراز با آواتار
+            <div className="flex-shrink-0 w-12 mr-1"></div> // فضای خالی همتراز با آواتار
           )}
 
           <div className="flex-1 min-w-0">
@@ -560,7 +560,7 @@ const Chat = () => {
                 </List>
               </div>
 
-              <div className="bg-[#1a1a1e] w-full pb-2 sm:px-1 md:px-2">
+              <div className="bg-[#1a1a1e] w-full pb-1 sm:pb-2 px-1 md:px-2">
                 <div
                   ref={inputRef}
                   className={`w-full flex transition-colors duration-200 ${
