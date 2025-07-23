@@ -54,11 +54,11 @@ public class Config {
     private File sslCertifiateFile = null;
     private File sslPrivateKeyFile = null;
 
-    private RateLimiter sendMessageLimiter;
-    private int maxSendMessageSize;
-    private RateLimiter bulkMessageLimiter;
+    private final RateLimiter sendMessageLimiter;
+    private final int maxSendMessageSize;
+    private final RateLimiter bulkMessageLimiter;
 
-    private byte[] jwtSecret = null;
+    private byte[] jwtSecret;
 
     @SneakyThrows
     public Config(Map<String, Object> data) {
