@@ -79,7 +79,7 @@ ByteTalk enables users to communicate instantly in both public (global) channels
    ```
 
 5. **Access the App**  
-   Open `http://localhost:5173` (or your configured Vite port) in your browser.
+   Open `http://localhost:8080` (or your configured Vite port) in your browser.
 
 ---
 
