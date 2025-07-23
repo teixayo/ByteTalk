@@ -134,7 +134,6 @@ public final class Server implements LoopApp {
                 }
             });
         }
-
         long end = System.currentTimeMillis();
         log.info("Loaded sever on {} ms", (end - start));
 
