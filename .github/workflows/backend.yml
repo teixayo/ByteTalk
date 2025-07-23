@@ -44,8 +44,3 @@ jobs:
         run: |
           docker build -t teixayo/bytetalk-backend:latest ./backend
           docker push teixayo/bytetalk-backend:latest
-
-      - name: Trigger production webhook
-        run: |
-          curl -X POST ${{ secrets.PRODUCTION_BACKEND_WEBHOOK_URL }} \
-               -H "Authorization: Bearer ${{ secrets.BACKEND_WEBHOOK_SECRET }}"

@@ -24,7 +24,3 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Trigger production webhook
-        run: |
-          curl -X POST ${{ secrets.PRODUCTION_BACKEND_WEBHOOK_URL }} -H "Authorization: Bearer ${{ secrets.BACKEND_WEBHOOK_SECRET }}"
