@@ -46,29 +46,31 @@ export const SocketProvider = ({ children }) => {
           toast.error("Invalid username format");
         } else if (data.code === "1007") {
           toast.error("Invalid password format");
+        } else if (data.code === "1008") {
+          toast.error("Please don't spam.");
         }
         // if (data.code == "1002") {
-          // if (!initialLoaded) {
-          //   data.messages.map((msg) => {
-          //     const date = new Date(msg.date);
-          //     const shortTime = date.toLocaleTimeString("en-US", {
-          //       hour: "2-digit",
-          //       minute: "2-digit",
-          //       hour12: true,
-          //     });
-          //     if (msg.content != "") {
-          //       setBulkMessages((prev) => [
-          //         ...prev,
-          //         {
-          //           content: msg.content,
-          //           time: shortTime,
-          //           username: msg.username,
-          //           timecode: msg.date,
-          //         },
-          //       ]);
-          //     }
-          // };
-          // }
+        // if (!initialLoaded) {
+        //   data.messages.map((msg) => {
+        //     const date = new Date(msg.date);
+        //     const shortTime = date.toLocaleTimeString("en-US", {
+        //       hour: "2-digit",
+        //       minute: "2-digit",
+        //       hour12: true,
+        //     });
+        //     if (msg.content != "") {
+        //       setBulkMessages((prev) => [
+        //         ...prev,
+        //         {
+        //           content: msg.content,
+        //           time: shortTime,
+        //           username: msg.username,
+        //           timecode: msg.date,
+        //         },
+        //       ]);
+        //     }
+        // };
+        // }
         // }
         console.log(data);
         setStatus(data);

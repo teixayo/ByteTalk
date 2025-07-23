@@ -79,8 +79,8 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
 
   const inputRef = useRef(null);
-  const [inputHeight, setInputHeight] = useState(56);
-  const [titleHeight, setTitleHight] = useState(63); // ارتفاع پیش‌فرض
+  const [inputHeight, setInputHeight] = useState(58);
+  const [titleHeight, setTitleHight] = useState(64); // ارتفاع پیش‌فرض
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -202,16 +202,12 @@ const Chat = () => {
         setMessages((prev) => {
           const newMessages = [...prev, msg];
 
-          if (isAtBottom) {
+          if (listRef.current) {
             setTimeout(() => {
-              if (listRef.current) {
-                listRef.current.scrollToItem(newMessages.length + 1, "end");
-              }
+              listRef.current.scrollToItem(newMessages.length, "end");
             }, 60);
             setTimeout(() => {
-              if (listRef.current) {
-                listRef.current.scrollToItem(newMessages.length + 1, "end");
-              }
+              listRef.current.scrollToItem(newMessages.length, "end");
             }, 100);
           }
           // اسکرول پس از به‌روزرسانی state
@@ -603,9 +599,7 @@ const Chat = () => {
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     className={`${
-                      writing
-                        ? "rounded-l-lg"
-                        : "rounded-lg"
+                      writing ? "rounded-l-lg" : "rounded-lg"
                     } w-full h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-[#222327] focus:outline-none overflow-y-auto resize-none`}
                   />
                   {writing && (

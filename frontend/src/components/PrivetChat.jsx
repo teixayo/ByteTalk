@@ -74,8 +74,8 @@ const PrivetChat = () => {
   const [messages, setMessages] = useState([]);
 
   const inputRef = useRef(null);
-  const [inputHeight, setInputHeight] = useState(56);
-  const [titleHeight, setTitleHight] = useState(63); // ارتفاع پیش‌فرض
+  const [inputHeight, setInputHeight] = useState(58);
+  const [titleHeight, setTitleHight] = useState(64); // ارتفاع پیش‌فرض
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -193,11 +193,11 @@ const PrivetChat = () => {
   }, [bulkMessages]);
 
   useEffect(() => {
-    console.log(newMessage);
-
+    
     if (newMessage.date) {
-      if (location.pathname == `/chat/${newMessage.channel}`) {
+      if (newMessage.channel == localStorage.getItem('username') || newMessage.channel == userID) {
         const timestamp = Date.now();
+
         const date = new Date(newMessage.date);
         const shortTime = date.toLocaleTimeString("en-US", {
           hour: "2-digit",
@@ -208,37 +208,28 @@ const PrivetChat = () => {
         const msg = {
           content: newMessage.content,
           time: shortTime,
-          username: newMessage.username || "anonymous",
-          timecode: timestamp,
+          username: newMessage.username,
+          timecode: timestamp, // اضافه کردن timecode
         };
-        console.log(msg);
+
         setMessages((prev) => {
           const newMessages = [...prev, msg];
 
-          if (isAtBottom) {
+          if (listRef.current) {
             setTimeout(() => {
-              if (listRef.current) {
-                listRef.current.scrollToItem(newMessages.length + 1, "end");
-              }
+              listRef.current.scrollToItem(newMessages.length, "end");
             }, 60);
             setTimeout(() => {
-              if (listRef.current) {
-                listRef.current.scrollToItem(newMessages.length + 1, "end");
-              }
+              listRef.current.scrollToItem(newMessages.length, "end");
             }, 100);
           }
           // اسکرول پس از به‌روزرسانی state
-          if (!messages[0]) {
-            setPrivetChannels((prev) => [
-              { name: newMessage.channel },
-              ...prev,
-            ]);
-          }
-
           return newMessages;
         });
 
-        setLocalMessages((prev) => [...prev, msg]);
+        setLocalMessages((prev) => {
+          return [...prev, msg];
+        });
       } else {
         const username = localStorage.getItem("username");
         if (newMessage.channel == "global" || newMessage.channel == username)
@@ -270,37 +261,37 @@ const PrivetChat = () => {
   }, [messages]);
 
   const sendMessage = () => {
-    const timestamp = Date.now();
-    const date = new Date(timestamp);
-    const shortTime = date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    // const timestamp = Date.now();
+    // const date = new Date(timestamp);
+    // const shortTime = date.toLocaleTimeString("en-US", {
+    //   hour: "2-digit",
+    //   minute: "2-digit",
+    //   hour12: true,
+    // });
 
-    const msg = {
-      content: text,
-      time: shortTime,
-      username: localStorage.getItem("username") || "anonymous",
-      timecode: timestamp,
-    };
+    // const msg = {
+    //   content: text,
+    //   time: shortTime,
+    //   username: localStorage.getItem("username") || "anonymous",
+    //   timecode: timestamp,
+    // };
 
-    setMessages((prev) => {
-      const newMessages = [...prev, msg];
+    // setMessages((prev) => {
+    //   const newMessages = [...prev, msg];
 
-      if (listRef.current) {
-        setTimeout(() => {
-          listRef.current.scrollToItem(newMessages.length, "end");
-        }, 60);
-        setTimeout(() => {
-          listRef.current.scrollToItem(newMessages.length, "end");
-        }, 100);
-      }
+    //   if (listRef.current) {
+    //     setTimeout(() => {
+    //       listRef.current.scrollToItem(newMessages.length, "end");
+    //     }, 60);
+    //     setTimeout(() => {
+    //       listRef.current.scrollToItem(newMessages.length, "end");
+    //     }, 100);
+    //   }
 
-      return newMessages;
-    });
+    //   return newMessages;
+    // });
 
-    setLocalMessages((prev) => [...prev, msg]);
+    // setLocalMessages((prev) => [...prev, msg]);
 
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
@@ -571,10 +562,10 @@ const PrivetChat = () => {
                 {Row}
               </List>
             </div>
-            <div className="bg-[#1a1a1e] w-full pb-2 sm:px-1 md:px-2">
+            <div className="bg-[#1a1a1e] w-full pt-0 pb-2 sm:px-1 md:px-2">
               <div
                 ref={inputRef}
-                className={`w-full flex transition-colors duration-200 ${
+                className={`w-full flex transition-colors duration-200 mt-0${
                   isFocused
                     ? "border border-[#303135]"
                     : "border border-transparent"
