@@ -55,7 +55,7 @@ public class NettyHandler {
                                 log.info("Listening on {}", channel.localAddress());
                                 return;
                             }
-                            log.error("Can't bind to {}", Server.getInstance().getConfig().getNetworkingIp(), future.cause());
+                            log.error("Can't bind to {}:{}", Server.getInstance().getConfig().getNetworkingIp(), Server.getInstance().getConfig().getNetworkingPort(), future.cause());
                         }).sync().channel().closeFuture().sync();
 
             } catch (InterruptedException e) {

@@ -40,6 +40,7 @@ public class UserConnection {
     private RateLimiter sendMessageRateLimiter;
     private RateLimiter bulkMessageRateLimiter;
 
+
     public UserConnection(ChannelHandlerContext channel, User user) {
         this.channel = channel;
         this.user = user;
@@ -93,7 +94,9 @@ public class UserConnection {
     }
 
     public void handleClientPacket(ClientPacket packet) {
-        log.info(packet.getData().toString());
+        if (log.isDebugEnabled()) {
+            log.debug(packet.getData().toString());
+        }
         switch (packet.getPacketType()) {
             case CanSendMessage -> {
                 String channelString = packet.getData().getString("channel");
@@ -168,7 +171,6 @@ public class UserConnection {
                     RedisDBConnection.getInstance().publish(RedisChannel.SEND_MESSAGE,
                             this.getUser().getName() + " " + channel.getId() + " " + message.getId());
                 }
-                log.info("{} Sent message packet", sendMessagePacket.getData().toString());
 
             }
             case RequestBulkMessage -> {
@@ -181,7 +183,6 @@ public class UserConnection {
     }
 
     private String getChannelName(long username1, long username2) {
-
         if (username1 > username2) {
             long temp = username1;
             username1 = username2;
@@ -208,13 +209,10 @@ public class UserConnection {
         }
         if (date == null) {
             user.sendMessages(channelName, Server.getInstance().getCacheService().loadLastestMessages(channel.getId()));
-        } else {
-            log.info("{} Requested messages from {}", user.getName(), channelName);
-            List<Long> messageIds = Server.getInstance().getChannelService().loadMessagesBeforeDate(channel.getId(), date, 40);
-
-            log.info("{} | {}", messageIds.size(), channel.getMembers());
-            List<Message> loadedMessages = Server.getInstance().getMessageService().getMessage(messageIds);
-            user.sendMessages(channelName, loadedMessages);
+            return;
         }
+        List<Long> messageIds = Server.getInstance().getChannelService().loadMessagesBeforeDate(channel.getId(), date, 40);
+        List<Message> loadedMessages = Server.getInstance().getMessageService().getMessage(messageIds);
+        user.sendMessages(channelName, loadedMessages);
     }
 }

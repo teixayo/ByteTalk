@@ -4,20 +4,23 @@ import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.service.message.Message;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 public class MemoryChannelService implements ChannelService {
 
-    private HashMap<Long,Channel> channels;
-    private HashMap<Channel, List<Message>> channelMessages;
+    private final HashMap<Long, Channel> channels;
+    private final HashMap<Channel, List<Message>> channelMessages;
 
     public MemoryChannelService() {
         channels = new HashMap<>();
         channelMessages = new HashMap<>();
 
-        if(getChannel(1)==null) {
-            createChannel(new Channel(1,"global",Date.from(Instant.now()),List.of(),true));
+        if (getChannel(1) == null) {
+            createChannel(new Channel(1, "global", Date.from(Instant.now()), List.of(), true));
         }
     }
 
@@ -27,6 +30,7 @@ public class MemoryChannelService implements ChannelService {
         log.info("Created '{}' channel", channel.getName());
 
     }
+
     @Override
     public Channel getChannel(long channelId) {
         return channels.get(channelId);
@@ -35,7 +39,7 @@ public class MemoryChannelService implements ChannelService {
     @Override
     public Channel getChannelByName(String name) {
         for (Channel channel : channels.values()) {
-            if(channel.getName().equals(name)) return channel;
+            if (channel.getName().equals(name)) return channel;
         }
         return null;
     }
@@ -43,15 +47,16 @@ public class MemoryChannelService implements ChannelService {
     @Override
     public void saveMessage(long channelId, long messageId, Date date) {
         Channel channel = getChannel(channelId);
-        if(channel==null) return;
+        if (channel == null) return;
         List<Message> messages = channelMessages.get(channel);
-        if(messages==null) {
+        if (messages == null) {
             messages = new ArrayList<>();
-            channelMessages.put(channel,messages);
+            channelMessages.put(channel, messages);
         }
 
-        messages.add(new Message(messageId,-1,"",date));
+        messages.add(new Message(messageId, -1, "", date));
     }
+
     private Date getLastMessageDate(Channel channel) {
         List<Message> messages = channelMessages.get(channel);
         if (messages == null || messages.isEmpty()) {
@@ -65,6 +70,7 @@ public class MemoryChannelService implements ChannelService {
         }
         return last;
     }
+
     @Override
     public List<Channel> getUserPrivateChannels(long userId) {
         List<Channel> result = new ArrayList<>();
@@ -85,15 +91,15 @@ public class MemoryChannelService implements ChannelService {
     @Override
     public List<Long> loadMessagesBeforeDate(long channelId, Date date, int batchSize) {
         Channel channel = getChannel(channelId);
-        if(channel==null) return List.of();
+        if (channel == null) return List.of();
 
         List<Message> messages = channelMessages.get(channel);
-        if(messages==null) return List.of();
+        if (messages == null) return List.of();
         List<Long> messagesBeforeDate = new ArrayList<>();
         for (Message message : messages) {
             if (message.getDate().after(date)) continue;
             messagesBeforeDate.add(message.getId());
         }
-        return messagesBeforeDate.subList(Math.max(messagesBeforeDate.size()-batchSize,0),messagesBeforeDate.size());
+        return messagesBeforeDate.subList(Math.max(messagesBeforeDate.size() - batchSize, 0), messagesBeforeDate.size());
     }
 }

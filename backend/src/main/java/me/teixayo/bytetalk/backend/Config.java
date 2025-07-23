@@ -51,14 +51,13 @@ public class Config {
 
     private final boolean sslToggleUsingWSS;
     private final boolean sslToggleUsingKeys;
-    private File sslCertifiateFile = null;
-    private File sslPrivateKeyFile = null;
-
     private final RateLimiter sendMessageLimiter;
     private final int maxSendMessageSize;
     private final RateLimiter bulkMessageLimiter;
-
-    private byte[] jwtSecret;
+    private final int authenticationDelay;
+    private File sslCertifiateFile = null;
+    private File sslPrivateKeyFile = null;
+    private final byte[] jwtSecret;
 
     @SneakyThrows
     public Config(Map<String, Object> data) {
@@ -111,13 +110,15 @@ public class Config {
                 (int) get("rate-limiter.send-message.time")
         );
         maxSendMessageSize = (int) get("rate-limiter.send-message.max-size");
-        bulkMessageLimiter =new RateLimiter(
+        bulkMessageLimiter = new RateLimiter(
                 (int) get("rate-limiter.bulk-message.tokens"),
                 (int) get("rate-limiter.bulk-message.time")
         );
+        authenticationDelay = (int) get("rate-limiter.authentication.delay");
+
 
         File jwtSecretFile = new File((String) get("jwt-secret.file"));
-        if(!jwtSecretFile.exists()) {
+        if (!jwtSecretFile.exists()) {
             log.warn("JWT secret not found, generating a new one...");
             jwtSecret = generateJWTSecretFile(jwtSecretFile);
         } else {
@@ -157,7 +158,6 @@ public class Config {
         log.info("JWT secret key has been saved to: {}", file.getAbsolutePath());
         return secretBytes;
     }
-
 
 
 }

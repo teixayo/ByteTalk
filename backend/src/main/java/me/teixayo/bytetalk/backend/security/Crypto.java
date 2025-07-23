@@ -15,6 +15,7 @@ public class Crypto {
             e.printStackTrace();
         }
     }
+
     public static byte[] encryptSHA256(byte[] data) {
         return messageDigest.digest(data);
     }

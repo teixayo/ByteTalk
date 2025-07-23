@@ -15,7 +15,7 @@ public class MongoMessageService implements MessageService {
 
     private final MongoCollection<Document> messages;
 
-    private final ConcurrentHashMap<CompletableFuture<List<Message>>,List<Long>> loadingIdsPools;
+    private final ConcurrentHashMap<CompletableFuture<List<Message>>, List<Long>> loadingIdsPools;
 
     public MongoMessageService() {
         this.messages = MongoDBConnection
@@ -23,6 +23,7 @@ public class MongoMessageService implements MessageService {
                 .getMessageCollection();
         this.loadingIdsPools = new ConcurrentHashMap<>();
     }
+
     public void finalizeAllMessages() {
         Map<CompletableFuture<List<Message>>, List<Long>> snapshot;
         synchronized (loadingIdsPools) {
@@ -56,6 +57,7 @@ public class MongoMessageService implements MessageService {
             entry.getKey().complete(futureMessagesByOrder);
         }
     }
+
     @Override
     public void saveMessage(Message message) {
         Document document = toDocument(message);

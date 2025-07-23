@@ -13,6 +13,7 @@ public class Channel {
     private final Date creationDate;
     private final List<Long> members;
     private final boolean isGlobal;
+
     public Channel(long id, String name, Date creationDate, List<Long> members, boolean isGlobal) {
         this.id = id;
         this.name = name;

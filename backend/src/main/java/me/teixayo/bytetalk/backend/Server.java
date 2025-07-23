@@ -65,7 +65,7 @@ public final class Server implements LoopApp {
         Yaml yaml = new Yaml();
         InputStream inputStream = Server.class.getClassLoader().getResourceAsStream("config.yml");
         File configFile = new File("config.yml");
-        if(!configFile.exists()) {
+        if (!configFile.exists()) {
             try (FileOutputStream outputStream = new FileOutputStream(configFile)) {
                 byte[] buffer = new byte[4096];
                 int bytesRead;
@@ -101,7 +101,7 @@ public final class Server implements LoopApp {
         channelService = ChannelService.findBestService();
         log.info("Using {} as ChannelService", channelService.getClass().getSimpleName());
 
-        if(RedisDBConnection.isConnected()) {
+        if (RedisDBConnection.isConnected()) {
             RedisDBConnection.getInstance().registerConsumer(RedisChannel.SEND_MESSAGE, data -> {
                 log.info("Received Redis Message");
                 String[] dataSplit = data.split(" ");
@@ -110,7 +110,7 @@ public final class Server implements LoopApp {
                 long messageID = Long.parseLong(dataSplit[1]);
                 long channelID = Long.parseLong(dataSplit[2]);
                 RedisCacheService redisCacheService = (RedisCacheService) cacheService;
-                Message message = redisCacheService.getMessageById(1,messageID);
+                Message message = redisCacheService.getMessageById(1, messageID);
 
                 ServerPacket sendMessagePacket = ServerPacketType.SendMessage.createPacket(
                         "channel", username,
@@ -121,7 +121,7 @@ public final class Server implements LoopApp {
                 );
 
                 Channel channel = channelService.getChannel(channelID);
-                if(channel.isGlobal()) {
+                if (channel.isGlobal()) {
                     for (User otherUser : UserManager.getInstance().getUsers().values()) {
                         otherUser.sendPacket(sendMessagePacket);
                     }
@@ -138,6 +138,7 @@ public final class Server implements LoopApp {
         log.info("Loaded sever on {} ms", (end - start));
 
     }
+
     @Override
     public void update() {
         for (User user : UserManager.getInstance().getUsers().values()) {
@@ -149,7 +150,7 @@ public final class Server implements LoopApp {
 
             user.getUserConnection().processPackets();
         }
-        if(messageService instanceof MongoMessageService mongoMessageService) {
+        if (messageService instanceof MongoMessageService mongoMessageService) {
             mongoMessageService.finalizeAllMessages();
         }
     }

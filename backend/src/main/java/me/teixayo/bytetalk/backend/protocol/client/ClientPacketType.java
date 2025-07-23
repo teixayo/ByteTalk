@@ -9,14 +9,13 @@ public enum ClientPacketType {
     RequestBulkMessage,
     WritingMessage,
     Messaging,
-    CanSendMessage,
-    Typing;
+    CanSendMessage;
 
     public ClientPacket createPacket(Object... fields) {
         JSONObject jsonObject = new JSONObject();
         int length = fields.length;
         for (int i = 0; i < length / 2; i++) {
-            jsonObject.put((String)(fields[2 * i]), fields[2 * i + 1]);
+            jsonObject.put((String) (fields[2 * i]), fields[2 * i + 1]);
         }
 
         jsonObject.put("type", name());

@@ -25,6 +25,7 @@ import me.teixayo.bytetalk.backend.service.channel.Channel;
 import me.teixayo.bytetalk.backend.user.User;
 import me.teixayo.bytetalk.backend.user.UserConnection;
 import me.teixayo.bytetalk.backend.user.UserManager;
+import me.teixayo.bytetalk.backend.utils.Scheduler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -39,6 +40,9 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
     private User user;
 
     private ScheduledFuture<?> pingFuture;
+
+    private boolean lookedAuth = false;
+
     private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
         if (res.status().code() != 200) {
             ByteBuf buf = Unpooled.copiedBuffer(res.status().toString(), CharsetUtil.UTF_8);
@@ -64,6 +68,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof FullHttpRequest) {
+            if (handshaker != null) return;
             handleHttpRequest(ctx, (FullHttpRequest) msg);
         } else if (msg instanceof WebSocketFrame) {
             handleWebSocketFrame(ctx, (WebSocketFrame) msg);
@@ -72,7 +77,10 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
+        InetSocketAddress remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+        String clientIP = remoteAddress.getAddress().getHostAddress();
+        int clientPort = remoteAddress.getPort();
+        log.warn("[ExceptionCaught] An exception occurred from client {}:{}", clientIP, clientPort, cause);
         ctx.close();
     }
 
@@ -88,7 +96,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
         String jwtToken = req.headers().get(HttpHeaderNames.COOKIE);
         User user = null;
         if (jwtToken != null) {
-            jwtToken = jwtToken.replace("token=","");
+            jwtToken = jwtToken.replace("token=", "");
             DecodedJWT jwt = EncryptionUtils.decryptToken(jwtToken);
             if (jwt == null) {
                 sendHttpResponse(ctx, req, new DefaultFullHttpResponse(
@@ -120,7 +128,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
         handshaker.handshake(ctx.channel(), req);
         ctx.channel().attr(ChannelInitializer.getHandshake()).set(handshaker);
 
-        if(user!=null) {
+        if (user != null) {
             loggedIn(ctx, true, user);
         }
 
@@ -146,60 +154,76 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
         if (ctx.channel().attr(ChannelInitializer.getState()).get() == ClientStateType.IN_LOGIN) {
             if (type.equals("Login")) {
-                String name = jsonObject.getString("username");
-                User user = Server.getInstance().getUserService().getUserByUserName(name);
-                if (user == null) {
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
-                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                    log.info("Disconnected {} cause of invalid user", socketAddress.getAddress().getHostAddress());
-                    return;
-                }
-                String password = Crypto.encryptSHA256(jsonObject.getString("password"));
-                if (!user.getPassword().equals(password)) {
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
-                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                    log.info("Disconnected {} cause of invalid password", socketAddress.getAddress().getHostAddress());
-                    return;
-                }
-                loggedIn(ctx, false, user);
+                if (lookedAuth) return;
+                lookedAuth = true;
+                Scheduler.runTaskLater(() -> {
+                    if (!ctx.channel().isActive() && !ctx.channel().isOpen()) return;
+                    String name = jsonObject.getString("username");
+                    User user = Server.getInstance().getUserService().getUserByUserName(name);
+                    if (user == null) {
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
+                        handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                        log.info("Disconnected {} cause of invalid user", socketAddress.getAddress().getHostAddress());
+                        return;
+                    }
+                    String password = Crypto.encryptSHA256(jsonObject.getString("password"));
+                    if (!user.getPassword().equals(password)) {
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.NOT_SUCCESS_LOGIN_WITH_PASSWORD.createPacket().getData().toString()));
+                        handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                        log.info("Disconnected {} cause of invalid password", socketAddress.getAddress().getHostAddress());
+                        return;
+                    }
+                    loggedIn(ctx, false, user);
+                    lookedAuth = false;
+                }, Server.getInstance().getConfig().getAuthenticationDelay(), TimeUnit.MILLISECONDS);
             }
             if (type.equals("CreateUser")) {
-                String name = jsonObject.getString("username");
-                String password = jsonObject.getString("password");
-                if (!EncryptionUtils.isValidName(name)) {
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_USER.createPacket().getData().toString()));
-                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                    log.info("Disconnected {} cause of invalid name", socketAddress.getAddress().getHostAddress());
-                    return;
-                }
-                if (!EncryptionUtils.isValidPassword(password)) {
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_PASSWORD.createPacket().getData().toString()));
-                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                    log.info("Disconnected {} cause of invalid password", socketAddress.getAddress().getHostAddress());
-                    return;
-                }
-                if (Server.getInstance().getUserService().isUserExists(name)) {
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.USER_EXISTS.createPacket().getData().toString()));
-                    handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-                    log.info("Disconnected {} cause of using created exists names for signup", socketAddress.getAddress().getHostAddress());
-                    return;
-                }
-                log.info("User {} Created", name);
-                password = Crypto.encryptSHA256(password);
-                Server.getInstance().getUserService().saveUser(name, password);
-                ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.SUCCESS_SIGNUP.createPacket().getData().toString()));
+                if (lookedAuth) return;
+                lookedAuth = true;
+                Scheduler.runTaskLater(() -> {
+                    if (!ctx.channel().isActive() && !ctx.channel().isOpen()) return;
+                    String name = jsonObject.getString("username");
+                    String password = jsonObject.getString("password");
+                    if (!EncryptionUtils.isValidName(name)) {
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_USER.createPacket().getData().toString()));
+                        handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                        log.info("Disconnected {} cause of invalid name", socketAddress.getAddress().getHostAddress());
+                        return;
+                    }
+                    if (!EncryptionUtils.isValidPassword(password)) {
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.INVALID_PASSWORD.createPacket().getData().toString()));
+                        handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                        log.info("Disconnected {} cause of invalid password", socketAddress.getAddress().getHostAddress());
+                        return;
+                    }
+                    if (Server.getInstance().getUserService().isUserExists(name)) {
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.USER_EXISTS.createPacket().getData().toString()));
+                        handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+                        log.info("Disconnected {} cause of using created exists names for signup", socketAddress.getAddress().getHostAddress());
+                        return;
+                    }
+                    log.info("User {} Created", name);
+                    password = Crypto.encryptSHA256(password);
+                    Server.getInstance().getUserService().saveUser(name, password);
+                    ctx.channel().writeAndFlush(new TextWebSocketFrame(StatusCodes.SUCCESS_SIGNUP.createPacket().getData().toString()));
+                    lookedAuth = false;
+                }, Server.getInstance().getConfig().getAuthenticationDelay(), TimeUnit.MILLISECONDS);
             }
         } else {
-            ClientPacketType packetType;
+            ClientPacketType packetType = null;
+            boolean badPacket;
             try {
                 packetType = ClientPacketType.valueOf(type);
+                badPacket = packetType == ClientPacketType.Login || packetType == ClientPacketType.CreateUser;
             } catch (IllegalArgumentException exception) {
-                user.getUserConnection().disconnect();
+                badPacket = true;
+            }
+            if (badPacket) {
+                log.info("Disconnected {} cause of using bad packets", socketAddress.getAddress().getHostAddress());
                 return;
             }
             ClientPacket packet = packetType.createPacket(jsonObject);
             user.getUserConnection().handleClientPacket(packet);
-            log.info("Disconnected {} cause of using bad packets", socketAddress.getAddress().getHostAddress());
         }
     }
 
@@ -222,7 +246,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
             JSONObject jsonObject = new JSONObject();
 
             Optional<Long> targetUserID = privateChannel.getMembers().stream().filter(id -> id != user.getId()).findFirst();
-            if(targetUserID.isEmpty()) continue;
+            if (targetUserID.isEmpty()) continue;
 
             User targetUser = Server.getInstance().getUserService().getUserById(targetUserID.get());
 

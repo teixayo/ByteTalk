@@ -39,6 +39,8 @@ ssl:
   certificateFile: ""
   privateKeyFile: ""
 rate-limiter:
+  authentication:
+    delay: 1000
   send-message:
     max-size: 2000 #character
     time: 5000

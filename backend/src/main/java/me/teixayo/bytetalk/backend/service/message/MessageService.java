@@ -15,6 +15,7 @@ public interface MessageService {
     void saveMessage(Message message);
 
     Message getMessage(long message_id);
+
     List<Message> getMessage(List<Long> messages_id);
 
 }

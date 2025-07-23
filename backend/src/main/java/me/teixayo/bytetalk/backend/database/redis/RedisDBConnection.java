@@ -29,7 +29,8 @@ public class RedisDBConnection extends JedisPubSub {
     private static boolean isConnected = false;
 
     @Getter
-    private static Map<RedisChannel, List<Consumer<String>>> channelConsumers=null;
+    private static Map<RedisChannel, List<Consumer<String>>> channelConsumers = null;
+
     public RedisDBConnection(String address, int port, String password, boolean useSSL) {
 
         instance = this;
@@ -43,7 +44,7 @@ public class RedisDBConnection extends JedisPubSub {
         config.setTestOnReturn(true);
         config.setTestWhileIdle(true);
         jedisPool = new JedisPool(config, address, port, 2000, password, useSSL);
-        messagingPool = new JedisPool(config, address, port, 2000, password,useSSL);
+        messagingPool = new JedisPool(config, address, port, 2000, password, useSSL);
 
         try (Jedis jedis = jedisPool.getResource()) {
             String response = jedis.ping();
@@ -59,10 +60,23 @@ public class RedisDBConnection extends JedisPubSub {
 
 
         channelConsumers = new HashMap<>();
-        for(RedisChannel channel : RedisChannel.values()) {
+        for (RedisChannel channel : RedisChannel.values()) {
             channelConsumers.put(channel, new ArrayList<>());
         }
         startSubscription();
+    }
+
+    public static void start(String address, int port, String password, boolean useSSL) {
+        if (instance == null) {
+            new RedisDBConnection(address, port, password, useSSL);
+        }
+    }
+
+    public static void stop() {
+        if (instance != null) {
+            jedisPool.close();
+            isConnected = false;
+        }
     }
 
     private void startSubscription() {
@@ -99,19 +113,6 @@ public class RedisDBConnection extends JedisPubSub {
         if (channel == null) return;
         for (Consumer<String> consumer : channelConsumers.get(channel)) {
             consumer.accept(message);
-        }
-    }
-
-    public static void start(String address, int port, String password, boolean useSSL) {
-        if (instance == null) {
-            new RedisDBConnection(address, port, password, useSSL);
-        }
-    }
-
-    public static void stop() {
-        if (instance != null) {
-            jedisPool.close();
-            isConnected = false;
         }
     }
 }

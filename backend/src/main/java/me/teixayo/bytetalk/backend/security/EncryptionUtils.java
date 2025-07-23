@@ -18,7 +18,7 @@ public class EncryptionUtils {
     private static JWTVerifier verifier;
 
     static {
-        if(Server.getInstance()!=null) {
+        if (Server.getInstance() != null) {
             algorithm = Algorithm.HMAC512(Server.getInstance().getConfig().getJwtSecret());
             verifier = JWT.require(algorithm).build();
         }
@@ -40,6 +40,7 @@ public class EncryptionUtils {
                 .sign(algorithm);
         return token;
     }
+
     public static DecodedJWT decryptToken(String token) {
         try {
             DecodedJWT jwt = verifier.verify(token);

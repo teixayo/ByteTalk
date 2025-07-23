@@ -33,12 +33,12 @@ public class RedisCacheService implements CacheService {
 
         try (Jedis jedis = jedisPool.getResource()) {
             List<StreamEntry> entries =
-                    jedis.xrevrange(RedisKeys.MESSAGES.getKey(channelID),StreamEntryID.MAXIMUM_ID, StreamEntryID.MINIMUM_ID, maxSize);
+                    jedis.xrevrange(RedisKeys.MESSAGES.getKey(channelID), StreamEntryID.MAXIMUM_ID, StreamEntryID.MINIMUM_ID, maxSize);
             Collections.reverse(entries);
             for (StreamEntry entry : entries) {
-                Map<String,String> f = entry.getFields();
-                long id      = Long.parseLong(f.get("id"));
-                long userID  = Long.parseLong(f.get("userID"));
+                Map<String, String> f = entry.getFields();
+                long id = Long.parseLong(f.get("id"));
+                long userID = Long.parseLong(f.get("userID"));
                 String content = f.get("content");
                 Instant date = Instant.parse(f.get("date"));
                 out.add(new Message(id, userID, content, Date.from(date)));
@@ -46,9 +46,10 @@ public class RedisCacheService implements CacheService {
         }
         return out;
     }
+
     @Override
-    public void addMessageToCache(long channelID,Message message) {
-        addMessagesToCache(channelID,List.of(message));
+    public void addMessageToCache(long channelID, Message message) {
+        addMessagesToCache(channelID, List.of(message));
     }
 
     public void addMessagesToCache(long channelID, List<Message> messages) {
@@ -58,18 +59,19 @@ public class RedisCacheService implements CacheService {
         try (Jedis jedis = jedisPool.getResource()) {
             Pipeline pipeline = jedis.pipelined();
             for (Message msg : messages) {
-                Map<String,String> map = Map.of(
-                        "id",      String.valueOf(msg.getId()),
-                        "userID",  String.valueOf(msg.getUserID()),
+                Map<String, String> map = Map.of(
+                        "id", String.valueOf(msg.getId()),
+                        "userID", String.valueOf(msg.getUserID()),
                         "content", msg.getContent(),
-                        "date",    msg.getDate().toInstant().toString()
+                        "date", msg.getDate().toInstant().toString()
                 );
                 pipeline.xadd(RedisKeys.MESSAGES.getKey(channelID), map, xAddParams);
             }
             pipeline.sync();
         }
     }
-    public Message getMessageById(long channelID,long id) {
+
+    public Message getMessageById(long channelID, long id) {
         String script = """
                 local entries = redis.call('XRANGE', KEYS[1], '-', '+')
                 for _, entry in ipairs(entries) do

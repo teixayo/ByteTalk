@@ -35,6 +35,6 @@ public class RateLimiter {
     }
 
     public RateLimiter copy() {
-        return new RateLimiter(maxTokens,refillIntervalMillis);
+        return new RateLimiter(maxTokens, refillIntervalMillis);
     }
 }

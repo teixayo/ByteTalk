@@ -4,9 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import me.teixayo.bytetalk.backend.Server;
-import me.teixayo.bytetalk.backend.service.message.Message;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
+import me.teixayo.bytetalk.backend.service.message.Message;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -36,7 +36,7 @@ public class User {
         log.info("{} Sent to {}", serverPacket.getData().toString(), name);
     }
 
-    public void sendMessages(String channel,Collection<Message> messages) {
+    public void sendMessages(String channel, Collection<Message> messages) {
         JSONArray bulkJson = new JSONArray();
 
         HashSet<Long> userIds = new HashSet<>();

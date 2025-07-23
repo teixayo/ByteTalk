@@ -36,8 +36,8 @@ public class MongoChannelService implements ChannelService {
                 new IndexOptions().background(true)
         );
 
-        if(getChannel(1)==null) {
-            createChannel(new Channel(1,"global",Date.from(Instant.now()),List.of(),true));
+        if (getChannel(1) == null) {
+            createChannel(new Channel(1, "global", Date.from(Instant.now()), List.of(), true));
         }
     }
 
@@ -76,7 +76,7 @@ public class MongoChannelService implements ChannelService {
                 Filters.lte("date", date)
         );
         long total = messages.countDocuments(filter);
-        int skip = (int)Math.max(0, total - batchSize);
+        int skip = (int) Math.max(0, total - batchSize);
         List<Long> ids = new ArrayList<>();
         messages.find(filter)
                 .skip(skip)
@@ -88,7 +88,7 @@ public class MongoChannelService implements ChannelService {
 
     public List<Channel> getUserPrivateChannels(long userId) {
         Bson filter = Filters.in("members", userId);
-        List<Pair<Channel,Date>> result = new ArrayList<>();
+        List<Pair<Channel, Date>> result = new ArrayList<>();
         channels.find(filter).forEach(doc -> {
             List<Long> members = doc.getList("members", Long.class);
             if (members != null && members.size() == 2) {
@@ -97,7 +97,7 @@ public class MongoChannelService implements ChannelService {
                         .sort(Sorts.descending("date"))
                         .limit(1)
                         .first();
-                if(lastMsg!=null) {
+                if (lastMsg != null) {
                     result.add(Pair.of(channel, lastMsg.getDate("date")));
                 } else {
                     result.add(Pair.of(channel, doc.getDate("createdAt")));
@@ -106,7 +106,7 @@ public class MongoChannelService implements ChannelService {
         });
         result.sort(Comparator.comparing(Pair::getSecond));
         List<Channel> sorted = new ArrayList<>();
-        for (Pair<Channel,Date> entry : result) {
+        for (Pair<Channel, Date> entry : result) {
             sorted.add(entry.getFirst());
         }
         return sorted;

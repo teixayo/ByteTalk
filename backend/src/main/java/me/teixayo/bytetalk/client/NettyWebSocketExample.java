@@ -139,8 +139,7 @@ public class NettyWebSocketExample {
                 handshakeFuture.setSuccess();
                 return;
             }
-            if (msg instanceof BinaryWebSocketFrame) {
-                BinaryWebSocketFrame binFrame = (BinaryWebSocketFrame) msg;
+            if (msg instanceof BinaryWebSocketFrame binFrame) {
                 int readableBytes = binFrame.content().readableBytes();
                 System.out.println("Received binary frame of length: " + readableBytes + " bytes");
                 return;
