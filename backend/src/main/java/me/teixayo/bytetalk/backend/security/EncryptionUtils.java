@@ -10,12 +10,9 @@ import me.teixayo.bytetalk.backend.Server;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.HashMap;
 
 public class EncryptionUtils {
 
-    @Getter
-    private static final HashMap<String, String> tokens = new HashMap<>();
     @Getter
     private static Algorithm algorithm;
     private static JWTVerifier verifier;
@@ -41,19 +38,7 @@ public class EncryptionUtils {
                 .withIssuedAt(new Date())
                 .withExpiresAt(Date.from(Instant.now().plus(7, ChronoUnit.DAYS)))
                 .sign(algorithm);
-        tokens.put(username, token);
         return token;
-    }
-
-    public static DecodedJWT getJWT(String username) {
-        if (!tokens.containsKey(username)) return null;
-        String token = tokens.get(username);
-        DecodedJWT jwt = verifier.verify(token);
-        if (jwt.getExpiresAt().toInstant().isBefore(Instant.now())) {
-            tokens.remove(username);
-            return null;
-        }
-        return jwt;
     }
     public static DecodedJWT decryptToken(String token) {
         try {

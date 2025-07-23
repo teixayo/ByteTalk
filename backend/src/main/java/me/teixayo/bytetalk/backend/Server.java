@@ -9,7 +9,6 @@ import me.teixayo.bytetalk.backend.database.redis.RedisDBConnection;
 import me.teixayo.bytetalk.backend.networking.NettyHandler;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacket;
 import me.teixayo.bytetalk.backend.protocol.server.ServerPacketType;
-import me.teixayo.bytetalk.backend.security.EncryptionUtils;
 import me.teixayo.bytetalk.backend.service.cache.CacheService;
 import me.teixayo.bytetalk.backend.service.cache.RedisCacheService;
 import me.teixayo.bytetalk.backend.service.channel.Channel;
@@ -150,14 +149,6 @@ public final class Server implements LoopApp {
             }
 
             user.getUserConnection().processPackets();
-        }
-        if (loop.getUpdates() % 10000 == 0) {
-            for (String token : EncryptionUtils.getTokens().keySet()) {
-                if (EncryptionUtils.getJWT(token) == null) {
-                    log.info("{} token expired", token);
-                }
-
-            }
         }
         if(messageService instanceof MongoMessageService mongoMessageService) {
             mongoMessageService.finalizeAllMessages();
