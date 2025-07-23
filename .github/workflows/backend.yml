@@ -24,7 +24,6 @@ jobs:
 
       - name: Run tests
         run: ./gradlew test
-        working-directory: ./backend
 
   deploy:
     name: Deploy Backend
