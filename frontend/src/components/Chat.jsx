@@ -94,6 +94,8 @@ const Chat = () => {
 
   const [isMobileSidebar, setIsMobileSidebar] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [haveOpacity ,setHaveOpacity ] = useState(false)
+
 
   const handleSelectUser = (user) => {
     navigate(`/chat/${user.username}`);
@@ -435,7 +437,6 @@ const Chat = () => {
     }, 1000);
   };
 
-  const [haveOpacity ,setHaveOpacity ] = useState(false)
   return (
     <>
       {selectedUser?.username ? (
@@ -504,7 +505,7 @@ const Chat = () => {
             <div className="flex-1 flex flex-col">
               <div className="h-14 flex justify-center sm:justify-start items-center bg-[#1a1a1e] border-b border-[#29292d]">
                 <button
-                  className="absolute left-3.5 sm:hidden"
+                  className="absolute left-3.5 cursor-pointer sm:hidden"
                   onClick={() => {
                     setIsMobileSidebar(true);
                     setIsSidebarOpen(true);
