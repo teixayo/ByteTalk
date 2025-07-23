@@ -1,43 +1,36 @@
 # ByteTalk
 
-**ByteTalk** is a real‑time chat application featuring global and private (peer‑to‑peer) messaging. It’s built with a Java backend and a React/Tailwind frontend, and supports both in‑memory and MongoDB storage for message persistence.
-
----
-
-## 🎯 Purpose
-
-ByteTalk enables users to communicate instantly in both public (global) channels and private conversations. It’s designed to be lightweight, secure, and easily deployable—perfect for teams, communities, or as a foundation for more specialized chat solutions.
+**ByteTalk** is a real-time chat application that supports global and private messaging, designed with scalability and microservice architecture in mind. It features a Java-based backend and a React/Tailwind frontend. ByteTalk utilizes Redis for pub/sub communication and caching, and supports both in-memory and MongoDB storage for flexible and efficient message persistence.
 
 ---
 
 ## ⚙️ Tech Stack
 
 **Backend**
-- Java 21
-- Netty (TCP framework)
+- Java 
+- Netty
 - WebSocket for real‑time messaging
-- Redis (in‑memory message broker and pub/sub)
-- MongoDB (persistent storage)
-- JWT (JSON Web Tokens) for authentication
-- JUnit & Testcontainers for testing
+- Redis
+- MongoDB
+- JWT for authentication
+- JUnit & Testcontainers 
 - GitHub Actions CI/CD
-- Docker for containerization
-
+- Docker
+- 
 **Frontend**
-- React (with Vite)
+- React
+- Vite
 - Tailwind CSS
 
 ---
 
 ## 🚀 Features
 
-- **Global Chat**: Broadcast messages to all connected users.
-- **Private Chat**: One‑to‑one direct messaging.
-- **Group Chat**: Create and join group channels for team conversations.
-- **Authentication**: Secure login/signup via JWT and password hashing.
-- **Configurable Storage**: Supports both in‑memory (for development) and MongoDB (for production).
-- **Automated Testing**: Unit and integration tests with JUnit and Testcontainers.
-
+- **Global Chat**: Broadcast messages to all connected users
+- **Private Chat**: One‑to‑one direct messaging
+- **Authentication**: Secure login/signup via JWT and password hashing (SHA256)
+- **Configurable Storage**: Supports both in‑memory (for development) and MongoDB (for production)
+- **Automated Testing**: Unit and integration tests with JUnit and Testcontainers
 ---
 
 ## 🏗️ Architecture
@@ -54,7 +47,6 @@ ByteTalk enables users to communicate instantly in both public (global) channels
 1. **Prerequisites**
     - Java 21
     - Node.js ≥16
-    - Docker & Docker Compose (optional, but recommended)
 
 2. **Clone the repo**
    ```bash
@@ -79,15 +71,7 @@ ByteTalk enables users to communicate instantly in both public (global) channels
    ```
 
 5. **Access the App**  
-   Open `http://localhost:8080` (or your configured Vite port) in your browser.
-
----
-
-## ☁️ Deployment
-
-- **Platform:** VPS
-- **Containerization:** Docker & Docker Compose
-- **CI/CD:** GitHub Actions automatically builds and pushes Docker images, then deploys to your VPS.
+   Open `http://localhost:8080` (or your configured port) in your browser.
 
 ---
 
@@ -97,8 +81,7 @@ ByteTalk enables users to communicate instantly in both public (global) channels
 - **Integration Tests:** JUnit + Testcontainers (spins up temporary Redis & MongoDB)
 - Run all tests with:
   ```bash
-  cd backend
-  ./mvnw test
+  ./gradlew test
   ```
 
 ---
@@ -111,16 +94,8 @@ ByteTalk enables users to communicate instantly in both public (global) channels
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please fork the repo, create a feature branch, and open a pull request. For major changes, open an issue first to discuss your ideas.
-
----
-
 ## 📄 License
 
 [MIT License](LICENSE)
 
----
-
-*Built with ❤️ by [Your Name](https://github.com/your-username)*  
+--- 
