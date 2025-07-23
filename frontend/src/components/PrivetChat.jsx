@@ -358,7 +358,7 @@ const PrivetChat = () => {
         <div
           ref={rowRef}
           className={`flex p-2 ${isSameUserAsPrevious ? "pt-1" : ""}`}
-          style={{ minHeight: showAvatar ? "60px" : "40px" }}
+          style={{ minHeight: showAvatar ? "70px" : "45px" }}
         >
           {/* آواتار (فقط برای اولین پیام) */}
           {showAvatar ? (

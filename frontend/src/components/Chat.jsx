@@ -92,6 +92,9 @@ const Chat = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const popupRef = useRef(null);
 
+  const [isMobileSidebar, setIsMobileSidebar] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const handleSelectUser = (user) => {
     navigate(`/chat/${user.username}`);
   };
@@ -348,7 +351,7 @@ const Chat = () => {
         <div
           ref={rowRef}
           className={`flex p-2 ${isSameUserAsPrevious ? "pt-1" : ""}`}
-          style={{ minHeight: showAvatar ? "60px" : "40px" }}
+          style={{ minHeight: showAvatar ? "70px" : "45px" }}
         >
           {/* آواتار (فقط برای اولین پیام) */}
           {showAvatar ? (
@@ -432,6 +435,7 @@ const Chat = () => {
     }, 1000);
   };
 
+  const [haveOpacity ,setHaveOpacity ] = useState(false)
   return (
     <>
       {selectedUser?.username ? (
@@ -487,30 +491,64 @@ const Chat = () => {
           </div>
         </div>
       ) : (
-        <div className="h-screen grid grid-cols-7 xl:grid-cols-5 text-gray-300">
+        <div className={`h-screen grid grid-cols-7 xl:grid-cols-5 text-gray-300`}>
           {/* پنل کناری جدید */}
-          <Sidebar />
-          <div className="grid col-span-5 xl:col-span-4">
+            <Sidebar
+              isMobileSidebar={isMobileSidebar}
+              setIsMobileSidebar={setIsMobileSidebar}
+              isSidebarOpen={isSidebarOpen}
+              setIsSidebarOpen={setIsSidebarOpen}
+            setHaveOpacity={setHaveOpacity}
+            />
+          <div className={`${haveOpacity? "opacity-50" : null} grid col-span-7 sm:col-span-5 xl:col-span-4`}>
             <div className="flex-1 flex flex-col">
-              <div className="h-14 flex items-center bg-[#1a1a1e] border-b border-[#29292d]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.25}
-                  stroke="currentColor"
-                  className="size-8 ml-3.5 mr-3.5"
+              <div className="h-14 flex justify-center sm:justify-start items-center bg-[#1a1a1e] border-b border-[#29292d]">
+                <button
+                  className="absolute left-3.5 sm:hidden"
+                  onClick={() => {
+                    setIsMobileSidebar(true);
+                    setIsSidebarOpen(true);
+                    setHaveOpacity(true)
+                    console.log(isMobileSidebar);
+                    console.log(isSidebarOpen);
+
+                  }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
-                  />
-                </svg>
-                <p>Global</p>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.25}
+                    stroke="currentColor"
+                    className="size-8"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                    />
+                  </svg>
+                </button>
+                <div className="flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.25}
+                    stroke="currentColor"
+                    className="size-8 sm:ml-3.5 mr-3.5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
+                    />
+                  </svg>
+                  <p>Global</p>
+                </div>
               </div>
 
-              <div className="flex-1 ">
+              <div className={`flex-1  `}>
                 <List
                   ref={listRef}
                   height={listHeight}
