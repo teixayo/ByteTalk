@@ -92,6 +92,10 @@ const PrivetChat = () => {
   const [validUser, setValidUser] = useState(true);
   const [isFocused, setIsFocused] = useState(false);
 
+  const [isMobileSidebar, setIsMobileSidebar] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [haveOpacity ,setHaveOpacity ] = useState(false)
+
   // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
   useEffect(() => {
     if (socket.readyState == WebSocket.OPEN) {
@@ -441,15 +445,46 @@ const PrivetChat = () => {
   return (
     <>
       <div className="h-screen grid grid-cols-7 xl:grid-cols-5 text-gray-300">
-        <Sidebar />
-        <div className="grid col-span-5 xl:col-span-4">
-          <div className="h-14 flex items-center bg-[#1a1a1e] border-b border-[#29292d]">
+        <Sidebar
+          isMobileSidebar={isMobileSidebar}
+          setIsMobileSidebar={setIsMobileSidebar}
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+          setHaveOpacity={setHaveOpacity}
+        />
+        <div className={`${haveOpacity? "opacity-50" : null} grid col-span-7 sm:col-span-5 xl:col-span-4`}>
+          <div className="h-14 flex justify-center sm:justify-start items-center bg-[#1a1a1e] border-b border-[#29292d]">
+            <button
+              className="absolute left-3.5 cursor-pointer sm:hidden"
+              onClick={() => {
+                setIsMobileSidebar(true);
+                setIsSidebarOpen(true);
+                setHaveOpacity(true);
+                console.log(isMobileSidebar);
+                console.log(isSidebarOpen);
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.25}
+                stroke="currentColor"
+                className="size-8"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                />
+              </svg>
+            </button>
             {userID ? (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth={0.75}
+                strokeWidth={0.5}
                 stroke="currentColor"
                 className="size-11 text-white ml-2 mr-2.5"
               >
