@@ -1,2 +1,2 @@
 rootProject.name = "ByteTalk"
-include("shared", "backend")
+include("backend")

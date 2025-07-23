@@ -18,7 +18,7 @@ database:
     password: ""
 networking:
   ip: 0.0.0.0
-  port: 25565
+  port: 8080
   tcp-fast-open: true
   tcp-no-delay: true
   # AUTO (Find the best case)

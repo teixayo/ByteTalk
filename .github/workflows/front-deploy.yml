@@ -1,4 +1,3 @@
-# .github/workflows/frontend-deploy.yml
 name: Deploy Frontend
 
 on:
@@ -20,12 +19,12 @@ jobs:
         run: |
           cd frontend
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          docker build -t teixayo/bytetalk:latest .
-          docker push teixayo/bytetalk:latest
+          docker build -t teixayo/bytetalk-frontend:latest .
+          docker push teixayo/bytetalk-frontend:latest
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Trigger production webhook
         run: |
-          curl -X POST ${{ secrets.PRODUCTION_WEBHOOK_URL }} -H "Authorization: Bearer ${{ secrets.WEBHOOK_SECRET }}"
+          curl -X POST ${{ secrets.PRODUCTION_BACKEND_WEBHOOK_URL }} -H "Authorization: Bearer ${{ secrets.BACKEND_WEBHOOK_SECRET }}"
