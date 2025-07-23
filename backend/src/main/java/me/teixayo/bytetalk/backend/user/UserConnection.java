@@ -181,6 +181,7 @@ public class UserConnection {
     }
 
     private String getChannelName(long username1, long username2) {
+
         if (username1 > username2) {
             long temp = username1;
             username1 = username2;

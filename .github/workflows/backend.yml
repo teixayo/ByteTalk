@@ -42,5 +42,5 @@ jobs:
 
       - name: Build & push Docker image
         run: |
-          docker build -t teixayo/bytetalk-backend:latest ./backend
+          docker build -t teixayo/bytetalk-backend:latest .
           docker push teixayo/bytetalk-backend:latest
