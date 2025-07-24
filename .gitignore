@@ -69,7 +69,6 @@ desktop.ini
 
 # Docker
 *.pid
-*.env
 docker-compose.override.yml
 
 # Logs and temp data
