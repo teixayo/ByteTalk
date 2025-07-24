@@ -12,7 +12,6 @@ public class Scheduler {
         timerExecutionService = Executors.newSingleThreadScheduledExecutor();
     }
 
-
     public static void runTaskLater(Runnable task, long delay, TimeUnit timeUnit) {
         timerExecutionService.schedule(task, delay, timeUnit);
     }
