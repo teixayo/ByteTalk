@@ -45,9 +45,13 @@ rate-limiter:
     max-size: 2000 #character
     time: 5000
     tokens: 10
-  bulk-message:
+  request-bulk-message:
     time: 1000
     tokens: 5
+  can-send-message:
+    time: 1000
+    tokens: 5
+
 
 jwt-secret:
   file: "secret.txt"

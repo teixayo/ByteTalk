@@ -39,6 +39,7 @@ public class UserConnection {
     private long lastPongTime;
     private RateLimiter sendMessageRateLimiter;
     private RateLimiter bulkMessageRateLimiter;
+    private RateLimiter canMessageRateLimiter;
 
 
     public UserConnection(ChannelHandlerContext channel, User user) {
@@ -47,7 +48,8 @@ public class UserConnection {
         this.lastPongTime = System.currentTimeMillis();
         if (Server.getInstance() != null) {
             this.sendMessageRateLimiter = Server.getInstance().getConfig().getSendMessageLimiter().copy();
-            this.bulkMessageRateLimiter = Server.getInstance().getConfig().getBulkMessageLimiter().copy();
+            this.bulkMessageRateLimiter = Server.getInstance().getConfig().getRequestBulkMessageLimiter().copy();
+            this.canMessageRateLimiter = Server.getInstance().getConfig().getCanSendMessageLimiter().copy();
         }
     }
 
@@ -99,6 +101,7 @@ public class UserConnection {
         }
         switch (packet.getPacketType()) {
             case CanSendMessage -> {
+                if (!canMessageRateLimiter.allowRequest()) return;
                 String channelString = packet.getData().getString("channel");
                 boolean canSendMessage = false;
                 if (!channelString.equals("global")) {
@@ -174,6 +177,7 @@ public class UserConnection {
 
             }
             case RequestBulkMessage -> {
+                if (!bulkMessageRateLimiter.allowRequest()) return;
                 long time = packet.getData().getLong("date");
                 String channelString = packet.getData().getString("channel");
                 Date date = time == -1 ? null : Date.from(Instant.ofEpochMilli(time));
@@ -192,7 +196,6 @@ public class UserConnection {
     }
 
     private void sendBulkMessage(String channelName, Date date) {
-        if (!bulkMessageRateLimiter.allowRequest()) return;
         Channel channel = null;
         if (channelName.equals("global")) {
             channel = Server.getInstance().getChannelService().getChannelByName(channelName);

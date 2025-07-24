@@ -53,7 +53,8 @@ public class Config {
     private final boolean sslToggleUsingKeys;
     private final RateLimiter sendMessageLimiter;
     private final int maxSendMessageSize;
-    private final RateLimiter bulkMessageLimiter;
+    private final RateLimiter requestBulkMessageLimiter;
+    private final RateLimiter canSendMessageLimiter;
     private final int authenticationDelay;
     private File sslCertifiateFile = null;
     private File sslPrivateKeyFile = null;
@@ -110,12 +111,15 @@ public class Config {
                 (int) get("rate-limiter.send-message.time")
         );
         maxSendMessageSize = (int) get("rate-limiter.send-message.max-size");
-        bulkMessageLimiter = new RateLimiter(
-                (int) get("rate-limiter.bulk-message.tokens"),
-                (int) get("rate-limiter.bulk-message.time")
+        requestBulkMessageLimiter = new RateLimiter(
+                (int) get("rate-limiter.request-bulk-message.tokens"),
+                (int) get("rate-limiter.request-bulk-message.time")
         );
         authenticationDelay = (int) get("rate-limiter.authentication.delay");
-
+        canSendMessageLimiter = new RateLimiter(
+                (int) get("rate-limiter.can-send-message.tokens"),
+                (int) get("rate-limiter.can-send-message.time")
+        );
 
         File jwtSecretFile = new File((String) get("jwt-secret.file"));
         if (!jwtSecretFile.exists()) {
