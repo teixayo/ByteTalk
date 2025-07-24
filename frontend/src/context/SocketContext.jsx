@@ -39,7 +39,9 @@ export const SocketProvider = ({ children }) => {
 
       if (data.type == "Status") {
         if (data.code === "1004") {
-          toast.success("Sign up was successful");
+          setTimeout(() => {
+            toast.success("Sign up was successful");
+          }, 1000);
         } else if (data.code === "1005") {
           toast.error("This username is already taken");
         } else if (data.code === "1006") {

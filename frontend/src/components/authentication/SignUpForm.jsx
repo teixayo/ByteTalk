@@ -3,17 +3,10 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate, Link } from "react-router-dom";
 import { useSocket } from "../../context/SocketContext";
-import toast from "react-hot-toast";
 
 let localUserName = "";
 let localUserPassword = "";
 
-const statusMessages = {
-  1004: "Sign-up was successful",
-  1005: "❌ This username is already taken",
-  1006: "❌ Invalid username format",
-  1007: "❌ Invalid password format",
-};
 const SignUpForm = () => {
   const navigate = useNavigate();
   const { socket, status } = useSocket();
@@ -35,7 +28,7 @@ const SignUpForm = () => {
       setTimeout(() => {
 
         navigate("/chat");
-      }, 300);
+      }, 2300);
     }
   }, [status]);
 

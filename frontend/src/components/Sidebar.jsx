@@ -7,6 +7,7 @@ const Sidebar = ({
   isSidebarOpen,
   setIsSidebarOpen,
   setHaveOpacity,
+  setSelectedUser,
 }) => {
   const { privetChannels, setActiveChat, activeChat } = useSocket();
   const navigate = useNavigate();
@@ -67,6 +68,7 @@ const Sidebar = ({
                       : "hover:bg-[#1d1d1e] hover:opacity-100"
                   } rounded cursor-pointer`}
                   onClick={() => {
+                    setSelectedUser(null);
                     setActiveChat("chat");
                     navigate(`/chat`);
                     navigate(0);
@@ -147,9 +149,9 @@ const Sidebar = ({
                   : "hover:bg-[#1d1d1e] hover:opacity-100"
               } rounded cursor-pointer`}
               onClick={() => {
+                setSelectedUser(null);
                 setActiveChat("chat");
                 navigate(`/chat`);
-                // window.location.reload();
                 navigate(0);
               }}
             >

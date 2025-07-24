@@ -75,7 +75,7 @@ const PrivetChat = () => {
 
   const inputRef = useRef(null);
   const [inputHeight, setInputHeight] = useState(58);
-  const [titleHeight, setTitleHight] = useState(64); // ارتفاع پیش‌فرض
+  const [titleHeight, setTitleHight] = useState(65); // ارتفاع پیش‌فرض
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -451,6 +451,7 @@ const PrivetChat = () => {
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
           setHaveOpacity={setHaveOpacity}
+          setSelectedUser={setSelectedUser}
         />
         <div className={`${haveOpacity? "opacity-50" : null} grid col-span-7 sm:col-span-5 xl:col-span-4`}>
           <div className="h-14 flex justify-center sm:justify-start items-center bg-[#1a1a1e] border-b border-[#29292d]">
@@ -555,7 +556,7 @@ const PrivetChat = () => {
               {Row}
             </List>
           </div>
-          <div className="bg-[#1a1a1e] w-full pb-1 sm:pb-2 px-1 md:px-2">
+          <div className="bg-[#1a1a1e] w-full pb-3 px-2">
             <div
               ref={inputRef}
               className={`w-full flex transition-colors duration-200 ${

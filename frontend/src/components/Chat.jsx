@@ -12,6 +12,7 @@ import Sidebar from "./Sidebar";
 
 let flag = true;
 let firstRender = true;
+let length = 0;
 
 const convertMessage = (text) => {
   // تشخیص پیام‌های حاوی کد یا تگ‌های HTML
@@ -80,7 +81,7 @@ const Chat = () => {
 
   const inputRef = useRef(null);
   const [inputHeight, setInputHeight] = useState(58);
-  const [titleHeight, setTitleHight] = useState(64); // ارتفاع پیش‌فرض
+  const [titleHeight, setTitleHight] = useState(65); // ارتفاع پیش‌فرض
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -90,12 +91,12 @@ const Chat = () => {
   const navigate = useNavigate();
 
   const [selectedUser, setSelectedUser] = useState(null);
+
   const popupRef = useRef(null);
 
   const [isMobileSidebar, setIsMobileSidebar] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [haveOpacity ,setHaveOpacity ] = useState(false)
-
+  const [haveOpacity, setHaveOpacity] = useState(false);
 
   const handleSelectUser = (user) => {
     navigate(`/chat/${user.username}`);
@@ -118,7 +119,18 @@ const Chat = () => {
     const handleClickOutside = (event) => {
       console.log(popupRef.current && !popupRef.current.contains(event.target));
       if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setInitialScrollDone(false);
         setSelectedUser(null);
+        setTimeout(() => {
+          listRef.current.scrollToItem(length, "end");
+        }, 100);
+        setTimeout(() => {
+          listRef.current.scrollToItem(length, "end");
+        }, 130);
+
+        setTimeout(() => {
+          setInitialScrollDone(true);
+        }, 200);
       }
     };
 
@@ -160,7 +172,7 @@ const Chat = () => {
 
       console.log(bulkMessages);
       console.log("localMessages", localMessages);
-
+      length = bulkMessages.length;
       listRef.current.scrollToItem(bulkLength, "start");
       if (firstRender) {
         setTimeout(() => {
@@ -492,16 +504,23 @@ const Chat = () => {
           </div>
         </div>
       ) : (
-        <div className={`h-screen grid grid-cols-7 xl:grid-cols-5 text-gray-300`}>
+        <div
+          className={`h-screen grid grid-cols-7 xl:grid-cols-5 text-gray-300`}
+        >
           {/* پنل کناری جدید */}
-            <Sidebar
-              isMobileSidebar={isMobileSidebar}
-              setIsMobileSidebar={setIsMobileSidebar}
-              isSidebarOpen={isSidebarOpen}
-              setIsSidebarOpen={setIsSidebarOpen}
+          <Sidebar
+            isMobileSidebar={isMobileSidebar}
+            setIsMobileSidebar={setIsMobileSidebar}
+            isSidebarOpen={isSidebarOpen}
+            setIsSidebarOpen={setIsSidebarOpen}
             setHaveOpacity={setHaveOpacity}
-            />
-          <div className={`${haveOpacity? "opacity-50" : null} grid col-span-7 sm:col-span-5 xl:col-span-4`}>
+            setSelectedUser={setSelectedUser}
+          />
+          <div
+            className={`${
+              haveOpacity ? "opacity-50" : null
+            } grid col-span-7 sm:col-span-5 xl:col-span-4`}
+          >
             <div className="flex-1 flex flex-col">
               <div className="h-14 flex justify-center sm:justify-start items-center bg-[#1a1a1e] border-b border-[#29292d]">
                 <button
@@ -509,10 +528,9 @@ const Chat = () => {
                   onClick={() => {
                     setIsMobileSidebar(true);
                     setIsSidebarOpen(true);
-                    setHaveOpacity(true)
+                    setHaveOpacity(true);
                     console.log(isMobileSidebar);
                     console.log(isSidebarOpen);
-
                   }}
                 >
                   <svg
@@ -599,7 +617,7 @@ const Chat = () => {
                 </List>
               </div>
 
-              <div className="bg-[#1a1a1e] w-full pb-1 sm:pb-2 px-1 md:px-2">
+              <div className="bg-[#1a1a1e] w-full pb-3 px-2">
                 <div
                   ref={inputRef}
                   className={`w-full flex transition-colors duration-200 ${
