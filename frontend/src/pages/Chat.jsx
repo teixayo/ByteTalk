@@ -1,0 +1,601 @@
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { VariableSizeList as List } from "react-window";
+import toast from "react-hot-toast";
+import TextareaAutosize from "react-textarea-autosize";
+import linkifyHtml from "linkify-html";
+import DOMPurify from "dompurify";
+
+import { useSocket } from "../context/SocketContext";
+import Sidebar from "../components/Sidebar";
+import MessageInput from "../components/MessageInput";
+
+let flag = true;
+let firstRender = true;
+let length = 0;
+const convertMessage = (text) => {
+  // تشخیص پیام‌های حاوی کد یا تگ‌های HTML
+  const isCode =
+    /[<>]/.test(text) ||
+    text.includes("function") ||
+    text.includes("script") ||
+    text.includes("svg") ||
+    text.includes("href=");
+
+  if (isCode) {
+    // پاک‌سازی کامل و نمایش به عنوان کد
+    const sanitized = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br />");
+
+    return `<div class="message-code">${DOMPurify.sanitize(sanitized, {
+      ALLOWED_TAGS: ["br"],
+      ALLOWED_ATTR: [],
+    })}</div>`;
+  }
+
+  // پردازش معمولی برای پیام‌های عادی
+  const linkified = linkifyHtml(text, {
+    target: "_blank",
+    rel: "noopener noreferrer",
+    validate: {
+      url: (value) =>
+        value.startsWith("http://") || value.startsWith("https://"),
+    },
+  });
+
+  return DOMPurify.sanitize(linkified.replace(/\n/g, "<br />"), {
+    ALLOWED_TAGS: ["a", "br"],
+    ALLOWED_ATTR: ["href", "target", "rel"],
+  });
+};
+
+const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
+  const [text, setText] = useState("");
+  const {
+    socket,
+    bulkMessages,
+    newMessage,
+    sendStatus,
+    setSendStatus,
+    bulkLength,
+    setPrivetChannels,
+    privetChannels,
+    canMessage,
+    isFirstBulk,
+  } = useSocket();
+
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [localMessages, setLocalMessages] = useState([]);
+  const debounceTimeout = useRef(null);
+  const [initialScrollDone, setInitialScrollDone] = useState(false);
+  const [messages, setMessages] = useState([]);
+
+  const inputRef = useRef(null);
+  const [inputHeight, setInputHeight] = useState(58);
+  const [titleHeight, setTitleHight] = useState(68); // ارتفاع پیش‌فرض
+  const [listHeight, setListHeight] = useState(
+    window.innerHeight - titleHeight - titleHeight
+  );
+  const rowHeights = useRef({});
+  const listRef = useRef();
+  const navigate = useNavigate();
+
+  // const popupRef = useRef(null);
+
+  const [isMobileSidebar, setIsMobileSidebar] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [haveOpacity, setHaveOpacity] = useState(false);
+
+  const [whoClicked, setWhoClicked] = useState(null);
+  const [numOfMsg, setNumOfMsg] = useState(0);
+
+  const handleSelectUser = (user) => {
+    navigate(`/chat/${user.username}`);
+  };
+
+  // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
+  useEffect(() => {
+    setSelectedUser(null);
+
+    if (socket.readyState == WebSocket.OPEN) {
+      console.log("im in bulkmessages useEffect");
+      socket.send(
+        JSON.stringify({
+          type: "RequestBulkMessage",
+          date: -1,
+          channel: "global",
+        })
+      );
+    }
+    const handleClickOutside = (event) => {
+      // console.log(popupRef.current && !popupRef.current.contains(event.target));
+      // if (popupRef.current && !popupRef.current.contains(event.target)) {
+      //   setInitialScrollDone(false);
+      //   setSelectedUser(null);
+      //   setTimeout(() => {
+      //     listRef.current.scrollToItem(length, "end");
+      //   }, 100);
+      //   setTimeout(() => {
+      //     listRef.current.scrollToItem(length, "end");
+      //   }, 130);
+      //   setTimeout(() => {
+      //     setInitialScrollDone(true);
+      //   }, 200);
+      // }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (numOfMsg > 0) {
+      if (isFirstBulk) {
+        setTimeout(() => {
+          listRef.current.scrollToItem(bulkMessages.length, "end");
+        }, 100);
+        setTimeout(() => {
+          listRef.current.scrollToItem(bulkMessages.length, "end");
+          firstRender = false;
+        }, 130);
+        setTimeout(() => {
+          setInitialScrollDone(true);
+        }, 200);
+      } else {
+        listRef.current.scrollToItem(bulkLength, "start");
+      }
+    }
+  }, [numOfMsg]);
+
+  useEffect(() => {
+    console.log("whoClicked", whoClicked);
+    if (!whoClicked) return;
+    if (canMessage.status) {
+      setSelectedUser({
+        username: whoClicked,
+      });
+    }
+  }, [canMessage]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setListHeight(window.innerHeight - inputHeight - titleHeight);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [inputHeight]);
+
+  const handleInputResize = () => {
+    if (inputRef.current) {
+      const newHeight = inputRef.current.offsetHeight;
+      setInputHeight(newHeight);
+      setListHeight(window.innerHeight - newHeight - titleHeight);
+    }
+  };
+
+  useEffect(() => {
+    console.log("bulk", bulkMessages.length);
+    if (bulkMessages?.length > 0 && listRef.current) {
+      setMessages(() => {
+        return [...bulkMessages, ...localMessages];
+      });
+
+      console.log("bulkMessages", bulkMessages);
+      console.log("localMessages", localMessages);
+      length = bulkMessages.length;
+      listRef.current.scrollToItem(bulkLength, "start");
+      if (firstRender) {
+        setTimeout(() => {
+          listRef.current.scrollToItem(bulkMessages.length, "end");
+        }, 100);
+        setTimeout(() => {
+          listRef.current.scrollToItem(bulkMessages.length, "end");
+          firstRender = false;
+        }, 130);
+
+        setTimeout(() => {
+          setInitialScrollDone(true);
+        }, 200);
+      }
+    }
+    // if (loginCheck) {
+    //   setTimeout(() => {
+    //     console.log("koskesh");
+    //     listRef.current.scrollToItem(bulkMessages.length, "end");
+    //     setLoginCheck(false);
+    //   }, 200);
+    // }
+  }, [bulkMessages]);
+
+  useEffect(() => {
+    if (newMessage.date) {
+      if (newMessage.channel == "global") {
+        const timestamp = Date.now();
+
+        const date = new Date(newMessage.date);
+        const shortTime = date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+
+        const msg = {
+          content: newMessage.content,
+          time: shortTime,
+          username: newMessage.username,
+          timecode: timestamp,
+        };
+
+        setMessages((prev) => {
+          const newMessages = [...prev, msg];
+
+          if (listRef.current) {
+            setTimeout(() => {
+              listRef.current.scrollToItem(newMessages.length, "end"); // should fix xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            }, 200);
+            // setTimeout(() => {
+            //   listRef.current.scrollToItem(newMessages.length, "end");
+            // }, 210);
+          }
+          return newMessages;
+        });
+
+        setLocalMessages((prev) => {
+          return [...prev, msg];
+        });
+      } else {
+        const isRepetitive = privetChannels.find((item) => {
+          return item.name == newMessage.channel;
+        });
+        if (!isRepetitive)
+          setPrivetChannels((prev) => [{ name: newMessage.channel }, ...prev]);
+      }
+    }
+  }, [newMessage]);
+
+  useEffect(() => {
+    console.log("messages", messages);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 100);
+    if (isAtBottom && listRef.current && flag && bulkMessages.length > 0) {
+      // console.log(bulkMessages.length - 1);
+      setTimeout(() => {
+        // listRef.current.scrollToItem(bulkMessages.length - 1, "start");
+        flag = false;
+      }, 100);
+    }
+  }, [messages]);
+
+  const sendMessage = () => {
+    // const timestamp = Date.now();
+    // const date = new Date(timestamp);
+    // console.log(timestamp);
+    // const shortTime = date.toLocaleTimeString("en-US", {
+    //   hour: "2-digit",
+    //   minute: "2-digit",
+    //   hour12: true,
+    // });
+
+    // const msg = {
+    //   content: text,
+    //   time: shortTime,
+    //   username: localStorage.getItem("username") || "anonymous",
+    //   timecode: timestamp,
+    // };
+
+    // setMessages((prev) => {
+    //   const newMessages = [...prev, msg];
+    //   console.log(newMessages);
+    //   if (listRef.current) {
+    //     setTimeout(() => {
+    //       listRef.current.scrollToItem(newMessages.length, "end");
+    //     }, 60);
+    //     setTimeout(() => {
+    //       listRef.current.scrollToItem(newMessages.length, "end");
+    //     }, 100);
+    //   }
+
+    //   return newMessages;
+    // });
+
+    // setLocalMessages((prev) => {
+    //   console.log(prev);
+    //   console.log(msg);
+
+    //   return [...prev, msg];
+    // });
+
+    if (socket && socket.readyState == WebSocket.OPEN) {
+      const messagePayload = {
+        type: "SendMessage",
+        channel: "global",
+        content: text,
+      };
+      socket.send(JSON.stringify(messagePayload));
+    }
+  };
+
+  useEffect(() => {}, []);
+
+  // تابع اندازه‌گیری ارتفاع
+  const getRowHeight = (index) => {
+    // اگر ارتفاع ذخیره شده وجود دارد، از آن استفاده کنید
+    if (rowHeights.current[index]) {
+      return rowHeights.current[index];
+    }
+
+    // ارتفاع پیش‌فرض بر اساس اینکه آیا آواتار نمایش داده می‌شود یا نه
+    const isSameUserAsPrevious =
+      index > 0 && messages[index - 1].username === messages[index].username;
+    return isSameUserAsPrevious ? 50 : 70; // افزایش ارتفاع برای جا دادن زمان
+  };
+
+  // تابع برای تنظیم ارتفاع واقعی
+  const setRowHeight = (index, height) => {
+    if (rowHeights.current[index] !== height) {
+      rowHeights.current[index] = height;
+      listRef.current.resetAfterIndex(index);
+    }
+  };
+
+  useEffect(() => {
+    if (!canMessage) return;
+    const timeout = setTimeout(() => {
+      if (canMessage?.status && typeof canMessage.channel === "string") {
+        // setSelectedUser({
+        //   username: canMessage.channel,
+        // });
+      }
+    }, 20);
+
+    return () => clearTimeout(timeout);
+  }, [canMessage]);
+
+  const Row = ({ index, style }) => {
+    const msg = messages[index];
+    // console.log(`Rendering message ${index}:`, msg)
+
+    const rowRef = useRef();
+    const isSameUserAsPrevious =
+      index > 0 && messages[index - 1].username === msg.username;
+    const showAvatar = !isSameUserAsPrevious;
+
+    setNumOfMsg(messages.length);
+
+    useEffect(() => {
+      if (rowRef.current) {
+        const height = rowRef.current.getBoundingClientRect().height;
+        setRowHeight(index, height);
+      }
+    }, [index, msg.content]);
+
+    const handleUserClick = (e) => {
+      e.stopPropagation();
+      console.log({
+        type: "CanSendMessag",
+        channel: msg.username,
+      });
+
+      socket.send(
+        JSON.stringify({
+          type: "CanSendMessage",
+          channel: msg.username,
+        })
+      );
+      setWhoClicked(msg.username);
+    };
+
+    return (
+      <div style={style}>
+        <div
+          ref={rowRef}
+          className={`flex p-2 ${isSameUserAsPrevious ? "pt-1" : ""}`}
+          style={{ minHeight: showAvatar ? "70px" : "45px" }}
+        >
+          {/* آواتار (فقط برای اولین پیام) */}
+          {showAvatar ? (
+            <div className="flex-shrink-0 mr-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={0.75}
+                stroke="currentColor"
+                className="size-11" // کاهش سایز آواتار
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                />
+              </svg>
+            </div>
+          ) : (
+            <div className="flex-shrink-0 w-12 mr-1"></div> // فضای خالی همتراز با آواتار
+          )}
+
+          <div className="flex-1 min-w-0">
+            {/* نام کاربر (فقط برای اولین پیام) */}
+            {showAvatar && (
+              <div className="flex items-center mb-1">
+                <span
+                  className="pt-1 text-sm text-white mr-2 cursor-pointer"
+                  onClick={handleUserClick}
+                >
+                  {msg.username}
+                </span>
+              </div>
+            )}
+
+            {/* متن پیام و زمان در یک خط */}
+            <div className="flex items-baseline group">
+              <p
+                className="break-words whitespace-pre-wrap inline-block max-w-[85%]"
+                dangerouslySetInnerHTML={{
+                  __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
+                }}
+              ></p>
+              {/* opacity-0 */}
+              <span className="text-xs text-gray-400 ml-2  group-hover:opacity-100 transition-opacity">
+                {msg.time}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const handleScroll = ({ scrollOffset, scrollUpdateWasRequested }) => {
+    setTimeout(() => {
+      if (scrollUpdateWasRequested) return;
+
+      const list = listRef.current;
+      const totalHeight = messages.reduce(
+        (sum, _, i) => sum + getRowHeight(i),
+        0
+      );
+      const distanceFromBottom =
+        totalHeight - (scrollOffset + list.props.height);
+      setIsAtBottom(distanceFromBottom < 50);
+    }, 1000);
+  };
+
+  return (
+    <>
+      <div className={`h-screen grid grid-cols-7 xl:grid-cols-5 text-gray-300`}>
+        {/* پنل کناری جدید */}
+        <Sidebar
+          isMobileSidebar={isMobileSidebar}
+          setIsMobileSidebar={setIsMobileSidebar}
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+          setHaveOpacity={setHaveOpacity}
+          setSelectedUser={setSelectedUser}
+          setIsLoading={setIsLoading}
+          setFadeOut={setFadeOut}
+        />
+        <div
+          className={`${
+            haveOpacity ? "opacity-50" : null
+          } grid col-span-7 sm:col-span-5 xl:col-span-4`}
+        >
+          <div className="flex-1 flex flex-col">
+            <div className="h-14 flex justify-center sm:justify-start items-center bg-[#1a1a1e] border-b border-[#29292d]">
+              <button
+                className="absolute left-3.5 cursor-pointer sm:hidden"
+                onClick={() => {
+                  setIsMobileSidebar(true);
+                  setIsSidebarOpen(true);
+                  setHaveOpacity(true);
+                  console.log(isMobileSidebar);
+                  console.log(isSidebarOpen);
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.25}
+                  stroke="currentColor"
+                  className="size-8"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                  />
+                </svg>
+              </button>
+              <div className="flex items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.25}
+                  stroke="currentColor"
+                  className="size-8 sm:ml-3.5 mr-3.5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
+                  />
+                </svg>
+                <p>Global</p>
+              </div>
+            </div>
+
+            <div className={`flex-1  `}>
+              <List
+                ref={listRef}
+                height={listHeight}
+                itemCount={messages.length}
+                className="scrollbar-custom"
+                onScroll={handleScroll}
+                itemSize={getRowHeight} // استفاده از تابع اندازه‌گیری پویا
+                width={"100%"}
+                estimatedItemSize={120} // ارتفاع تخمینی برای محاسبه اولیه
+                onItemsRendered={({ visibleStartIndex }) => {
+                  if (
+                    visibleStartIndex === 0 &&
+                    sendStatus &&
+                    !debounceTimeout.current &&
+                    initialScrollDone
+                  ) {
+                    setSendStatus(false);
+                    console.log("🟡 کاربر به بالای لیست رسید");
+
+                    debounceTimeout.current = setTimeout(() => {
+                      debounceTimeout.current = null;
+                      setSendStatus(true);
+                    }, 1000);
+
+                    const firstMessageTimecode =
+                      messages[0]?.timecode || Date.now();
+                    console.log(messages[0]);
+                    const rqstBulkMessagePayload = {
+                      type: "RequestBulkMessage",
+                      date: firstMessageTimecode - 1,
+                      channel: "global",
+                    };
+                    console.log(rqstBulkMessagePayload);
+                    if (firstMessageTimecode) {
+                      socket.send(
+                        JSON.stringify({
+                          type: "RequestBulkMessage",
+                          date: firstMessageTimecode - 1,
+                          channel: "global",
+                        })
+                      );
+                    }
+                  }
+                }}
+              >
+                {Row}
+              </List>
+            </div>
+            <MessageInput
+              setInputHeight={setInputHeight}
+              inputHeight={inputHeight}
+              setPrivetChannels={setPrivetChannels}
+              setText={setText}
+              text={text}
+              messages={messages}
+              setListHeight={setListHeight}
+              titleHeight={titleHeight}
+            />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Chat;

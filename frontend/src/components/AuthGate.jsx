@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketContext";
 import { useNavigate, useLocation } from "react-router-dom";
 
+let firstTime = true;
+
 const AuthGate = ({ children }) => {
   const { socket, wsReady, setWsReady, status } = useSocket();
   const navigate = useNavigate();
@@ -10,12 +12,20 @@ const AuthGate = ({ children }) => {
   const [checked, setChecked] = useState(false);
   const [loginAgain, setLoginAgain] = useState(false);
 
-
   useEffect(() => {
     if (!socket || loginAgain) return;
 
     const handleOpen = () => setWsReady(true);
     if (socket.readyState === WebSocket.OPEN) {
+      // const loginPayload = {
+      //   type: "Login",
+      //   username: "AdelNouri02310231",
+      //   password: "ADEL1388",
+      // };
+      // localStorage.setItem("username", "AdelNouri02310231");
+
+      // console.log("📨 Sending login:", loginPayload);
+      // socket.send(JSON.stringify(loginPayload));
 
       function getCookie(name) {
         const value = `; ${document.cookie}`;
@@ -35,14 +45,19 @@ const AuthGate = ({ children }) => {
           } else if (status.code === "1003") {
             setLoginAgain(true);
             setChecked(true);
-            navigate("/")
+            if (firstTime) {
+              navigate("/");
+              firstTime = false;
+            }
           }
         }
       } else {
         setChecked(true);
-        navigate("/");
+        if (firstTime) {
+          navigate("/");
+          firstTime = false;
+        }
       }
-
     } else {
       socket.addEventListener("open", handleOpen);
     }
@@ -50,13 +65,7 @@ const AuthGate = ({ children }) => {
     return () => {
       socket.removeEventListener("open", handleOpen);
     };
-  }, [
-    socket,
-    wsReady,
-    location.pathname,
-    setWsReady,
-    status,
-  ]);
+  }, [socket, wsReady, location.pathname, setWsReady, status]);
 
   if (!checked) return null;
 

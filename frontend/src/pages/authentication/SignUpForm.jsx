@@ -112,7 +112,7 @@ const SignUpForm = () => {
                 type="submit"
                 className="bg-blue-600 w-10/12 h-11 rounded-md text-white"
               >
-                Sing Up
+                Sign Up
               </button>
             </div>
             <p className="flex justify-center mt-1 pb-6">

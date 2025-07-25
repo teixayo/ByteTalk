@@ -1,6 +1,7 @@
 import { useSocket } from "../context/SocketContext";
 import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+
 const Sidebar = ({
   isMobileSidebar,
   setIsMobileSidebar,
@@ -8,8 +9,11 @@ const Sidebar = ({
   setIsSidebarOpen,
   setHaveOpacity,
   setSelectedUser,
+  setIsLoading,
+  setFadeOut,
 }) => {
   const { privetChannels, setActiveChat, activeChat } = useSocket();
+
   const navigate = useNavigate();
   useEffect(() => {
     if (!privetChannels[0]) return;
@@ -69,9 +73,11 @@ const Sidebar = ({
                   } rounded cursor-pointer`}
                   onClick={() => {
                     setSelectedUser(null);
+                    setFadeOut(false);
+                    setIsLoading(false);
                     setActiveChat("chat");
                     navigate(`/chat`);
-                    navigate(0);
+                    // navigate(0);
                     setIsSidebarOpen(false); // بستن در موبایل
                   }}
                 >
@@ -102,10 +108,13 @@ const Sidebar = ({
                         : "hover:bg-[#1d1d1e] hover:opacity-100"
                     } rounded cursor-pointer`}
                     onClick={() => {
+                      setFadeOut(false);
+                      setIsLoading(false);
                       setActiveChat(channel.name);
                       navigate(`/chat/${channel.name}`);
-                      navigate(0);
+                      // navigate(0);
                       setIsSidebarOpen(false); // بستن در موبایل
+                      setHaveOpacity(false);
                     }}
                   >
                     <svg
@@ -133,8 +142,8 @@ const Sidebar = ({
     );
   };
 
-  return (
-    <>
+  const desktopSidebar = () => {
+    return (
       <div className={`hidden sm:hidden-none sm:grid col-span-2 xl:col-span-1`}>
         <div className="bg-[#121214] h-full p-4">
           <h2 className="text-lg font-semibold text-white mb-4">
@@ -150,9 +159,11 @@ const Sidebar = ({
               } rounded cursor-pointer`}
               onClick={() => {
                 setSelectedUser(null);
-                setActiveChat("chat");
+                setFadeOut(false);
+                setIsLoading(false);
                 navigate(`/chat`);
-                navigate(0);
+                // navigate(0);
+                setActiveChat("chat");
               }}
             >
               <svg
@@ -181,10 +192,11 @@ const Sidebar = ({
                       : "hover:bg-[#1d1d1e] hover:opacity-100"
                   } rounded cursor-pointer`}
                   onClick={() => {
-                    setActiveChat(channel.name);
+                    setFadeOut(false);
+                    setIsLoading(false);
                     navigate(`/chat/${channel.name}`);
-                    // window.location.reload();
-                    navigate(0);
+                    // navigate(0);
+                    setActiveChat(channel.name);
                   }}
                 >
                   <svg
@@ -201,6 +213,7 @@ const Sidebar = ({
                       d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                     />
                   </svg>
+                  {/* <Link to={`/chat/${channel.name}`} onClick={() => console.log('meakasdflafjdajflasdfjdsjlfjsaldfl')}>{channel.name}</Link> */}
                   <p className={`text-white pl-1.5 mb-0.5`}>{channel.name}</p>
                 </div>
               );
@@ -208,9 +221,10 @@ const Sidebar = ({
           </div>
         </div>
       </div>
-      {isMobileSidebar ? mobileSidebar() : null}
-    </>
-  );
+    );
+  };
+
+  return <>{isMobileSidebar ? mobileSidebar() : desktopSidebar()}</>;
 };
 
 export default Sidebar;

@@ -8,24 +8,12 @@ import { useSocket } from "../../context/SocketContext.jsx";
 
 let localUserName;
 let localUserPassword;
-const statusMessages = {
-  1000: "✅ Success",
-  1001: "❌ Incorrect username or password",
-  1006: "❌ Invalid username format",
-  1007: "❌ Invalid password format",
-};
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const { socket, status } = useSocket();
 
   useEffect(() => {
-    if (status.code == "1000") {
-      alert(statusMessages[status.code]);
-    } else if (status.code == "1001") {
-      alert(statusMessages[status.code]);
-    }
-
     console.log("✅ useEffect in login form is running");
 
     if (status.type == "Status" && status.code == "1000") {
@@ -117,7 +105,7 @@ const LoginForm = () => {
             <p className="flex justify-center mt-1 pb-6">
               Create an account?
               <Link to="/" className="text-blue-600 underline ml-1">
-                Sing up
+                Sign up
               </Link>
             </p>
           </div>

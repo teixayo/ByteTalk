@@ -1,15 +1,21 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useId } from "react";
 import { useSocket } from "../context/SocketContext";
 import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
-import TextareaAutosize from "react-textarea-autosize";
 import { VariableSizeList as List } from "react-window";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import Sidebar from "./Sidebar";
+
+import Sidebar from "../components/Sidebar";
+import MessageInput from "../components/MessageInput";
+
+import { useAtom } from "jotai";
+import { isAppLoadingAtom } from "../atoms/chatAtoms";
 
 let flag = true;
 let firstRender = true;
+let mofolog = true;
+
 const convertMessage = (text) => {
   // تشخیص پیام‌های حاوی کد یا تگ‌های HTML
   const isCode =
@@ -49,8 +55,12 @@ const convertMessage = (text) => {
   });
 };
 
-let flag2 = false;
-const PrivetChat = () => {
+// let flag2 = false;
+const PrivetChat = ({
+  setIsLoading,
+  setFadeOut,
+  setSelectedUser,
+}) => {
   const [text, setText] = useState("");
   const {
     socket,
@@ -64,18 +74,18 @@ const PrivetChat = () => {
     activeChat,
     setPrivetChannels,
     canMessage,
+    isFirstBulk,
+    setIsFirstBulk,
   } = useSocket();
 
-  const [writing, setWriting] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [localMessages, setLocalMessages] = useState([]);
   const debounceTimeout = useRef(null);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
   const [messages, setMessages] = useState([]);
 
-  const inputRef = useRef(null);
   const [inputHeight, setInputHeight] = useState(58);
-  const [titleHeight, setTitleHight] = useState(65); // ارتفاع پیش‌فرض
+  const [titleHeight, setTitleHight] = useState(68); // ارتفاع پیش‌فرض
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -86,18 +96,43 @@ const PrivetChat = () => {
   const navigate = useNavigate();
   const { userID } = useParams();
 
-  const [selectedUser, setSelectedUser] = useState(null);
+  // const [selectedUser, setSelectedUser] = useState(null);
   const popupRef = useRef(null);
 
   const [validUser, setValidUser] = useState(true);
-  const [isFocused, setIsFocused] = useState(false);
 
   const [isMobileSidebar, setIsMobileSidebar] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [haveOpacity ,setHaveOpacity ] = useState(false)
+  const [haveOpacity, setHaveOpacity] = useState(false);
+
+  const [folog, setFolog] = useState(false);
+  const [flag2, setFlag2] = useState(false);
+  const [numOfMsg, setNumOfMsg] = useState(0);
 
   // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
+
   useEffect(() => {
+    if (numOfMsg > 0) {
+      if (isFirstBulk) {
+        setTimeout(() => {
+          listRef.current.scrollToItem(bulkMessages.length, "end");
+        }, 100);
+        setTimeout(() => {
+          listRef.current.scrollToItem(bulkMessages.length, "end");
+          firstRender = false;
+        }, 130);
+        setTimeout(() => {
+          setInitialScrollDone(true);
+        }, 200);
+      } else {
+        listRef.current.scrollToItem(bulkLength, "start");
+      }
+    }
+  }, [numOfMsg]);
+
+  useEffect(() => {
+    setInitialScrollDone(false);
+
     if (socket.readyState == WebSocket.OPEN) {
       socket.send(
         JSON.stringify({
@@ -107,17 +142,17 @@ const PrivetChat = () => {
         })
       );
 
-      socket.send(
-        JSON.stringify({
-          type: "CanSendMessage",
-          channel: userID,
-        })
-      );
+      // socket.send(
+      //   JSON.stringify({
+      //     type: "CanSendMessage",
+      //     channel: userID,
+      //   })
+      // );
     }
 
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
-        setSelectedUser(null);
+        // setSelectedUser(null);
       }
     };
 
@@ -125,78 +160,50 @@ const PrivetChat = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
-
-  useEffect(() => {
-    console.log(canMessage);
-    if (!canMessage) return;
-    if (canMessage.status) {
-      setValidUser(true);
-    } else {
-      setValidUser(false);
-    }
-  }, [canMessage]);
+  }, [userID]);
 
   useEffect(() => {
     console.log("active chat: ", activeChat);
-  }, [activeChat]);
+  }, [activeChat, userID]);
 
   useEffect(() => {
-    const handleResize = () => {
-      setListHeight(window.innerHeight - inputHeight - titleHeight);
-      console.log(window.innerHeight - inputHeight - titleHeight);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [inputHeight]);
-
-  const handleInputResize = () => {
-    if (inputRef.current) {
-      const newHeight = inputRef.current.offsetHeight;
-      setInputHeight(newHeight);
-      setListHeight(window.innerHeight - newHeight - titleHeight);
-    }
-  };
+    setLocalMessages([]);
+  }, [userID]);
 
   useEffect(() => {
-    console.log("bulk", bulkMessages.length);
     if (flag2) {
       if (bulkMessages?.length > 0 && listRef.current) {
         setMessages([...bulkMessages, ...localMessages]);
+        console.log(folog);
 
         console.log(bulkMessages);
         console.log(localMessages);
 
-        listRef.current.scrollToItem(bulkLength, "start");
-        if (firstRender) {
-          setTimeout(() => {
-            listRef.current.scrollToItem(bulkMessages.length, "end");
-          }, 100);
-          setTimeout(() => {
-            listRef.current.scrollToItem(bulkMessages.length, "end");
+        // listRef.current.scrollToItem(bulkLength, "start");
 
-            firstRender = false;
-          }, 130);
+        // if (firstRender) {
+        //   setTimeout(() => {
+        //     listRef.current.scrollToItem(bulkMessages.length, "end");
+        //   }, 100);
+        //   setTimeout(() => {
+        //     listRef.current.scrollToItem(bulkMessages.length, "end");
 
-          setTimeout(() => {
-            setInitialScrollDone(true);
-          }, 200);
-        }
+        //     firstRender = false;
+        //   }, 130);
+
+        //   setTimeout(() => {
+        //     setInitialScrollDone(true);
+        //   }, 200);
+        // }
       }
     } else {
-      flag2 = true;
+      setFlag2(true);
       setMessages([]);
     }
-
-    // if (loginCheck) {
-    //   setTimeout(() => {
-    //     listRef.current.scrollToItem(bulkMessages.length, "end");
-    //     setLoginCheck(false);
-    //   }, 200);
-    // }
   }, [bulkMessages]);
 
   useEffect(() => {
+    console.log(newMessage);
     if (newMessage.date) {
       if (
         newMessage.channel == localStorage.getItem("username") ||
@@ -215,7 +222,7 @@ const PrivetChat = () => {
           content: newMessage.content,
           time: shortTime,
           username: newMessage.username,
-          timecode: timestamp, // اضافه کردن timecode
+          timecode: timestamp,
         };
 
         setMessages((prev) => {
@@ -223,13 +230,12 @@ const PrivetChat = () => {
 
           if (listRef.current) {
             setTimeout(() => {
-              listRef.current.scrollToItem(newMessages.length, "end");
-            }, 60);
-            setTimeout(() => {
-              listRef.current.scrollToItem(newMessages.length, "end");
-            }, 100);
+              listRef.current.scrollToItem(newMessages.length, "end"); // should fix xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            }, 200);
+            // setTimeout(() => {
+            //   listRef.current.scrollToItem(newMessages.length, "end");
+            // }, 210);
           }
-          // اسکرول پس از به‌روزرسانی state
           return newMessages;
         });
 
@@ -257,61 +263,20 @@ const PrivetChat = () => {
     }
   }, [newMessage]);
 
-  useEffect(() => {
-    if (isAtBottom && listRef.current && flag && bulkMessages.length > 0) {
-      setTimeout(() => {
-        // listRef.current.scrollToItem(bulkMessages.length - 1, "start");
-        flag = false;
-      }, 100);
-    }
-  }, [messages]);
+  // To avoid loading being limited to a specific time
 
-  const sendMessage = () => {
-    // const timestamp = Date.now();
-    // const date = new Date(timestamp);
-    // const shortTime = date.toLocaleTimeString("en-US", {
-    //   hour: "2-digit",
-    //   minute: "2-digit",
-    //   hour12: true,
-    // });
-
-    // const msg = {
-    //   content: text,
-    //   time: shortTime,
-    //   username: localStorage.getItem("username") || "anonymous",
-    //   timecode: timestamp,
-    // };
-
-    // setMessages((prev) => {
-    //   const newMessages = [...prev, msg];
-
-    //   if (listRef.current) {
-    //     setTimeout(() => {
-    //       listRef.current.scrollToItem(newMessages.length, "end");
-    //     }, 60);
-    //     setTimeout(() => {
-    //       listRef.current.scrollToItem(newMessages.length, "end");
-    //     }, 100);
-    //   }
-
-    //   return newMessages;
-    // });
-
-    // setLocalMessages((prev) => [...prev, msg]);
-
-    if (socket && socket.readyState == WebSocket.OPEN) {
-      const messagePayload = {
-        type: "SendMessage",
-        channel: userID,
-        content: text,
-      };
-      console.log("messagePayload", messagePayload);
-      socket.send(JSON.stringify(messagePayload));
-    }
-    if (!messages[0]) {
-      setPrivetChannels((prev) => [{ name: userID }, ...prev]);
-    }
-  };
+  // useEffect(() => {
+  //   console.log(messages);
+  //   setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, 100);
+  //   if (isAtBottom && listRef.current && flag && bulkMessages.length > 0) {
+  //     setTimeout(() => {
+  //       // listRef.current.scrollToItem(bulkMessages.length - 1, "start");
+  //       flag = false;
+  //     }, 100);
+  //   }
+  // }, [messages]);
 
   // تابع اندازه‌گیری ارتفاع
   const getRowHeight = (index) => {
@@ -336,6 +301,8 @@ const PrivetChat = () => {
 
   const Row = ({ index, style }) => {
     const msg = messages[index];
+    // console.log(`Rendering message ${index}:`, msg)
+
     const rowRef = useRef();
     const isSameUserAsPrevious =
       index > 0 && messages[index - 1].username === msg.username;
@@ -348,6 +315,8 @@ const PrivetChat = () => {
       }
     }, [index, msg.content]);
 
+    setNumOfMsg(messages.length);
+
     const handleUserClick = (e) => {
       e.stopPropagation();
       console.log("mealkfdasfa");
@@ -356,6 +325,7 @@ const PrivetChat = () => {
         // میتوانید اطلاعات بیشتر کاربر را اینجا اضافه کنید
       });
     };
+    setFolog(true);
 
     return (
       <div style={style}>
@@ -435,12 +405,26 @@ const PrivetChat = () => {
     }, 100);
   };
 
-  if (!validUser) {
-    console.log(validUser);
+  // useEffect(() => {
+  //   console.log("can message",canMessage);
+  //   if (!canMessage) return;
+  //   if(mofolog) {
 
-    navigate(-1);
-    return null;
-  }
+  //     if (canMessage.status) {
+  //       setValidUser(true);
+  //     } else {
+  //       setValidUser(false);
+  //     }
+  //     mofolog = false
+  //   }
+  // }, [canMessage]);
+
+  // if (!validUser) {
+  //   console.log(validUser);
+
+  //   navigate(-1);
+  //   return null;
+  // }
 
   return (
     <>
@@ -452,8 +436,15 @@ const PrivetChat = () => {
           setIsSidebarOpen={setIsSidebarOpen}
           setHaveOpacity={setHaveOpacity}
           setSelectedUser={setSelectedUser}
+          setIsLoading={setIsLoading}
+          setFadeOut={setFadeOut}
+          
         />
-        <div className={`${haveOpacity? "opacity-50" : null} grid col-span-7 sm:col-span-5 xl:col-span-4`}>
+        <div
+          className={`${
+            haveOpacity ? "opacity-50" : null
+          } grid col-span-7 sm:col-span-5 xl:col-span-4`}
+        >
           <div className="h-14 flex justify-center sm:justify-start items-center bg-[#1a1a1e] border-b border-[#29292d]">
             <button
               className="absolute left-3.5 cursor-pointer sm:hidden"
@@ -556,84 +547,16 @@ const PrivetChat = () => {
               {Row}
             </List>
           </div>
-          <div className="bg-[#1a1a1e] w-full pb-3 px-2">
-            <div
-              ref={inputRef}
-              className={`w-full flex transition-colors duration-200 ${
-                isFocused
-                  ? "border border-[#303135]"
-                  : "border border-transparent"
-              } rounded-lg`}
-            >
-              <TextareaAutosize
-                type="text"
-                minRows={1}
-                maxRows={4}
-                value={text}
-                onChange={(e) => {
-                  setText(e.target.value);
-                  setWriting(e.target.value.trim() !== "");
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    if (text.length > 2000) {
-                      toast.error(
-                        "The message should not exceed 2000 characters."
-                      );
-                      return;
-                    }
-                    if (text.trim() !== "") {
-                      sendMessage();
-                      setWriting(false);
-                      setText("");
-                    }
-                  }
-                }}
-                onHeightChange={handleInputResize}
-                placeholder="Message"
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-                className={`${
-                  writing ? "rounded-l-lg" : "rounded-lg"
-                } w-full h-full pb-4.5 pt-4.5 pl-4 no-scrollbar bg-[#222327] focus:outline-none overflow-y-auto resize-none`}
-              />
-              {writing && (
-                <div
-                  role="button"
-                  onClick={() => {
-                    if (text.length > 2000) {
-                      toast.error(
-                        "The message should not exceed 2000 characters."
-                      );
-                      return;
-                    }
-                    if (text.trim() !== "") {
-                      sendMessage();
-                      setWriting(false);
-                      setText("");
-                    }
-                  }}
-                  className="flex items-end pb-0.5 cursor-pointer rounded-r-lg bg-[#222327]"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="size-7 mx-4 mb-3.25"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
-                    />
-                  </svg>
-                </div>
-              )}
-            </div>
-          </div>
+          <MessageInput
+            setInputHeight={setInputHeight}
+            inputHeight={inputHeight}
+            setPrivetChannels={setPrivetChannels}
+            setText={setText}
+            text={text}
+            messages={messages}
+            setListHeight={setListHeight}
+            titleHeight={titleHeight}
+          />
         </div>
       </div>
     </>

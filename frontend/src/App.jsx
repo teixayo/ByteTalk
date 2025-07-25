@@ -1,14 +1,81 @@
-import "./App.css";
-import { Route, Routes } from "react-router-dom";
-
-import AuthGate from "./components/AuthGate.jsx";
-import SignUpForm from "./components/authentication/SignUpForm";
-import Chat from "./components/Chat";
-import LoginForm from "./components/authentication/LoginForm";
-import PrivetChat from "./components/PrivetChat.jsx";
+import { Route, Routes, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 import { Toaster } from "react-hot-toast";
 
+import AuthGate from "./components/AuthGate.jsx";
+import SignUpForm from "./pages/authentication/SignUpForm.jsx";
+import LoginForm from "./pages/authentication/LoginForm.jsx";
+import Chat from "./pages/Chat";
+import PrivetChat from "./pages/PrivetChat.jsx";
+import { useSocket } from "./context/SocketContext";
+
+import "./App.css";
+
 const App = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [fadeOut, setFadeOut] = useState(false);
+
+  const popupRef = useRef(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+      if (!isLoading) {
+        setTimeout(() => {
+          setFadeOut(true);
+        }, 1400);
+        const timeout = setTimeout(() => {
+          setIsLoading(true);
+        }, 1500);
+
+        return () => clearTimeout(timeout);
+      }
+  }, [isLoading]);
+
+  useEffect(() => {
+    // setSelectedUser(null);
+
+    const handleClickOutside = (event) => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        // setInitialScrollDone(false);
+        setSelectedUser(null);
+        // setTimeout(() => {
+        //   listRef.current.scrollToItem(length, "end");
+        // }, 100);
+        // setTimeout(() => {
+        //   listRef.current.scrollToItem(length, "end");
+        // }, 130);
+
+        // setTimeout(() => {
+        //   setInitialScrollDone(true);
+        // }, 200);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const LoadingScreen = () => {
+    if (!isLoading && fadeOut) return null;
+    return (
+      <div
+        className={`fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-xl transition-all duration-500 `}
+      >
+        <div
+          className={`bg-white/10 rounded-2xl p-8 shadow-xl border border-white/30 backdrop-blur-lg text-white flex flex-col items-center ${
+            fadeOut ? "fade-out-down" : "fade-in-up"
+          }`}
+        >
+          <div className="spinner rounded-full h-16 w-16 border-t-4 border-white border-solid mb-6" />
+          <p className="text-lg font-semibold">Preparing...</p>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <AuthGate>
       <Toaster
@@ -35,10 +102,88 @@ const App = () => {
           },
         }}
       />
+
+      {selectedUser ? (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSelectedUser(null);
+            }
+          }}
+        >
+          <div
+            ref={popupRef}
+            className="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4 border border-gray-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center mb-4">
+              <div className="mr-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-11 text-white"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">
+                  {selectedUser.username}
+                </h3>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <button
+                onClick={() => {
+                  setFadeOut(false);
+                    setIsLoading(false);
+                  navigate(`/chat/${selectedUser.username}`);
+                  setSelectedUser(null);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg w-full"
+              >
+                ارسال پیام خصوصی
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {!isLoading ? <LoadingScreen /> : null}
+
       <Routes>
         <Route path="/" element={<SignUpForm />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/chat/:userID" element={<PrivetChat />} />
+        <Route
+          path="/chat"
+          element={
+            <Chat
+              setIsLoading={setIsLoading}
+              setFadeOut={setFadeOut}
+              selectedUser={selectedUser}
+              setSelectedUser={setSelectedUser}
+            />
+          }
+        />
+        <Route
+          path="/chat/:userID"
+          element={
+            <PrivetChat
+              setIsLoading={setIsLoading}
+              setFadeOut={setFadeOut}
+              selectedUser={selectedUser}
+              setSelectedUser={setSelectedUser}
+            />
+          }
+        />
         <Route path="/login" element={<LoginForm />} />
       </Routes>
     </AuthGate>
