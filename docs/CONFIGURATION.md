@@ -7,7 +7,7 @@ This guide outlines how to configure `config.yml`, build Docker images, and unde
 
 ## 📄 `config.yml` Overview
 
-ByteTalk uses [config.yml](../backend/src/main/java/me/teixayo/bytetalk/resources/config.yml) to define system behavior, including database connections, networking, rate limits, and more.
+ByteTalk uses [config.yml](../backend/src/main/resources/config.yml) to define system behavior, including database connections, networking, rate limits, and more.
 
 ---
 
