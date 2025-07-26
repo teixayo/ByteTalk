@@ -16,11 +16,17 @@
 - JUnit & Testcontainers 
 - GitHub Actions CI/CD
 - Docker
-- 
+  
 **Frontend**
-- React
+- React 19 (with Hooks)
 - Vite
+- JavaScript (ES6+)
 - Tailwind CSS
+- React Router v7
+- Formik & Yup (for form handling and validation)
+- react-hot-toast (for user notifications)
+- react-textarea-autosize (chat input)
+- react-window (virtualized message list)
 
 ---
 
@@ -31,6 +37,7 @@
 - **Authentication**: Secure login/signup via JWT and password hashing (SHA256)
 - **Configurable Storage**: Supports both in‑memory (for development) and MongoDB (for production)
 - **Automated Testing**: Unit and integration tests with JUnit and Testcontainers
+  
 ---
 
 ## 🏗️ Architecture
@@ -39,7 +46,9 @@
 - Real‑time messaging powered by WebSocket connections managed by Netty on the server.
 - Messages are first published via Redis pub/sub; then persisted to MongoDB (if enabled).
 - Authentication uses JWTs; user credentials are hashed securely before storage.
-
+- The frontend uses React and communicates with the backend through WebSocket and REST APIs.
+- UI is designed with Tailwind CSS and supports responsive layouts for both desktop and mobile.
+  
 ---
 
 ## 💻 Installation & Local Development
@@ -91,6 +100,13 @@
 - **Chain Encryption**: End‑to‑end encryption for all messages.
 - **Media Support**: Camera, voice messages with encryption.
 - **P2P Mode**: Direct, decentralized peer‑to‑peer connections.
+
+---
+
+## 👨‍💻 Contributors
+
+- Backend: [Ali Nikbakht](https://github.com/teixayo)
+- Frontend: [Adel Nouri](https://github.com/AdelNouri)
 
 ---
 
