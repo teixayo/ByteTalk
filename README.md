@@ -1,5 +1,10 @@
 # ByteTalk
 
+<p align="center">
+  <img src="https://github.com/teixayo/ByteTalk/actions/workflows/backend.yml/badge.svg">
+  <img src="https://github.com/teixayo/ByteTalk/actions/workflows/front-deploy.yml/badge.svg">
+</p>
+
 **ByteTalk** is a real-time chat application that supports global and private messaging, designed with scalability and microservice architecture in mind. It features a Java-based backend and a React/Tailwind frontend. ByteTalk uses Redis for pub/sub communication and caching, and supports both in-memory and MongoDB storage for flexible and efficient message persistence.
 
 ---
