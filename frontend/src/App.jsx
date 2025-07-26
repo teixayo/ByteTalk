@@ -7,7 +7,6 @@ import SignUpForm from "./pages/authentication/SignUpForm.jsx";
 import LoginForm from "./pages/authentication/LoginForm.jsx";
 import Chat from "./pages/Chat";
 import PrivetChat from "./pages/PrivetChat.jsx";
-import { useSocket } from "./context/SocketContext";
 
 import "./App.css";
 
@@ -105,7 +104,7 @@ const App = () => {
 
       {selectedUser ? (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          className="fixed inset-0 backdrop-blur-xs bg-opacity-50 flex items-center justify-center z-50"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setSelectedUser(null);
@@ -114,7 +113,7 @@ const App = () => {
         >
           <div
             ref={popupRef}
-            className="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4 border border-gray-700"
+            className="bg-neutral-900 rounded-lg p-6 max-w-sm w-full mx-4 border border-neutral-800"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center mb-4">
@@ -123,7 +122,7 @@ const App = () => {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  strokeWidth={1.5}
+                  strokeWidth={1}
                   stroke="currentColor"
                   className="size-11 text-white"
                 >
@@ -149,7 +148,7 @@ const App = () => {
                   navigate(`/chat/${selectedUser.username}`);
                   setSelectedUser(null);
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg w-full"
+                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 cursor-pointer rounded-lg w-full"
               >
                 ارسال پیام خصوصی
               </button>

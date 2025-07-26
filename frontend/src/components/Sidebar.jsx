@@ -1,6 +1,6 @@
 import { useSocket } from "../context/SocketContext";
 import { useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({
   isMobileSidebar,
@@ -13,8 +13,8 @@ const Sidebar = ({
   setFadeOut,
 }) => {
   const { privetChannels, setActiveChat, activeChat } = useSocket();
-
   const navigate = useNavigate();
+
   useEffect(() => {
     if (!privetChannels[0]) return;
 

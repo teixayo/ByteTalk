@@ -17,6 +17,7 @@ const LoginForm = () => {
     console.log("✅ useEffect in login form is running");
 
     if (status.type == "Status" && status.code == "1000") {
+      localStorage.setItem("username", localUserName)
       navigate("/chat");
     }
   }, [status]);

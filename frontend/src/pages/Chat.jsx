@@ -249,6 +249,9 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
           return [...prev, msg];
         });
       } else {
+        const username = localStorage.getItem("username")
+        if (newMessage.channel == "global" || newMessage.channel == username)
+          return;
         const isRepetitive = privetChannels.find((item) => {
           return item.name == newMessage.channel;
         });

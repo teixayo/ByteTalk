@@ -28,7 +28,7 @@ const SignUpForm = () => {
       setTimeout(() => {
 
         navigate("/chat");
-      }, 2300);
+      }, 1800);
     }
   }, [status]);
 

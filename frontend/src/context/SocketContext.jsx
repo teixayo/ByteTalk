@@ -59,39 +59,16 @@ export const SocketProvider = ({ children }) => {
         } else if (data.code === "1008") {
           toast.error("Please don't spam.");
         }
-        // if (data.code == "1002") {
-        // if (!initialLoaded) {
-        //   data.messages.map((msg) => {
-        //     const date = new Date(msg.date);
-        //     const shortTime = date.toLocaleTimeString("en-US", {
-        //       hour: "2-digit",
-        //       minute: "2-digit",
-        //       hour12: true,
-        //     });
-        //     if (msg.content != "") {
-        //       setBulkMessages((prev) => [
-        //         ...prev,
-        //         {
-        //           content: msg.content,
-        //           time: shortTime,
-        //           username: msg.username,
-        //           timecode: msg.date,
-        //         },
-        //       ]);
-        //     }
-        // };
-        // }
-        // }
         setStatus(data);
       }
 
-      // if (data.type === "LoginToken") {
-      //   console.log("login token::::::::::::::", data.token);
-      //   document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
+      if (data.type === "LoginToken") {
+        console.log("login token::::::::::::::", data.token);
+        document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
 
-      //   // localStorage.setItem("token", data.token);
-      //   // setLoginToken(data.token);
-      // }
+        // localStorage.setItem("token", data.token);
+        // setLoginToken(data.token);
+      }
 
       if (data.type === "BulkMessages") {
         if (location.pathname == "/chat" && data.channel == "global") {
