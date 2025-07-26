@@ -10,12 +10,6 @@ database:
   mongo:
     toggle: false
     connectionURL: "mongodb://root:@localhost:27017/?retryWrites=true&w=majority"
-  elastic:
-    toggle: false
-    address: ""
-    port: 9200
-    user: ""
-    password: ""
 networking:
   ip: 0.0.0.0
   port: 8080
