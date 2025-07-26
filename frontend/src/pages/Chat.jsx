@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { VariableSizeList as List } from "react-window";
 import toast from "react-hot-toast";
 import TextareaAutosize from "react-textarea-autosize";
@@ -84,6 +84,7 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
   const navigate = useNavigate();
 
   // const popupRef = useRef(null);
+  const location = useLocation;
 
   const [isMobileSidebar, setIsMobileSidebar] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -151,6 +152,10 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
       }
     }
   }, [numOfMsg]);
+
+  useEffect(() => {
+    setLocalMessages([]);
+  }, [location]);
 
   useEffect(() => {
     console.log("whoClicked", whoClicked);
@@ -249,7 +254,7 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
           return [...prev, msg];
         });
       } else {
-        const username = localStorage.getItem("username")
+        const username = localStorage.getItem("username");
         if (newMessage.channel == "global" || newMessage.channel == username)
           return;
         const isRepetitive = privetChannels.find((item) => {

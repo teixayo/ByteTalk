@@ -72,30 +72,6 @@ export const SocketProvider = ({ children }) => {
 
       if (data.type === "BulkMessages") {
         if (location.pathname == "/chat" && data.channel == "global") {
-          // if (!initialLoaded) {
-          //   data.messages.map((msg) => {
-          //     const date = new Date(msg.date);
-
-          //     const shortTime = date.toLocaleTimeString("en-US", {
-          //       hour: "2-digit",
-          //       minute: "2-digit",
-          //       hour12: true,
-          //     });
-
-          //     if (msg.content != "") {
-          //       setBulkMessages((prev) => [
-          //         ...prev,
-          //         {
-          //           content: msg.content,
-          //           time: shortTime,
-          //           username: msg.username,
-          //           timecode: msg.date,
-          //         },
-          //       ]);
-          //     }
-          //   });
-          //   initialLoaded = true;
-          // } else {
           console.log("data.messages.length", data.messages.length);
 
           setBulkLength(data.messages.length);
@@ -126,19 +102,22 @@ export const SocketProvider = ({ children }) => {
           setBulkMessages((prev) => {
             console.log(prev);
             if (prev[0]) {
-              const filteredMsg =
-                newMessages[0].channel == prev[0].channel
-                  ? [...newMessages, ...prev]
-                  : [...newMessages];
-              console.log(filteredMsg);
-              console.log("123456789");
-              return [...filteredMsg];
+              if (newMessages[0].channel == prev[0].channel) {
+                  setIsFirstBulk(false);
+
+                  const filteredMsg = [...newMessages, ...prev];
+                  return [...filteredMsg];
+                } else {
+                  setIsFirstBulk(true);
+
+                  const filteredMsg = [...newMessages];
+                  return [...filteredMsg];
+                }
             } else {
               console.log("filteredMsg neshon nadeeeeeeeeeeeeeeeeee");
               return [...newMessages];
             }
           });
-          // }
         } else {
           if (location.pathname == `/chat/${data.channel}`) {
             setBulkLength(data.messages.length);
@@ -166,7 +145,7 @@ export const SocketProvider = ({ children }) => {
                   timecode: msg.date,
                 };
               });
-            
+
             setBulkMessages((prev) => {
               console.log(newMessages[0].channel);
               console.log("prev:", prev);
@@ -179,9 +158,7 @@ export const SocketProvider = ({ children }) => {
                   const filteredMsg = [...newMessages, ...prev];
                   return [...filteredMsg];
                 } else {
-                  // if (!isFirstBulk) {
-                    setIsFirstBulk(true);
-                  // }
+                  setIsFirstBulk(true);
 
                   const filteredMsg = [...newMessages];
                   return [...filteredMsg];

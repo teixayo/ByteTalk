@@ -3,7 +3,7 @@ import { useSocket } from "../context/SocketContext";
 import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
 import { VariableSizeList as List } from "react-window";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation  } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import Sidebar from "../components/Sidebar";
@@ -98,6 +98,7 @@ const PrivetChat = ({
 
   // const [selectedUser, setSelectedUser] = useState(null);
   const popupRef = useRef(null);
+  const location = useLocation();
 
   const [validUser, setValidUser] = useState(true);
 
@@ -168,7 +169,7 @@ const PrivetChat = ({
 
   useEffect(() => {
     setLocalMessages([]);
-  }, [userID]);
+  }, [location]);
 
   useEffect(() => {
     if (flag2) {
