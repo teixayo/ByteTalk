@@ -1,6 +1,6 @@
 # ByteTalk
 
-**ByteTalk** is a real-time chat application that supports global and private messaging, designed with scalability and microservice architecture in mind. It features a Java-based backend and a React/Tailwind frontend. ByteTalk utilizes Redis for pub/sub communication and caching, and supports both in-memory and MongoDB storage for flexible and efficient message persistence.
+**ByteTalk** is a real-time chat application that supports global and private messaging, designed with scalability and microservice architecture in mind. It features a Java-based backend and a React/Tailwind frontend. ByteTalk uses Redis for pub/sub communication and caching, and supports both in-memory and MongoDB storage for flexible and efficient message persistence.
 
 ---
 
@@ -32,12 +32,12 @@
 
 ## 🚀 Features
 
-- **Global Chat**: Broadcast messages to all connected users
-- **Private Chat**: One‑to‑one direct messaging
-- **Microservice Sync**: Redis Pub/Sub is used for real-time synchronization and message broadcasting across microservices
-- **Authentication**: Secure login/signup via JWT and password hashing (SHA256)
+- **Global Chat**: Broadcast messages to all connected users.
+- **Private Chat**: One‑to‑one direct messaging.
+- **Microservice Sync**: Redis Pub/Sub is used for real-time synchronization and message broadcasting across microservices.
+- **Authentication**: Secure login/signup via JWT and password hashing (SHA256).
 - **Configurable Storage**: Supports both in‑memory (for development) and MongoDB (for production)
-- **Automated Testing**: Unit and integration tests with JUnit and Testcontainers
+- **Automated Testing**: Unit and integration tests with JUnit and Testcontainers.
   
 ---
 
@@ -71,11 +71,11 @@
 
 ---
 
----
-
 ## 🔧 Configuration
 
-See the [Configuration Guide](docs/configuration.md) for environment variables, Redis/MongoDB setup, port settings, and storage options.
+See the [Configuration Guide](docs/CONFIGURATION.md) for environment variables, Redis/MongoDB setup, port settings, and storage options.
+
+---
 
 ## 🧪 Testing
 
