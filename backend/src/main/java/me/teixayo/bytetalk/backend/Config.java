@@ -39,7 +39,7 @@ public class Config {
     private final int networkingWriteBufferWaterMarkLow;
     private final int networkingWriteBufferWaterMarkHigh;
 
-    private final int cacheMessageSize;
+    private final int bulkMessageSize;
 
     private final int maxTimeOut;
 
@@ -50,9 +50,9 @@ public class Config {
     private final RateLimiter requestBulkMessageLimiter;
     private final RateLimiter canSendMessageLimiter;
     private final int authenticationDelay;
+    private final byte[] jwtSecret;
     private File sslCertifiateFile = null;
     private File sslPrivateKeyFile = null;
-    private final byte[] jwtSecret;
 
     @SneakyThrows
     public Config(Map<String, Object> data) {
@@ -81,8 +81,7 @@ public class Config {
         networkingWriteBufferWaterMarkLow = (int) get("networking.write-buffer-watermark.low");
         networkingWriteBufferWaterMarkHigh = (int) get("networking.write-buffer-watermark.high");
 
-        cacheMessageSize = (int) get("cache.message-size");
-
+        bulkMessageSize = (int) get("storage.bulk-message-size");
 
         sslToggleUsingKeys = (boolean) get("ssl.toggleUsingKeys");
         sslToggleUsingWSS = (boolean) get("ssl.toggleUsingWSS") | sslToggleUsingKeys;

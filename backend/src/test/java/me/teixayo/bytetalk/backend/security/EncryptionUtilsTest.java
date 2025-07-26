@@ -8,7 +8,7 @@ public class EncryptionUtilsTest {
 
     @Test
     void testEncryptMethod() {
-        assertEquals(Crypto.encryptSHA256("Test"),"532eaabd9574880dbf76b9b8cc00832c20a6ec113d682299550d7a6e0f345e25");
+        assertEquals(Crypto.encryptSHA256("Test"), "532eaabd9574880dbf76b9b8cc00832c20a6ec113d682299550d7a6e0f345e25");
 
     }
 
@@ -35,7 +35,8 @@ public class EncryptionUtilsTest {
         assertTrue(EncryptionUtils.isValidPassword("A".repeat(30)));
 
         assertFalse(EncryptionUtils.isValidPassword("A".repeat(7)));
-        assertFalse(EncryptionUtils.isValidPassword("A".repeat(31)));;
+        assertFalse(EncryptionUtils.isValidPassword("A".repeat(31)));
+        ;
 
 
     }

@@ -48,31 +48,31 @@ public class CacheServiceTest {
     public void testCacheService(CacheService service) {
         List<Message> messages = new ArrayList<>();
         Date lastDate = null;
-        for(int i = 0 ; i < 30; i++) {
+        for (int i = 0; i < 30; i++) {
             Message message = new Message(i, i * 10, "HelloWorld" + i, Date.from(Instant.now()));
             messages.add(message);
             lastDate = message.getDate();
-            service.addMessageToCache(1,message);
+            service.addMessageToCache(1, message);
         }
         Message[] lastestMessages = service.loadLastestMessages(1).toArray(new Message[0]);
         List<Message> last10 = messages.stream()
                 .skip(Math.max(0, messages.size() - 10))
                 .toList();
 
-        for(int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             System.out.println(last10.get(i).getContent() + " | " + lastestMessages[i].getContent());
             assertEquals(last10.get(i), lastestMessages[i]);
 
         }
-        Message newwestMessage = lastestMessages[lastestMessages.length-1];
-        assertEquals(29,newwestMessage.getId());
-        assertEquals(290,newwestMessage.getUserID());
+        Message newwestMessage = lastestMessages[lastestMessages.length - 1];
+        assertEquals(29, newwestMessage.getId());
+        assertEquals(290, newwestMessage.getUserID());
         assertEquals("HelloWorld29", newwestMessage.getContent());
-        assertEquals(lastDate,newwestMessage.getDate());
+        assertEquals(lastDate, newwestMessage.getDate());
 
 
-        if(service instanceof RedisCacheService redisCacheService) {
-            assertEquals("HelloWorld29", redisCacheService.getMessageById(1,29).getContent());
+        if (service instanceof RedisCacheService redisCacheService) {
+            assertEquals("HelloWorld29", redisCacheService.getMessageById(1, 29).getContent());
         }
 
     }

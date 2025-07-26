@@ -11,8 +11,8 @@ public interface CacheService {
 
     static CacheService findBestService() {
         if (RedisDBConnection.isConnected())
-            return new RedisCacheService(Server.getInstance().getConfig().getCacheMessageSize());
-        return new MemoryCacheService(Server.getInstance().getConfig().getCacheMessageSize());
+            return new RedisCacheService(Server.getInstance().getConfig().getBulkMessageSize());
+        return new MemoryCacheService(Server.getInstance().getConfig().getBulkMessageSize());
     }
 
 

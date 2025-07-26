@@ -2,7 +2,7 @@ package me.teixayo.bytetalk.backend.user;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UserTest {
 
@@ -12,14 +12,13 @@ public class UserTest {
         String name = "Test";
         String password = "MyPassword";
         UserConnection userConnection = new UserConnection(null, null);
-        User user = new User(id,name,password, userConnection);
+        User user = new User(id, name, password, userConnection);
 
-        assertEquals(id,user.getId());
-        assertEquals(name,user.getName());
-        assertEquals(password,user.getPassword());
-        assertEquals(userConnection,user.getUserConnection());
+        assertEquals(id, user.getId());
+        assertEquals(name, user.getName());
+        assertEquals(password, user.getPassword());
+        assertEquals(userConnection, user.getUserConnection());
     }
-
 
 
 }

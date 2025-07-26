@@ -18,10 +18,10 @@ class MessageTest {
         String content = "Test";
         Date from = Date.from(Instant.now());
 
-        Message message = new Message(id,userId,content, from);
-        assertEquals(id,message.getId());
-        assertEquals(userId,message.getUserID());
-        assertEquals(content,message.getContent());
-        assertEquals(from,message.getDate());
+        Message message = new Message(id, userId, content, from);
+        assertEquals(id, message.getId());
+        assertEquals(userId, message.getUserID());
+        assertEquals(content, message.getContent());
+        assertEquals(from, message.getDate());
     }
 }

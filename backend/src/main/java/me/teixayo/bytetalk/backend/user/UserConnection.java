@@ -214,7 +214,7 @@ public class UserConnection {
             user.sendMessages(channelName, Server.getInstance().getCacheService().loadLastestMessages(channel.getId()));
             return;
         }
-        List<Long> messageIds = Server.getInstance().getChannelService().loadMessagesBeforeDate(channel.getId(), date, 40);
+        List<Long> messageIds = Server.getInstance().getChannelService().loadMessagesBeforeDate(channel.getId(), date, Server.getInstance().getConfig().getBulkMessageSize());
         List<Message> loadedMessages = Server.getInstance().getMessageService().getMessage(messageIds);
         user.sendMessages(channelName, loadedMessages);
     }

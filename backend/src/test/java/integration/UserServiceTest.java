@@ -56,6 +56,7 @@ public class UserServiceTest {
         assertFalse(service.isUserExists(-1));
         assertFalse(service.isUserExists("-"));
     }
+
     private void assertUserEquals(User user, String expectedName, String expectedPassword, long expectedId) {
         assertEquals(expectedName, user.getName());
         assertEquals(expectedPassword, user.getPassword());

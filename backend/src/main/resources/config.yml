@@ -25,8 +25,8 @@ networking:
   write-buffer-watermark:
     low: 1048576 #bytes
     high: 2097152 #bytes
-cache:
-  message-size: 50
+storage:
+  bulk-message-size: 50
 ssl:
   toggleUsingWSS: false
   toggleUsingKeys: false
