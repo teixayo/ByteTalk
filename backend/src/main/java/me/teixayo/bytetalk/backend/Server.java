@@ -16,7 +16,6 @@ import me.teixayo.bytetalk.backend.service.channel.ChannelService;
 import me.teixayo.bytetalk.backend.service.message.Message;
 import me.teixayo.bytetalk.backend.service.message.MessageService;
 import me.teixayo.bytetalk.backend.service.message.MongoMessageService;
-import me.teixayo.bytetalk.backend.service.search.SearchService;
 import me.teixayo.bytetalk.backend.service.user.UserService;
 import me.teixayo.bytetalk.backend.user.User;
 import me.teixayo.bytetalk.backend.user.UserManager;
@@ -40,7 +39,6 @@ public final class Server implements LoopApp {
     private final Loop loop;
     private UserService userService;
     private MessageService messageService;
-    private SearchService searchService;
     private CacheService cacheService;
     private ChannelService channelService;
     private NettyHandler nettyHandler;
@@ -91,9 +89,6 @@ public final class Server implements LoopApp {
 
         messageService = MessageService.findBestService();
         log.info("Using {} as MessageService", messageService.getClass().getSimpleName());
-
-        searchService = SearchService.findBestService();
-        log.info("Using {} as SearchService", searchService.getClass().getSimpleName());
 
         cacheService = CacheService.findBestService();
         log.info("Using {} as CacheService", cacheService.getClass().getSimpleName());
