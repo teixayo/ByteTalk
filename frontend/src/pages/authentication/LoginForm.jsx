@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
@@ -14,7 +13,7 @@ const LoginForm = () => {
   const { socket, status } = useSocket();
 
   useEffect(() => {
-    console.log("✅ useEffect in login form is running");
+    // console.log("✅ useEffect in login form is running");
 
     if (status.type == "Status" && status.code == "1000") {
       localStorage.setItem("username", localUserName)
@@ -33,10 +32,10 @@ const LoginForm = () => {
         password: localUserPassword,
       };
 
-      console.log("📨 Sending login:", loginPayload);
+      // console.log("📨 Sending login:", loginPayload);
       socket.send(JSON.stringify(loginPayload));
     } else {
-      console.log("⚠️ WebSocket هنوز وصل نشده. منتظر اتصال باش.");
+      // console.log("⚠️ WebSocket is not connected yet. Wait for connection.");
     }
   };
 

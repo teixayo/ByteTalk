@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
-import toast from "react-hot-toast";
 import { useSocket } from "../context/SocketContext";
 import { useParams } from "react-router-dom";
+
+import toast from "react-hot-toast";
 import TextareaAutosize from "react-textarea-autosize";
 
 const MessageInput = ({
@@ -23,7 +24,6 @@ const MessageInput = ({
   useEffect(() => {
     const handleResize = () => {
       setListHeight(window.innerHeight - inputHeight - titleHeight);
-      console.log(window.innerHeight - inputHeight - titleHeight);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -38,45 +38,12 @@ const MessageInput = ({
   };
 
   const sendMessage = () => {
-    // const timestamp = Date.now();
-    // const date = new Date(timestamp);
-    // const shortTime = date.toLocaleTimeString("en-US", {
-    //   hour: "2-digit",
-    //   minute: "2-digit",
-    //   hour12: true,
-    // });
-
-    // const msg = {
-    //   content: text,
-    //   time: shortTime,
-    //   username: localStorage.getItem("username") || "anonymous",
-    //   timecode: timestamp,
-    // };
-
-    // setMessages((prev) => {
-    //   const newMessages = [...prev, msg];
-
-    //   if (listRef.current) {
-    //     setTimeout(() => {
-    //       listRef.current.scrollToItem(newMessages.length, "end");
-    //     }, 60);
-    //     setTimeout(() => {
-    //       listRef.current.scrollToItem(newMessages.length, "end");
-    //     }, 100);
-    //   }
-
-    //   return newMessages;
-    // });
-
-    // setLocalMessages((prev) => [...prev, msg]);
-
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
         type: "SendMessage",
         channel: userID || "global",
         content: text,
       };
-      console.log("messagePayload", messagePayload);
       socket.send(JSON.stringify(messagePayload));
     }
     if (!messages[0]) {

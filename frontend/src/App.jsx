@@ -8,7 +8,6 @@ import LoginForm from "./pages/authentication/LoginForm.jsx";
 import Chat from "./pages/Chat";
 import PrivetChat from "./pages/PrivetChat.jsx";
 
-import "./App.css";
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,23 +30,13 @@ const App = () => {
       }
   }, [isLoading]);
 
+
+  // Close popup when clicked outside of it
   useEffect(() => {
-    // setSelectedUser(null);
 
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
-        // setInitialScrollDone(false);
         setSelectedUser(null);
-        // setTimeout(() => {
-        //   listRef.current.scrollToItem(length, "end");
-        // }, 100);
-        // setTimeout(() => {
-        //   listRef.current.scrollToItem(length, "end");
-        // }, 130);
-
-        // setTimeout(() => {
-        //   setInitialScrollDone(true);
-        // }, 200);
       }
     };
 
@@ -81,21 +70,21 @@ const App = () => {
         position="top-right"
         toastOptions={{
           style: {
-            background: "#1a1a1a", // خیلی نزدیک به رنگ بک‌گراند چت
-            color: "#f0f0f0", // متن روشن
-            border: "1px solid #333", // بوردر ظریف
+            background: "#1a1a1a", 
+            color: "#f0f0f0",
+            border: "1px solid #333",
             padding: "10px 15px",
             fontSize: "0.9rem",
           },
           success: {
             iconTheme: {
-              primary: "#4ade80", // سبز ملایم
+              primary: "#4ade80", 
               secondary: "#1a1a1a",
             },
           },
           error: {
             iconTheme: {
-              primary: "#f87171", // قرمز ملایم
+              primary: "#f87171", 
               secondary: "#1f1f1f",
             },
           },
@@ -150,7 +139,7 @@ const App = () => {
                 }}
                 className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 cursor-pointer rounded-lg w-full"
               >
-                ارسال پیام خصوصی
+                Send private message
               </button>
             </div>
           </div>
