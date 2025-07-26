@@ -40,17 +40,6 @@
   
 ---
 
-## 🏗️ Architecture
-
-- Frontend and backend live in separate folders within the same repository.
-- Real‑time messaging powered by WebSocket connections managed by Netty on the server.
-- Messages are first published via Redis pub/sub; then persisted to MongoDB (if enabled).
-- Authentication uses JWTs; user credentials are hashed securely before storage.
-- The frontend uses React and communicates with the backend through WebSocket and REST APIs.
-- UI is designed with Tailwind CSS and supports responsive layouts for both desktop and mobile.
-  
----
-
 ## 💻 Installation & Local Development
 
 1. **Prerequisites**
@@ -59,17 +48,15 @@
 
 2. **Clone the repo**
    ```bash
-   git clone https://github.com/your-username/ByteTalk.git
+   git clone https://github.com/teixayo/ByteTalk.git
    cd ByteTalk
    ```
 
 3. **Backend Setup**
-    - Edit `backend/config.yml` to set your desired port (defaults to `8080`) and MongoDB/Redis connection details.
-    - Build and run with Maven:
+    - Build and run with Gradle:
       ```bash
-      cd backend
-      ./mvnw clean package
-      java -jar target/bytetalk-backend.jar
+      ./gradlew shadowJar
+      java -jar backend/build/libs/backend-1.0-SNAPSHOT-ByteTalk.jar
       ```
 
 4. **Frontend Setup**

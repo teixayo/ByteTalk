@@ -29,8 +29,8 @@ networking:
   transport: AUTO
   max-time-out: 10 #s
   write-buffer-watermark:
-    low: 1048576
-    high: 2097152
+    low: 1048576 #bytes
+    high: 2097152 #bytes
 cache:
   message-size: 50
 ssl:
@@ -40,16 +40,16 @@ ssl:
   privateKeyFile: ""
 rate-limiter:
   authentication:
-    delay: 1000
+    delay: 1000 #ms
   send-message:
     max-size: 2000 #character
-    time: 5000
+    time: 5000 #ms
     tokens: 10
   request-bulk-message:
-    time: 1000
+    time: 1000 #ms
     tokens: 5
   can-send-message:
-    time: 1000
+    time: 1000 #ms
     tokens: 5
 
 
