@@ -31,12 +31,6 @@ public class Config {
     private final boolean mongoToggle;
     private final String mongoConnectionUrl;
 
-    private final boolean elasticToggle;
-    private final String elasticAddress;
-    private final int elasticPort;
-    private final String elasticUser;
-    private final String elasticPassword;
-
     private final String networkingIp;
     private final int networkingPort;
     private final boolean networkingTcpFastOpen;
@@ -73,12 +67,6 @@ public class Config {
 
         mongoToggle = (boolean) get("database.mongo.toggle");
         mongoConnectionUrl = (String) get("database.mongo.connectionURL");
-
-        elasticToggle = (boolean) get("database.elastic.toggle");
-        elasticAddress = (String) get("database.elastic.address");
-        elasticPort = (int) get("database.elastic.port");
-        elasticUser = (String) get("database.elastic.user");
-        elasticPassword = (String) get("database.elastic.password");
 
         networkingIp = (String) get("networking.ip");
         networkingPort = (int) get("networking.port");
