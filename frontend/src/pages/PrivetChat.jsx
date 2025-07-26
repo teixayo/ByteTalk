@@ -3,7 +3,7 @@ import { useSocket } from "../context/SocketContext";
 import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
 import { VariableSizeList as List } from "react-window";
-import { useNavigate, useParams, useLocation  } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import Sidebar from "../components/Sidebar";
@@ -56,11 +56,7 @@ const convertMessage = (text) => {
 };
 
 // let flag2 = false;
-const PrivetChat = ({
-  setIsLoading,
-  setFadeOut,
-  setSelectedUser,
-}) => {
+const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   const [text, setText] = useState("");
   const {
     socket,
@@ -76,16 +72,17 @@ const PrivetChat = ({
     canMessage,
     isFirstBulk,
     setIsFirstBulk,
+    initialScrollDone,
+    setInitialScrollDone,
   } = useSocket();
 
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [localMessages, setLocalMessages] = useState([]);
   const debounceTimeout = useRef(null);
-  const [initialScrollDone, setInitialScrollDone] = useState(false);
   const [messages, setMessages] = useState([]);
 
   const [inputHeight, setInputHeight] = useState(58);
-  const [titleHeight, setTitleHight] = useState(68); // ارتفاع پیش‌فرض
+  const [titleHeight, setTitleHight] = useState(65); // ارتفاع پیش‌فرض
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -110,30 +107,38 @@ const PrivetChat = ({
   const [flag2, setFlag2] = useState(false);
   const [numOfMsg, setNumOfMsg] = useState(0);
 
+  const [isBulkMsg, setIsBulkMsg] = useState(true);
+
   // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
 
   useEffect(() => {
+    setInitialScrollDone(false);
+    setLocalMessages([]);
+  }, [location]);
+
+  useEffect(() => {
+    console.log(isBulkMsg);
     if (numOfMsg > 0) {
-      if (isFirstBulk) {
-        setTimeout(() => {
-          listRef.current.scrollToItem(bulkMessages.length, "end");
-        }, 100);
-        setTimeout(() => {
-          listRef.current.scrollToItem(bulkMessages.length, "end");
-          firstRender = false;
-        }, 130);
-        setTimeout(() => {
-          setInitialScrollDone(true);
-        }, 200);
-      } else {
-        listRef.current.scrollToItem(bulkLength, "start");
+      if (isBulkMsg) {
+        if (isFirstBulk) {
+          setTimeout(() => {
+            listRef.current.scrollToItem(bulkMessages.length, "end");
+          }, 500);
+          // setTimeout(() => {
+          //   listRef.current.scrollToItem(bulkMessages.length, "end");
+          //   firstRender = false;
+          // }, 130);
+          setTimeout(() => {
+            setInitialScrollDone(true);
+          }, 800);
+        } else {
+          listRef.current.scrollToItem(bulkLength, "start");
+        }
       }
     }
   }, [numOfMsg]);
 
   useEffect(() => {
-    setInitialScrollDone(false);
-
     if (socket.readyState == WebSocket.OPEN) {
       socket.send(
         JSON.stringify({
@@ -174,6 +179,7 @@ const PrivetChat = ({
   useEffect(() => {
     if (flag2) {
       if (bulkMessages?.length > 0 && listRef.current) {
+        setIsBulkMsg(true);
         setMessages([...bulkMessages, ...localMessages]);
         console.log(folog);
 
@@ -226,19 +232,43 @@ const PrivetChat = ({
           timecode: timestamp,
         };
 
-        setMessages((prev) => {
-          const newMessages = [...prev, msg];
+        setIsBulkMsg(false);
 
-          if (listRef.current) {
-            setTimeout(() => {
-              listRef.current.scrollToItem(newMessages.length, "end"); // should fix xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-            }, 200);
-            // setTimeout(() => {
-            //   listRef.current.scrollToItem(newMessages.length, "end");
-            // }, 210);
-          }
-          return newMessages;
-        });
+        
+        
+        if (newMessage.username == localStorage.getItem("username")) {
+          setMessages((prev) => {
+            const newMessages = [...prev, msg];
+
+            if (listRef.current) {
+              setTimeout(() => {
+                listRef.current.scrollToItem(newMessages.length, "end"); // should fix xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+              }, 200);
+              // setTimeout(() => {
+              //   listRef.current.scrollToItem(newMessages.length, "end");
+              // }, 210);
+            }
+            return newMessages;
+          });
+        } else {
+          setMessages((prev) => {
+            const newMessages = [...prev, msg];
+
+            if (listRef.current) {
+              if (isAtBottom) {
+                setTimeout(() => {
+                  listRef.current.scrollToItem(newMessages.length, "end"); // should fix xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                }, 200);
+              }
+              // setTimeout(() => {
+              //   listRef.current.scrollToItem(newMessages.length, "end");
+              // }, 210);
+            }
+            return newMessages;
+          });
+        }
+
+
 
         setLocalMessages((prev) => {
           return [...prev, msg];
@@ -318,14 +348,6 @@ const PrivetChat = ({
 
     setNumOfMsg(messages.length);
 
-    const handleUserClick = (e) => {
-      e.stopPropagation();
-      console.log("mealkfdasfa");
-      setSelectedUser({
-        username: msg.username,
-        // میتوانید اطلاعات بیشتر کاربر را اینجا اضافه کنید
-      });
-    };
     setFolog(true);
 
     return (
@@ -361,10 +383,7 @@ const PrivetChat = ({
             {/* نام کاربر (فقط برای اولین پیام) */}
             {showAvatar && (
               <div className="flex items-center mb-1">
-                <span
-                  className="font-medium text-sm mr-2 cursor-pointer"
-                  onClick={handleUserClick}
-                >
+                <span className="font-medium text-sm mr-2 cursor-pointer">
                   {msg.username}
                 </span>
               </div>
@@ -439,7 +458,6 @@ const PrivetChat = ({
           setSelectedUser={setSelectedUser}
           setIsLoading={setIsLoading}
           setFadeOut={setFadeOut}
-          
         />
         <div
           className={`${

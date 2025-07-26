@@ -27,6 +27,9 @@ export const SocketProvider = ({ children }) => {
 
   const [isFirstBulk, setIsFirstBulk] = useState(true);
 
+  const [initialScrollDone, setInitialScrollDone] = useState(false);
+
+
   const connectWebSocket = () => {
     const ws = new WebSocket(import.meta.env.VITE_SERVER_WEBSOCKET_URL);
     ws.onopen = () => {
@@ -37,7 +40,7 @@ export const SocketProvider = ({ children }) => {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      console.log("📨 WS received:", data);
+      // console.log("📨 WS received:", data);
 
       if (data.type == "Status") {
         if (data.code === "1000") {
@@ -103,16 +106,14 @@ export const SocketProvider = ({ children }) => {
             console.log(prev);
             if (prev[0]) {
               if (newMessages[0].channel == prev[0].channel) {
-                  setIsFirstBulk(false);
+                setIsFirstBulk(false);
 
-                  const filteredMsg = [...newMessages, ...prev];
-                  return [...filteredMsg];
-                } else {
-                  setIsFirstBulk(true);
+                return [...newMessages, ...prev];
+              } else {
+                setIsFirstBulk(true);
 
-                  const filteredMsg = [...newMessages];
-                  return [...filteredMsg];
-                }
+                return [...newMessages];
+              }
             } else {
               console.log("filteredMsg neshon nadeeeeeeeeeeeeeeeeee");
               return [...newMessages];
@@ -147,8 +148,6 @@ export const SocketProvider = ({ children }) => {
               });
 
             setBulkMessages((prev) => {
-              console.log(newMessages[0].channel);
-              console.log("prev:", prev);
               if (prev[0]) {
                 console.log(newMessages[0].channel == prev[0].channel);
 
@@ -239,6 +238,8 @@ export const SocketProvider = ({ children }) => {
         canMessage,
         isFirstBulk,
         setIsFirstBulk,
+        initialScrollDone,
+        setInitialScrollDone,
       }}
     >
       {children}

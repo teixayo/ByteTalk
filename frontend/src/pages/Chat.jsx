@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { VariableSizeList as List } from "react-window";
-import toast from "react-hot-toast";
-import TextareaAutosize from "react-textarea-autosize";
+
 import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
 
@@ -13,6 +12,7 @@ import MessageInput from "../components/MessageInput";
 let flag = true;
 let firstRender = true;
 let length = 0;
+
 const convertMessage = (text) => {
   // تشخیص پیام‌های حاوی کد یا تگ‌های HTML
   const isCode =
@@ -52,7 +52,7 @@ const convertMessage = (text) => {
   });
 };
 
-const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
+const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   const [text, setText] = useState("");
   const {
     socket,
@@ -65,17 +65,18 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
     privetChannels,
     canMessage,
     isFirstBulk,
+    initialScrollDone,
+    setInitialScrollDone,
   } = useSocket();
 
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [localMessages, setLocalMessages] = useState([]);
   const debounceTimeout = useRef(null);
-  const [initialScrollDone, setInitialScrollDone] = useState(false);
   const [messages, setMessages] = useState([]);
 
   const inputRef = useRef(null);
   const [inputHeight, setInputHeight] = useState(58);
-  const [titleHeight, setTitleHight] = useState(68); // ارتفاع پیش‌فرض
+  const [titleHeight, setTitleHight] = useState(65); // ارتفاع پیش‌فرض
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -84,7 +85,7 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
   const navigate = useNavigate();
 
   // const popupRef = useRef(null);
-  const location = useLocation;
+  const location = useLocation();
 
   const [isMobileSidebar, setIsMobileSidebar] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -93,14 +94,17 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
   const [whoClicked, setWhoClicked] = useState(null);
   const [numOfMsg, setNumOfMsg] = useState(0);
 
-  const handleSelectUser = (user) => {
-    navigate(`/chat/${user.username}`);
-  };
+  const [isBulkMsg, setIsBulkMsg] = useState(true);
+
+  useEffect(() => {
+    setInitialScrollDone(false);
+    setLocalMessages([]);
+  }, [location]);
 
   // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
   useEffect(() => {
     setSelectedUser(null);
-
+    console.log("hello");
     if (socket.readyState == WebSocket.OPEN) {
       console.log("im in bulkmessages useEffect");
       socket.send(
@@ -136,26 +140,27 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
 
   useEffect(() => {
     if (numOfMsg > 0) {
-      if (isFirstBulk) {
-        setTimeout(() => {
-          listRef.current.scrollToItem(bulkMessages.length, "end");
-        }, 100);
-        setTimeout(() => {
-          listRef.current.scrollToItem(bulkMessages.length, "end");
-          firstRender = false;
-        }, 130);
-        setTimeout(() => {
-          setInitialScrollDone(true);
-        }, 200);
-      } else {
-        listRef.current.scrollToItem(bulkLength, "start");
+      console.log("numOfMsg", numOfMsg);
+      if (isBulkMsg) {
+        if (isFirstBulk) {
+          console.log("mewm ew mew mewwme wmw");
+          setTimeout(() => {
+            listRef.current.scrollToItem(numOfMsg, "end");
+          }, 500);
+          // setTimeout(() => {
+          //   listRef.current.scrollToItem(numOfMsg, "end");
+          //   firstRender = false;
+          // }, 400);
+          setTimeout(() => {
+            setInitialScrollDone(true);
+          }, 800);
+        } else {
+          console.log("salam");
+          listRef.current.scrollToItem(bulkLength, "start");
+        }
       }
     }
   }, [numOfMsg]);
-
-  useEffect(() => {
-    setLocalMessages([]);
-  }, [location]);
 
   useEffect(() => {
     console.log("whoClicked", whoClicked);
@@ -186,39 +191,34 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
   useEffect(() => {
     console.log("bulk", bulkMessages.length);
     if (bulkMessages?.length > 0 && listRef.current) {
+      setIsBulkMsg(true);
       setMessages(() => {
         return [...bulkMessages, ...localMessages];
       });
 
-      console.log("bulkMessages", bulkMessages);
-      console.log("localMessages", localMessages);
-      length = bulkMessages.length;
-      listRef.current.scrollToItem(bulkLength, "start");
-      if (firstRender) {
-        setTimeout(() => {
-          listRef.current.scrollToItem(bulkMessages.length, "end");
-        }, 100);
-        setTimeout(() => {
-          listRef.current.scrollToItem(bulkMessages.length, "end");
-          firstRender = false;
-        }, 130);
+      // console.log("bulkMessages", bulkMessages);
+      // console.log("localMessages", localMessages);
+      // length = bulkMessages.length;
+      // listRef.current.scrollToItem(bulkLength, "start");
+      // if (firstRender) {
+      //   setTimeout(() => {
+      //     listRef.current.scrollToItem(bulkMessages.length, "end");
+      //   }, 100);
+      //   setTimeout(() => {
+      //     listRef.current.scrollToItem(bulkMessages.length, "end");
+      //     firstRender = false;
+      //   }, 130);
 
-        setTimeout(() => {
-          setInitialScrollDone(true);
-        }, 200);
-      }
+      //   setTimeout(() => {
+      //     setInitialScrollDone(true);
+      //   }, 200);
+      // }
     }
-    // if (loginCheck) {
-    //   setTimeout(() => {
-    //     console.log("koskesh");
-    //     listRef.current.scrollToItem(bulkMessages.length, "end");
-    //     setLoginCheck(false);
-    //   }, 200);
-    // }
   }, [bulkMessages]);
 
   useEffect(() => {
     if (newMessage.date) {
+      console.log("newMessage", newMessage);
       if (newMessage.channel == "global") {
         const timestamp = Date.now();
 
@@ -235,20 +235,43 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
           username: newMessage.username,
           timecode: timestamp,
         };
+        setIsBulkMsg(false);
 
-        setMessages((prev) => {
-          const newMessages = [...prev, msg];
 
-          if (listRef.current) {
-            setTimeout(() => {
-              listRef.current.scrollToItem(newMessages.length, "end"); // should fix xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-            }, 200);
-            // setTimeout(() => {
-            //   listRef.current.scrollToItem(newMessages.length, "end");
-            // }, 210);
-          }
-          return newMessages;
-        });
+
+        if (newMessage.username == localStorage.getItem("username")) {
+          setMessages((prev) => {
+            const newMessages = [...prev, msg];
+
+            if (listRef.current) {
+              setTimeout(() => {
+                listRef.current.scrollToItem(newMessages.length, "end"); // should fix xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+              }, 200);
+              // setTimeout(() => {
+              //   listRef.current.scrollToItem(newMessages.length, "end");
+              // }, 210);
+            }
+            return newMessages;
+          });
+        } else {
+          setMessages((prev) => {
+            const newMessages = [...prev, msg];
+
+            if (listRef.current) {
+              if (isAtBottom) {
+                setTimeout(() => {
+                  listRef.current.scrollToItem(newMessages.length, "end"); // should fix xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                }, 200);
+              }
+              // setTimeout(() => {
+              //   listRef.current.scrollToItem(newMessages.length, "end");
+              // }, 210);
+            }
+            return newMessages;
+          });
+        }
+
+
 
         setLocalMessages((prev) => {
           return [...prev, msg];
@@ -281,44 +304,6 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
   }, [messages]);
 
   const sendMessage = () => {
-    // const timestamp = Date.now();
-    // const date = new Date(timestamp);
-    // console.log(timestamp);
-    // const shortTime = date.toLocaleTimeString("en-US", {
-    //   hour: "2-digit",
-    //   minute: "2-digit",
-    //   hour12: true,
-    // });
-
-    // const msg = {
-    //   content: text,
-    //   time: shortTime,
-    //   username: localStorage.getItem("username") || "anonymous",
-    //   timecode: timestamp,
-    // };
-
-    // setMessages((prev) => {
-    //   const newMessages = [...prev, msg];
-    //   console.log(newMessages);
-    //   if (listRef.current) {
-    //     setTimeout(() => {
-    //       listRef.current.scrollToItem(newMessages.length, "end");
-    //     }, 60);
-    //     setTimeout(() => {
-    //       listRef.current.scrollToItem(newMessages.length, "end");
-    //     }, 100);
-    //   }
-
-    //   return newMessages;
-    // });
-
-    // setLocalMessages((prev) => {
-    //   console.log(prev);
-    //   console.log(msg);
-
-    //   return [...prev, msg];
-    // });
-
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
         type: "SendMessage",
@@ -352,19 +337,6 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
     }
   };
 
-  useEffect(() => {
-    if (!canMessage) return;
-    const timeout = setTimeout(() => {
-      if (canMessage?.status && typeof canMessage.channel === "string") {
-        // setSelectedUser({
-        //   username: canMessage.channel,
-        // });
-      }
-    }, 20);
-
-    return () => clearTimeout(timeout);
-  }, [canMessage]);
-
   const Row = ({ index, style }) => {
     const msg = messages[index];
     // console.log(`Rendering message ${index}:`, msg)
@@ -374,6 +346,7 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
       index > 0 && messages[index - 1].username === msg.username;
     const showAvatar = !isSameUserAsPrevious;
 
+    console.log("setNumOfMsg");
     setNumOfMsg(messages.length);
 
     useEffect(() => {
@@ -488,6 +461,7 @@ const Chat = ({ setIsLoading, setFadeOut, selectedUser, setSelectedUser }) => {
           setSelectedUser={setSelectedUser}
           setIsLoading={setIsLoading}
           setFadeOut={setFadeOut}
+          // setInitialScrollDone={setInitialScrollDone}
         />
         <div
           className={`${
