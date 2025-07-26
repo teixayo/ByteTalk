@@ -21,7 +21,7 @@ networking:
   # KQUEUE
   # NIO
   transport: AUTO
-  max-time-out: 10 #s
+  max-time-out: 10 #seconds
   write-buffer-watermark:
     low: 1048576 #bytes
     high: 2097152 #bytes
@@ -34,16 +34,16 @@ ssl:
   privateKeyFile: ""
 rate-limiter:
   authentication:
-    delay: 1000 #ms
+    delay: 1000 #miliseconds
   send-message:
     max-size: 2000 #character
-    time: 5000 #ms
+    time: 5000 #miliseconds
     tokens: 10
   request-bulk-message:
-    time: 1000 #ms
+    time: 1000
     tokens: 5
   can-send-message:
-    time: 1000 #ms
+    time: 1000
     tokens: 5
 
 
