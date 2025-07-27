@@ -110,6 +110,6 @@ See the [Configuration Guide](docs/CONFIGURATION.md) for environment variables, 
 
 ## 📄 License
 
-[GPL‑3.0 License](LICENSE)
+[GPL License](LICENSE)
 
 --- 
