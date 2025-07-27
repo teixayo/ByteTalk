@@ -110,6 +110,6 @@ See the [Configuration Guide](docs/CONFIGURATION.md) for environment variables, 
 
 ## 📄 License
 
-[MIT License](LICENSE)
+[GPL‑3.0 License](LICENSE)
 
 --- 
