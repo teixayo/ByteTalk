@@ -114,6 +114,7 @@ const Sidebar = ({
         setSelectedUser(null);
         setFadeOut(false);
         setIsLoading(false);
+        setLocalGlobalMessages([])
         setActiveChat("chat");
         navigate(`/chat`);
         if (isMobileSidebar) {

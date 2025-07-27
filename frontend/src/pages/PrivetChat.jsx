@@ -90,8 +90,9 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   const [isBulkMsg, setIsBulkMsg] = useState(true);
 
+  const [validMessage, setValidMessage] = useState(false);
+
   useEffect(() => {
-    
     setInitialScrollDone(false);
     setLocalPvMessages([]);
   }, [location]);
@@ -118,7 +119,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [numOfMsg]);
 
   useEffect(() => {
-    
     if (socket.readyState == WebSocket.OPEN) {
       socket.send(
         JSON.stringify({
@@ -147,6 +147,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [bulkMessages]);
 
   useEffect(() => {
+    console.log(newMessage);
     if (newMessage.date) {
       if (
         newMessage.channel == localStorage.getItem("username") ||
@@ -202,18 +203,11 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           });
         }
 
-
-
-
-        setLocalPvMessages((prev) => {
-          return [...prev, msg];
-        });
-
-
-
-
-
-
+        if (validMessage) {
+          setLocalPvMessages((prev) => {
+            return [...prev, msg];
+          });
+        }
       } else {
         const username = localStorage.getItem("username");
         if (newMessage.channel == "global" || newMessage.channel == username)
@@ -237,7 +231,8 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     console.log("localPvMessages", localPvMessages);
     console.log("bulkMessages", bulkMessages);
     console.log("messages", messages);
-  }, [messages])
+    setValidMessage(true)
+  }, [messages]);
 
   // Height measurement function
   const getRowHeight = (index) => {
