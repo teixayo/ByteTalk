@@ -1,23 +1,16 @@
-import { useState, useEffect, useRef, useId } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../context/SocketContext";
+import { useParams, useLocation } from "react-router-dom";
+import { VariableSizeList as List } from "react-window";
+
 import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
-import { VariableSizeList as List } from "react-window";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import toast from "react-hot-toast";
 
 import Sidebar from "../components/Sidebar";
 import MessageInput from "../components/MessageInput";
 
-import { useAtom } from "jotai";
-import { isAppLoadingAtom } from "../atoms/chatAtoms";
-
-let flag = true;
-let firstRender = true;
-let mofolog = true;
-
 const convertMessage = (text) => {
-  // تشخیص پیام‌های حاوی کد یا تگ‌های HTML
+  // Detect messages containing HTML code or tags
   const isCode =
     /[<>]/.test(text) ||
     text.includes("function") ||
@@ -26,7 +19,7 @@ const convertMessage = (text) => {
     text.includes("href=");
 
   if (isCode) {
-    // پاک‌سازی کامل و نمایش به عنوان کد
+    // Complete cleanup and display as code
     const sanitized = text
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
@@ -39,7 +32,7 @@ const convertMessage = (text) => {
     })}</div>`;
   }
 
-  // پردازش معمولی برای پیام‌های عادی
+  // Normal processing for normal messages
   const linkified = linkifyHtml(text, {
     target: "_blank",
     rel: "noopener noreferrer",
@@ -55,7 +48,6 @@ const convertMessage = (text) => {
   });
 };
 
-// let flag2 = false;
 const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   const [text, setText] = useState("");
   const {
@@ -65,13 +57,8 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     sendStatus,
     setSendStatus,
     bulkLength,
-    // setLoginCheck,
-    // loginCheck,
-    activeChat,
     setPrivetChannels,
-    canMessage,
     isFirstBulk,
-    setIsFirstBulk,
     initialScrollDone,
     setInitialScrollDone,
   } = useSocket();
@@ -82,34 +69,26 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   const [messages, setMessages] = useState([]);
 
   const [inputHeight, setInputHeight] = useState(58);
-  const [titleHeight, setTitleHight] = useState(65); // ارتفاع پیش‌فرض
+  const [titleHeight, setTitleHight] = useState(65); // Default height
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
   const rowHeights = useRef({});
   const listRef = useRef();
 
-  // const rowRefs = useRef([]);
-  const navigate = useNavigate();
   const { userID } = useParams();
 
-  // const [selectedUser, setSelectedUser] = useState(null);
-  const popupRef = useRef(null);
   const location = useLocation();
 
-  const [validUser, setValidUser] = useState(true);
 
   const [isMobileSidebar, setIsMobileSidebar] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [haveOpacity, setHaveOpacity] = useState(false);
 
-  const [folog, setFolog] = useState(false);
   const [flag2, setFlag2] = useState(false);
   const [numOfMsg, setNumOfMsg] = useState(0);
 
   const [isBulkMsg, setIsBulkMsg] = useState(true);
-
-  // بستن پاپ‌آپ وقتی بیرون از آن کلیک شود
 
   useEffect(() => {
     setInitialScrollDone(false);
@@ -117,13 +96,12 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [location]);
 
   useEffect(() => {
-    console.log(isBulkMsg);
     if (numOfMsg > 0) {
       if (isBulkMsg) {
         if (isFirstBulk) {
           setTimeout(() => {
             listRef.current.scrollToItem(bulkMessages.length, "end");
-          }, 500);
+          }, 400);
           // setTimeout(() => {
           //   listRef.current.scrollToItem(bulkMessages.length, "end");
           //   firstRender = false;
@@ -147,30 +125,8 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           channel: userID,
         })
       );
-
-      // socket.send(
-      //   JSON.stringify({
-      //     type: "CanSendMessage",
-      //     channel: userID,
-      //   })
-      // );
     }
-
-    const handleClickOutside = (event) => {
-      if (popupRef.current && !popupRef.current.contains(event.target)) {
-        // setSelectedUser(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
   }, [userID]);
-
-  useEffect(() => {
-    console.log("active chat: ", activeChat);
-  }, [activeChat, userID]);
 
   useEffect(() => {
     setLocalMessages([]);
@@ -181,27 +137,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
       if (bulkMessages?.length > 0 && listRef.current) {
         setIsBulkMsg(true);
         setMessages([...bulkMessages, ...localMessages]);
-        console.log(folog);
-
-        console.log(bulkMessages);
-        console.log(localMessages);
-
-        // listRef.current.scrollToItem(bulkLength, "start");
-
-        // if (firstRender) {
-        //   setTimeout(() => {
-        //     listRef.current.scrollToItem(bulkMessages.length, "end");
-        //   }, 100);
-        //   setTimeout(() => {
-        //     listRef.current.scrollToItem(bulkMessages.length, "end");
-
-        //     firstRender = false;
-        //   }, 130);
-
-        //   setTimeout(() => {
-        //     setInitialScrollDone(true);
-        //   }, 200);
-        // }
       }
     } else {
       setFlag2(true);
@@ -210,7 +145,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [bulkMessages]);
 
   useEffect(() => {
-    console.log(newMessage);
     if (newMessage.date) {
       if (
         newMessage.channel == localStorage.getItem("username") ||
@@ -242,7 +176,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
             if (listRef.current) {
               setTimeout(() => {
-                listRef.current.scrollToItem(newMessages.length, "end"); // should fix xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                listRef.current.scrollToItem(newMessages.length, "end"); // It must be fixed.
               }, 200);
               // setTimeout(() => {
               //   listRef.current.scrollToItem(newMessages.length, "end");
@@ -257,7 +191,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             if (listRef.current) {
               if (isAtBottom) {
                 setTimeout(() => {
-                  listRef.current.scrollToItem(newMessages.length, "end"); // should fix xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                  listRef.current.scrollToItem(newMessages.length, "end"); // It must be fixed.
                 }, 200);
               }
               // setTimeout(() => {
@@ -277,10 +211,8 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         const username = localStorage.getItem("username");
         if (newMessage.channel == "global" || newMessage.channel == username)
           return;
-        console.log(newMessage);
         setPrivetChannels((prev) => {
           const prevChannels = prev;
-          console.log(prevChannels);
           const isRepetitive = prevChannels.find((item) => {
             return item.name == newMessage.channel;
           });
@@ -294,35 +226,20 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     }
   }, [newMessage]);
 
-  // To avoid loading being limited to a specific time
-
-  // useEffect(() => {
-  //   console.log(messages);
-  //   setTimeout(() => {
-  //     setIsLoading(false);
-  //   }, 100);
-  //   if (isAtBottom && listRef.current && flag && bulkMessages.length > 0) {
-  //     setTimeout(() => {
-  //       // listRef.current.scrollToItem(bulkMessages.length - 1, "start");
-  //       flag = false;
-  //     }, 100);
-  //   }
-  // }, [messages]);
-
-  // تابع اندازه‌گیری ارتفاع
+  // Height measurement function
   const getRowHeight = (index) => {
-    // اگر ارتفاع ذخیره شده وجود دارد، از آن استفاده کنید
+    // If there is a saved height, use it.
     if (rowHeights.current[index]) {
       return rowHeights.current[index];
     }
 
-    // ارتفاع پیش‌فرض بر اساس اینکه آیا آواتار نمایش داده می‌شود یا نه
+    // Default height based on whether the avatar is displayed or not
     const isSameUserAsPrevious =
       index > 0 && messages[index - 1].username === messages[index].username;
-    return isSameUserAsPrevious ? 50 : 70; // افزایش ارتفاع برای جا دادن زمان
+    return isSameUserAsPrevious ? 50 : 70; // Increasing altitude to accommodate time
   };
 
-  // تابع برای تنظیم ارتفاع واقعی
+  // Function to set the actual height
   const setRowHeight = (index, height) => {
     if (rowHeights.current[index] !== height) {
       rowHeights.current[index] = height;
@@ -332,8 +249,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   const Row = ({ index, style }) => {
     const msg = messages[index];
-    // console.log(`Rendering message ${index}:`, msg)
-
     const rowRef = useRef();
     const isSameUserAsPrevious =
       index > 0 && messages[index - 1].username === msg.username;
@@ -348,8 +263,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
     setNumOfMsg(messages.length);
 
-    setFolog(true);
-
     return (
       <div style={style}>
         <div
@@ -357,7 +270,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           className={`flex p-2 ${isSameUserAsPrevious ? "pt-1" : ""}`}
           style={{ minHeight: showAvatar ? "70px" : "45px" }}
         >
-          {/* آواتار (فقط برای اولین پیام) */}
+          {/* Avatar (only for the first message) */}
           {showAvatar ? (
             <div className="flex-shrink-0 mr-2">
               <svg
@@ -366,7 +279,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                 viewBox="0 0 24 24"
                 strokeWidth={0.75}
                 stroke="currentColor"
-                className="size-11" // کاهش سایز آواتار
+                className="size-11"
               >
                 <path
                   strokeLinecap="round"
@@ -376,11 +289,11 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
               </svg>
             </div>
           ) : (
-            <div className="flex-shrink-0 w-12 mr-1"></div> // فضای خالی همتراز با آواتار
+            <div className="flex-shrink-0 w-12 mr-1"></div> // Empty space on par with avatar
           )}
 
           <div className="flex-1 min-w-0">
-            {/* نام کاربر (فقط برای اولین پیام) */}
+            {/* Username (for first message only) */}
             {showAvatar && (
               <div className="flex items-center mb-1">
                 <span className="font-medium text-sm mr-2 cursor-pointer">
@@ -389,7 +302,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
               </div>
             )}
 
-            {/* متن پیام و زمان در یک خط */}
+            {/* Message text and time on one line */}
             <div className="flex items-baseline group">
               <p
                 className="break-words whitespace-pre-wrap inline-block max-w-[85%]"
@@ -397,7 +310,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                   __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
                 }}
               ></p>
-              {/* opacity-0 */}
               <span className="text-xs text-gray-400 ml-2  group-hover:opacity-100 transition-opacity">
                 {msg.time}
               </span>
@@ -421,30 +333,8 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         totalHeight - (scrollOffset + list.props.height);
 
       setIsAtBottom(distanceFromBottom < 50);
-      console.log(isAtBottom);
     }, 100);
   };
-
-  // useEffect(() => {
-  //   console.log("can message",canMessage);
-  //   if (!canMessage) return;
-  //   if(mofolog) {
-
-  //     if (canMessage.status) {
-  //       setValidUser(true);
-  //     } else {
-  //       setValidUser(false);
-  //     }
-  //     mofolog = false
-  //   }
-  // }, [canMessage]);
-
-  // if (!validUser) {
-  //   console.log(validUser);
-
-  //   navigate(-1);
-  //   return null;
-  // }
 
   return (
     <>
@@ -471,8 +361,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                 setIsMobileSidebar(true);
                 setIsSidebarOpen(true);
                 setHaveOpacity(true);
-                console.log(isMobileSidebar);
-                console.log(isSidebarOpen);
               }}
             >
               <svg
@@ -524,16 +412,16 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
             <p>{userID}</p>
           </div>
-          <div className="flex-1 ">
+          <div className="flex-1">
             <List
               ref={listRef}
               height={listHeight}
               itemCount={messages.length}
               onScroll={handleScroll}
-              itemSize={getRowHeight} // استفاده از تابع اندازه‌گیری پویا
+              itemSize={getRowHeight} // Using the dynamic measurement function
               width={"100%"}
               className="scrollbar-custom"
-              estimatedItemSize={120} // ارتفاع تخمینی برای محاسبه اولیه
+              estimatedItemSize={120} // Estimated height for initial calculation
               onItemsRendered={({ visibleStartIndex }) => {
                 if (
                   visibleStartIndex === 0 &&
@@ -542,7 +430,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                   initialScrollDone
                 ) {
                   setSendStatus(false);
-                  console.log("🟡 کاربر به بالای لیست رسید");
+                  // console.log("🟡The user has reached the top of the list.");
 
                   debounceTimeout.current = setTimeout(() => {
                     debounceTimeout.current = null;

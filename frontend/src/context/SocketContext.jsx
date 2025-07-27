@@ -1,9 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-const SocketContext = createContext();
 
-let initialLoaded = false;
-let firstTime = false;
+const SocketContext = createContext();
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
@@ -11,11 +9,9 @@ export const SocketProvider = ({ children }) => {
   const [bulkMessages, setBulkMessages] = useState([]);
   const [bulkLength, setBulkLength] = useState(0);
 
-  const [loginToken, setLoginToken] = useState(null);
   const [status, setStatus] = useState({});
   const [newMessage, setNewMessage] = useState({});
 
-  // const [loginCheck, setLoginCheck] = useState(false);
   const [sendStatus, setSendStatus] = useState(true);
 
   const [wsReady, setWsReady] = useState(false);
@@ -33,7 +29,7 @@ export const SocketProvider = ({ children }) => {
   const connectWebSocket = () => {
     const ws = new WebSocket(import.meta.env.VITE_SERVER_WEBSOCKET_URL);
     ws.onopen = () => {
-      console.log("✅ WebSocket connected");
+      // console.log("✅ WebSocket connected");
       setSocket(ws);
     };
 
@@ -66,17 +62,12 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type === "LoginToken") {
-        console.log("login token::::::::::::::", data.token);
+        // console.log("login token::::::::::::::", data.token);
         document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
-
-        // localStorage.setItem("token", data.token);
-        // setLoginToken(data.token);
       }
 
       if (data.type === "BulkMessages") {
         if (location.pathname == "/chat" && data.channel == "global") {
-          console.log("data.messages.length", data.messages.length);
-
           setBulkLength(data.messages.length);
           if (data.messages.length < 1) {
             setBulkMessages([]);
@@ -101,9 +92,8 @@ export const SocketProvider = ({ children }) => {
                 timecode: msg.date,
               };
             });
-          // حالا فقط یکبار state رو آپدیت کن:
+
           setBulkMessages((prev) => {
-            console.log(prev);
             if (prev[0]) {
               if (newMessages[0].channel == prev[0].channel) {
                 setIsFirstBulk(false);
@@ -115,7 +105,6 @@ export const SocketProvider = ({ children }) => {
                 return [...newMessages];
               }
             } else {
-              console.log("filteredMsg neshon nadeeeeeeeeeeeeeeeeee");
               return [...newMessages];
             }
           });
@@ -149,8 +138,6 @@ export const SocketProvider = ({ children }) => {
 
             setBulkMessages((prev) => {
               if (prev[0]) {
-                console.log(newMessages[0].channel == prev[0].channel);
-
                 if (newMessages[0].channel == prev[0].channel) {
                   setIsFirstBulk(false);
 
@@ -165,11 +152,6 @@ export const SocketProvider = ({ children }) => {
               } else {
                 return [...newMessages];
               }
-              //  else {
-              //   firstTime = true;
-              //   console.log("dafafegwegawgehwehw",newMessages);
-              //   return [...newMessages];
-              // }
             });
           }
         }
@@ -189,18 +171,18 @@ export const SocketProvider = ({ children }) => {
     };
 
     ws.onerror = (err) => {
-      console.error("❌ WebSocket error:", err);
+      // console.error("❌ WebSocket error:", err);
       document.cookie =
         "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
     };
 
     ws.onclose = (event) => {
-      console.warn("❌ WebSocket disconnected", event);
+      // console.warn("❌ WebSocket disconnected", event);
 
       setSocket(null);
 
       reconnectTimeoutRef.current = setTimeout(() => {
-        console.log("🔁 Trying to reconnect...");
+        // console.log("🔁 Trying to reconnect...");
 
         connectWebSocket();
       }, 600);
@@ -221,14 +203,11 @@ export const SocketProvider = ({ children }) => {
         socket,
         setBulkMessages,
         bulkMessages,
-        loginToken,
         status,
         newMessage,
         sendStatus,
         setSendStatus,
         bulkLength,
-        // setLoginCheck,
-        // loginCheck,
         wsReady,
         setWsReady,
         privetChannels,

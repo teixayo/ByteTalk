@@ -16,12 +16,6 @@ const Sidebar = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!privetChannels[0]) return;
-
-    console.log(privetChannels[0]);
-  }, [privetChannels]);
-
-  useEffect(() => {
     const path = location.pathname.split("/")[2] || "chat";
     setActiveChat(path);
 
@@ -77,8 +71,7 @@ const Sidebar = ({
                     setIsLoading(false);
                     setActiveChat("chat");
                     navigate(`/chat`);
-                    // navigate(0);
-                    setIsSidebarOpen(false); // بستن در موبایل
+                    setIsSidebarOpen(false); // Close on mobile
                   }}
                 >
                   <svg
@@ -98,7 +91,7 @@ const Sidebar = ({
                   <p className="text-white pl-2">Global</p>
                 </div>
 
-                {/* آیتم‌های خصوصی */}
+                {/* Private items */}
                 {privetChannels.map((channel, index) => (
                   <div
                     key={index}
@@ -112,8 +105,7 @@ const Sidebar = ({
                       setIsLoading(false);
                       setActiveChat(channel.name);
                       navigate(`/chat/${channel.name}`);
-                      // navigate(0);
-                      setIsSidebarOpen(false); // بستن در موبایل
+                      setIsSidebarOpen(false); // Close on mobile
                       setHaveOpacity(false);
                     }}
                   >
@@ -150,7 +142,7 @@ const Sidebar = ({
             Private chats
           </h2>
           <div className="space-y-2">
-            {/* لیست کاربران - بعداً تکمیل می‌شود */}
+            {/* User List - To be completed later */}
             <div
               className={`pl-2 h-[46px] opacity-50 flex items-center ${
                 activeChat == "chat"
@@ -162,7 +154,6 @@ const Sidebar = ({
                 setFadeOut(false);
                 setIsLoading(false);
                 navigate(`/chat`);
-                // navigate(0);
                 setActiveChat("chat");
               }}
             >
@@ -195,7 +186,6 @@ const Sidebar = ({
                     setFadeOut(false);
                     setIsLoading(false);
                     navigate(`/chat/${channel.name}`);
-                    // navigate(0);
                     setActiveChat(channel.name);
                   }}
                 >
@@ -213,7 +203,6 @@ const Sidebar = ({
                       d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                     />
                   </svg>
-                  {/* <Link to={`/chat/${channel.name}`} onClick={() => console.log('meakasdflafjdajflasdfjdsjlfjsaldfl')}>{channel.name}</Link> */}
                   <p className={`text-white pl-1.5 mb-0.5`}>{channel.name}</p>
                 </div>
               );

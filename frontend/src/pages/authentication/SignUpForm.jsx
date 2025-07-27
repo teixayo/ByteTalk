@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
 import { useNavigate, Link } from "react-router-dom";
+import * as Yup from "yup";
+
 import { useSocket } from "../../context/SocketContext";
 
 let localUserName = "";
@@ -21,8 +22,8 @@ const SignUpForm = () => {
           username: localUserName,
           password: localUserPassword,
         };
-        console.log("📨 Sending login:", loginPayload);
-        console.log("WS readyState:", socket.readyState);
+        // console.log("📨 Sending login:", loginPayload);
+        // console.log("WS readyState:", socket.readyState);
         socket.send(JSON.stringify(loginPayload));
       }, 100);
       setTimeout(() => {
@@ -33,7 +34,6 @@ const SignUpForm = () => {
   }, [status]);
 
   const handleSubmit = (values) => {
-    console.log("🚀 Form submitted", values);
     localUserName = values.fildname;
     localUserPassword = values.password;
 
@@ -48,7 +48,6 @@ const SignUpForm = () => {
       password: localUserPassword,
     };
 
-    console.log("📨 Sending CreateUser", signupPayload);
     socket.send(JSON.stringify(signupPayload));
   };
 
