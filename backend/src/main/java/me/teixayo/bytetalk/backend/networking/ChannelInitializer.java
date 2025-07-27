@@ -41,7 +41,6 @@ public class ChannelInitializer extends io.netty.channel.ChannelInitializer<Chan
 
     @Override
     protected void initChannel(Channel channel) {
-
         ChannelPipeline pipeline = channel.pipeline();
         if (sslContent != null) {
             pipeline.addLast("ssl", sslContent.newHandler(channel.alloc()));
