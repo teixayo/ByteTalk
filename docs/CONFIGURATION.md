@@ -5,13 +5,13 @@ This guide outlines how to configure `config.yml`, build Docker images, and unde
 
 ---
 
-## 📄 `config.yml` Overview
+## `config.yml` Overview
 
 ByteTalk uses [config.yml](../backend/src/main/resources/config.yml) to define system behavior, including database connections, networking, rate limits, and more.
 
 ---
 
-## 💾 Storage System
+## Storage System
 
 ByteTalk supports two storage backends:
 
@@ -20,11 +20,11 @@ ByteTalk supports two storage backends:
 | **Memory**| Stores data temporarily, Best for development/testing                                          | `mongo.toggle: false` |
 | **MongoDB** | Persists messages and channel and user data to a MongoDB instance, Recommended for production. | `mongo.toggle: true` |
 
-> 🔁 Redis can be used optionally for caching and microservice synchronization via Pub/Sub. Enable with `redis.toggle: true`
+> Redis can be used optionally for caching and microservice synchronization via Pub/Sub. Enable with `redis.toggle: true`
 
 ---
 
-## 🔑 Multi-node Deployment Note
+## Multi-node Deployment Note
 
 If you're deploying ByteTalk in a **multi-node microservice architecture**, the following are **required**:
 
@@ -34,9 +34,9 @@ If you're deploying ByteTalk in a **multi-node microservice architecture**, the 
 
 ---
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
-### 📦 Build & Run Frontend Docker Image
+### Build & Run Frontend Docker Image
 
 ```bash
 cd Frontend
@@ -44,7 +44,7 @@ docker build -t bytetalk-frontend --build-arg SERVER_WEBSOCKET_URL=ws://localhos
 docker run -d -p 3000:80 bytetalk-frontend
 ```
 
-### ⚙️ Build & Run Backend Docker Image
+### Build & Run Backend Docker Image
 
 ```bash
 docker build -t bytetalk-backend .

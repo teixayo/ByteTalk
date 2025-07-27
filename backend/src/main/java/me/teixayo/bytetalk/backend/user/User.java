@@ -33,12 +33,13 @@ public class User {
 
     public void sendPacket(ServerPacket serverPacket) {
         userConnection.sendPacket(serverPacket);
-        log.info("{} Sent to {}", serverPacket.getData().toString(), name);
+        if (log.isDebugEnabled()) {
+            log.debug("{} Sent to {}", serverPacket.getData().toString(), name);
+        }
     }
 
     public void sendMessages(String channel, Collection<Message> messages) {
         JSONArray bulkJson = new JSONArray();
-
         HashSet<Long> userIds = new HashSet<>();
         for (Message message : messages) {
             userIds.add(message.getUserID());
@@ -53,6 +54,7 @@ public class User {
             jsonObject.put("date", message.getDate().toInstant().toEpochMilli());
             bulkJson.put(jsonObject);
         }
+
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("channel", channel);
         jsonObject.put("messages", bulkJson);
