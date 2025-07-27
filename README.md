@@ -72,7 +72,7 @@
    ```
 
 5. **Access the App**  
-   Open `http://localhost:5174` (or your configured port) in your browser.
+   Open `http://localhost:5173` (or your configured frontend port) in your browser.
 
 ---
 
