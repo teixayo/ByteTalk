@@ -54,6 +54,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     socket,
     bulkMessages,
     newMessage,
+    setNewMessage,
     sendStatus,
     setSendStatus,
     bulkLength,
@@ -208,6 +209,8 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             return [...prev, msg];
           });
         }
+
+        setNewMessage([])
       } else {
         const username = localStorage.getItem("username");
         if (newMessage.channel == "global" || newMessage.channel == username)

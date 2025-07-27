@@ -208,6 +208,7 @@ export const SocketProvider = ({ children }) => {
         bulkMessages,
         status,
         newMessage,
+        setNewMessage,
         sendStatus,
         setSendStatus,
         bulkLength,

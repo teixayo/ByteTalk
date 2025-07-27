@@ -91,6 +91,8 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   const [isBulkMsg, setIsBulkMsg] = useState(true);
 
+  const [validMessage, setValidMessage] = useState(false);
+
   useEffect(() => {
     setInitialScrollDone(false);
     setLocalGlobalMessages([]);
@@ -208,9 +210,11 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           });
         }
 
-        setLocalGlobalMessages((prev) => {
-          return [...prev, msg];
-        });
+        if (validMessage) {
+          setLocalGlobalMessages((prev) => {
+            return [...prev, msg];
+          });
+        }
       } else {
         const username = localStorage.getItem("username");
         if (newMessage.channel == "global" || newMessage.channel == username)
@@ -223,6 +227,10 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
       }
     }
   }, [newMessage]);
+
+  useEffect(() => {
+    setValidMessage(true)
+  }, [messages]);
 
   // Height measurement function
   const getRowHeight = (index) => {
