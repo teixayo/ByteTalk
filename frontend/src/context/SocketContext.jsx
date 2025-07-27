@@ -61,10 +61,10 @@ export const SocketProvider = ({ children }) => {
         setStatus(data);
       }
 
-      if (data.type === "LoginToken") {
-        // console.log("login token::::::::::::::", data.token);
-        document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
-      }
+      // if (data.type === "LoginToken") {
+      //   // console.log("login token::::::::::::::", data.token);
+      //   document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
+      // }
 
       if (data.type === "BulkMessages") {
         if (location.pathname == "/chat" && data.channel == "global") {
