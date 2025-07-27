@@ -33,7 +33,9 @@ public class User {
 
     public void sendPacket(ServerPacket serverPacket) {
         userConnection.sendPacket(serverPacket);
-        log.info("{} Sent to {}", serverPacket.getData().toString(), name);
+        if(log.isDebugEnabled()) {
+            log.debug("{} Sent to {}", serverPacket.getData().toString(), name);
+        }
     }
 
     public void sendMessages(String channel, Collection<Message> messages) {
