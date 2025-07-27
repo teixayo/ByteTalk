@@ -32,7 +32,7 @@ const convertMessage = (text) => {
     })}</div>`;
   }
 
-// Normal processing for normal messages
+  // Normal processing for normal messages
   const linkified = linkifyHtml(text, {
     target: "_blank",
     rel: "noopener noreferrer",
@@ -62,17 +62,18 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     isFirstBulk,
     initialScrollDone,
     setInitialScrollDone,
+    localGlobalMessages,
+    setLocalGlobalMessages,
   } = useSocket();
 
   const [text, setText] = useState("");
 
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const [localMessages, setLocalMessages] = useState([]);
   const debounceTimeout = useRef(null);
   const [messages, setMessages] = useState([]);
 
   const [inputHeight, setInputHeight] = useState(58);
-  const [titleHeight, setTitleHight] = useState(65); // Default height
+  const [titleHeight, setTitleHight] = useState(68); // Default height
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -92,7 +93,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   useEffect(() => {
     setInitialScrollDone(false);
-    setLocalMessages([]);
+    setLocalGlobalMessages([]);
   }, [location]);
 
   useEffect(() => {
@@ -150,7 +151,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     if (bulkMessages?.length > 0 && listRef.current) {
       setIsBulkMsg(true);
       setMessages(() => {
-        return [...bulkMessages, ...localMessages];
+        return [...bulkMessages, ...localGlobalMessages];
       });
     }
   }, [bulkMessages]);
@@ -207,7 +208,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           });
         }
 
-        setLocalMessages((prev) => {
+        setLocalGlobalMessages((prev) => {
           return [...prev, msg];
         });
       } else {
@@ -412,7 +413,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                 ref={listRef}
                 height={listHeight}
                 itemCount={messages.length}
-                className="scrollbar-custom"
+                className="chat-scrollbar-custom"
                 onScroll={handleScroll}
                 itemSize={getRowHeight} // Using the dynamic measurement function
                 width={"100%"}

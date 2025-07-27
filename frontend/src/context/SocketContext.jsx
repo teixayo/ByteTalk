@@ -25,6 +25,8 @@ export const SocketProvider = ({ children }) => {
 
   const [initialScrollDone, setInitialScrollDone] = useState(false);
 
+  const [localPvMessages, setLocalPvMessages] = useState([]);
+  const [localGlobalMessages, setLocalGlobalMessages] = useState([]);
 
   const connectWebSocket = () => {
     const ws = new WebSocket(import.meta.env.VITE_SERVER_WEBSOCKET_URL);
@@ -219,6 +221,10 @@ export const SocketProvider = ({ children }) => {
         setIsFirstBulk,
         initialScrollDone,
         setInitialScrollDone,
+        localPvMessages,
+        setLocalPvMessages,
+        localGlobalMessages,
+        setLocalGlobalMessages,
       }}
     >
       {children}

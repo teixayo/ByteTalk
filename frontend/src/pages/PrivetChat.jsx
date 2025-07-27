@@ -61,15 +61,16 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     isFirstBulk,
     initialScrollDone,
     setInitialScrollDone,
+    localPvMessages,
+    setLocalPvMessages,
   } = useSocket();
 
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const [localMessages, setLocalMessages] = useState([]);
   const debounceTimeout = useRef(null);
   const [messages, setMessages] = useState([]);
 
   const [inputHeight, setInputHeight] = useState(58);
-  const [titleHeight, setTitleHight] = useState(65); // Default height
+  const [titleHeight, setTitleHight] = useState(68); // Default height
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -79,7 +80,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   const { userID } = useParams();
 
   const location = useLocation();
-
 
   const [isMobileSidebar, setIsMobileSidebar] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -91,8 +91,9 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   const [isBulkMsg, setIsBulkMsg] = useState(true);
 
   useEffect(() => {
+    
     setInitialScrollDone(false);
-    setLocalMessages([]);
+    setLocalPvMessages([]);
   }, [location]);
 
   useEffect(() => {
@@ -117,6 +118,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [numOfMsg]);
 
   useEffect(() => {
+    
     if (socket.readyState == WebSocket.OPEN) {
       socket.send(
         JSON.stringify({
@@ -129,14 +131,14 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [userID]);
 
   useEffect(() => {
-    setLocalMessages([]);
+    setLocalPvMessages([]);
   }, [location]);
 
   useEffect(() => {
     if (flag2) {
       if (bulkMessages?.length > 0 && listRef.current) {
         setIsBulkMsg(true);
-        setMessages([...bulkMessages, ...localMessages]);
+        setMessages([...bulkMessages, ...localPvMessages]);
       }
     } else {
       setFlag2(true);
@@ -168,8 +170,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
         setIsBulkMsg(false);
 
-        
-        
         if (newMessage.username == localStorage.getItem("username")) {
           setMessages((prev) => {
             const newMessages = [...prev, msg];
@@ -204,9 +204,16 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
 
 
-        setLocalMessages((prev) => {
+
+        setLocalPvMessages((prev) => {
           return [...prev, msg];
         });
+
+
+
+
+
+
       } else {
         const username = localStorage.getItem("username");
         if (newMessage.channel == "global" || newMessage.channel == username)
@@ -225,6 +232,12 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
       }
     }
   }, [newMessage]);
+
+  useEffect(() => {
+    console.log("localPvMessages", localPvMessages);
+    console.log("bulkMessages", bulkMessages);
+    console.log("messages", messages);
+  }, [messages])
 
   // Height measurement function
   const getRowHeight = (index) => {
@@ -420,7 +433,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
               onScroll={handleScroll}
               itemSize={getRowHeight} // Using the dynamic measurement function
               width={"100%"}
-              className="scrollbar-custom"
+              className="chat-scrollbar-custom"
               estimatedItemSize={120} // Estimated height for initial calculation
               onItemsRendered={({ visibleStartIndex }) => {
                 if (
