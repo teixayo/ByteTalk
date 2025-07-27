@@ -54,6 +54,7 @@ public class User {
             jsonObject.put("date", message.getDate().toInstant().toEpochMilli());
             bulkJson.put(jsonObject);
         }
+
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("channel", channel);
         jsonObject.put("messages", bulkJson);
