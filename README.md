@@ -35,7 +35,7 @@
 
 ---
 
-## 🚀 Features
+## Features
 
 - **Global Chat**: Broadcast messages to all connected users.
 - **Private Chat**: One‑to‑one direct messaging.
@@ -46,7 +46,7 @@
   
 ---
 
-## 💻 Installation & Local Development
+## Installation & Local Development
 
 1. **Prerequisites**
     - Java 21
@@ -76,13 +76,13 @@
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
 See the [Configuration Guide](docs/CONFIGURATION.md) for environment variables, Redis/MongoDB setup, port settings, and storage options.
 
 ---
 
-## 🧪 Testing
+## Testing
 
 - **Unit Tests:** JUnit (backend)
 - **Integration Tests:** JUnit + Testcontainers (spins up temporary Redis & MongoDB)
@@ -93,7 +93,7 @@ See the [Configuration Guide](docs/CONFIGURATION.md) for environment variables, 
 
 ---
 
-## 🚧 Roadmap & Future Plans
+## Roadmap & Future Plans
 
 - **Chain Encryption**: End‑to‑end encryption for all messages.
 - **Media Support**: Camera, voice messages with encryption.
@@ -101,7 +101,7 @@ See the [Configuration Guide](docs/CONFIGURATION.md) for environment variables, 
 
 ---
 
-## 👨‍💻 Contributors
+## Contributors
 
 - Backend: [Ali Nikbakht](https://github.com/teixayo)
 - Frontend: [Adel Nouri](https://github.com/AdelNouri)
