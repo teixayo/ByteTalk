@@ -33,7 +33,7 @@ public class User {
 
     public void sendPacket(ServerPacket serverPacket) {
         userConnection.sendPacket(serverPacket);
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("{} Sent to {}", serverPacket.getData().toString(), name);
         }
     }

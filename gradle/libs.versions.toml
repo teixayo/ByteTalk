@@ -21,7 +21,7 @@ testcontainer-testcontainers = { module = "org.testcontainers:testcontainers", v
 testcontainer-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer" }
 testcontainer-mongodb = { module = "org.testcontainers:mongodb", version.ref = "testcontainer" }
 
-lombok =  { module = "org.projectlombok:lombok", version.ref = "lombok" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 
 slf4j = "org.slf4j:slf4j-api:2.0.17"
 snakeyaml = "org.yaml:snakeyaml:2.2"
@@ -35,5 +35,5 @@ mongodb = "org.mongodb:mongodb-driver-sync:4.11.0"
 
 [bundles]
 log4j = ["log4j-api", "log4j-core", "log4j-slf4j-impl"]
-testcontainer = ["testcontainer-testcontainers","testcontainer-junit","testcontainer-mongodb"]
+testcontainer = ["testcontainer-testcontainers", "testcontainer-junit", "testcontainer-mongodb"]
 
