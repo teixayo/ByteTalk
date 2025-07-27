@@ -40,7 +40,6 @@ public class User {
 
     public void sendMessages(String channel, Collection<Message> messages) {
         JSONArray bulkJson = new JSONArray();
-
         HashSet<Long> userIds = new HashSet<>();
         for (Message message : messages) {
             userIds.add(message.getUserID());
