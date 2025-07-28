@@ -54,6 +54,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     socket,
     bulkMessages,
     newMessage,
+    setNewMessage,
     sendStatus,
     setSendStatus,
     bulkLength,
@@ -61,15 +62,16 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     isFirstBulk,
     initialScrollDone,
     setInitialScrollDone,
+    localPvMessages,
+    setLocalPvMessages,
   } = useSocket();
 
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const [localMessages, setLocalMessages] = useState([]);
   const debounceTimeout = useRef(null);
   const [messages, setMessages] = useState([]);
 
   const [inputHeight, setInputHeight] = useState(58);
-  const [titleHeight, setTitleHight] = useState(65); // Default height
+  const [titleHeight, setTitleHight] = useState(68); // Default height
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -80,7 +82,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   const location = useLocation();
 
-
   const [isMobileSidebar, setIsMobileSidebar] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [haveOpacity, setHaveOpacity] = useState(false);
@@ -90,9 +91,13 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   const [isBulkMsg, setIsBulkMsg] = useState(true);
 
+  const [validMessage, setValidMessage] = useState(false);
+
+  const [newMessagesLength, setNewMessagesLenngth] = useState(0);
+
   useEffect(() => {
     setInitialScrollDone(false);
-    setLocalMessages([]);
+    setLocalPvMessages([]);
   }, [location]);
 
   useEffect(() => {
@@ -129,14 +134,14 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [userID]);
 
   useEffect(() => {
-    setLocalMessages([]);
+    setLocalPvMessages([]);
   }, [location]);
 
   useEffect(() => {
     if (flag2) {
       if (bulkMessages?.length > 0 && listRef.current) {
         setIsBulkMsg(true);
-        setMessages([...bulkMessages, ...localMessages]);
+        setMessages([...bulkMessages, ...localPvMessages]);
       }
     } else {
       setFlag2(true);
@@ -168,45 +173,27 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
         setIsBulkMsg(false);
 
-        
-        
         if (newMessage.username == localStorage.getItem("username")) {
+          setNewMessagesLenngth(messages.length + 1);
           setMessages((prev) => {
             const newMessages = [...prev, msg];
-
-            if (listRef.current) {
-              setTimeout(() => {
-                listRef.current.scrollToItem(newMessages.length, "end"); // It must be fixed.
-              }, 200);
-              // setTimeout(() => {
-              //   listRef.current.scrollToItem(newMessages.length, "end");
-              // }, 210);
-            }
             return newMessages;
           });
         } else {
+          setNewMessagesLenngth(messages.length + 1);
           setMessages((prev) => {
             const newMessages = [...prev, msg];
-
-            if (listRef.current) {
-              if (isAtBottom) {
-                setTimeout(() => {
-                  listRef.current.scrollToItem(newMessages.length, "end"); // It must be fixed.
-                }, 200);
-              }
-              // setTimeout(() => {
-              //   listRef.current.scrollToItem(newMessages.length, "end");
-              // }, 210);
-            }
             return newMessages;
           });
         }
 
+        if (validMessage) {
+          setLocalPvMessages((prev) => {
+            return [...prev, msg];
+          });
+        }
 
-
-        setLocalMessages((prev) => {
-          return [...prev, msg];
-        });
+        setNewMessage([]);
       } else {
         const username = localStorage.getItem("username");
         if (newMessage.channel == "global" || newMessage.channel == username)
@@ -225,6 +212,21 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
       }
     }
   }, [newMessage]);
+
+  useEffect(() => {
+    setNumOfMsg(messages.length);
+
+    setValidMessage(true);
+    if (newMessagesLength > 0) {
+      if (newMessage.username == localStorage.getItem("username")) {
+        listRef.current.scrollToItem(newMessagesLength, "end");
+      } else {
+        if (isAtBottom) {
+          listRef.current.scrollToItem(newMessagesLength, "end");
+        }
+      }
+    }
+  }, [messages]);
 
   // Height measurement function
   const getRowHeight = (index) => {
@@ -260,8 +262,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         setRowHeight(index, height);
       }
     }, [index, msg.content]);
-
-    setNumOfMsg(messages.length);
 
     return (
       <div style={style}>
@@ -420,7 +420,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
               onScroll={handleScroll}
               itemSize={getRowHeight} // Using the dynamic measurement function
               width={"100%"}
-              className="scrollbar-custom"
+              className="chat-scrollbar-custom"
               estimatedItemSize={120} // Estimated height for initial calculation
               onItemsRendered={({ visibleStartIndex }) => {
                 if (

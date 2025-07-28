@@ -32,7 +32,7 @@ const convertMessage = (text) => {
     })}</div>`;
   }
 
-// Normal processing for normal messages
+  // Normal processing for normal messages
   const linkified = linkifyHtml(text, {
     target: "_blank",
     rel: "noopener noreferrer",
@@ -62,17 +62,18 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     isFirstBulk,
     initialScrollDone,
     setInitialScrollDone,
+    localGlobalMessages,
+    setLocalGlobalMessages,
   } = useSocket();
 
   const [text, setText] = useState("");
 
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const [localMessages, setLocalMessages] = useState([]);
   const debounceTimeout = useRef(null);
   const [messages, setMessages] = useState([]);
 
   const [inputHeight, setInputHeight] = useState(58);
-  const [titleHeight, setTitleHight] = useState(65); // Default height
+  const [titleHeight, setTitleHight] = useState(68); // Default height
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -90,9 +91,14 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   const [isBulkMsg, setIsBulkMsg] = useState(true);
 
+  const [validMessage, setValidMessage] = useState(false);
+
+  const [newMessagesLength, setNewMessagesLenngth] = useState(0);
+
   useEffect(() => {
     setInitialScrollDone(false);
-    setLocalMessages([]);
+    setLocalGlobalMessages([]);
+    setNewMessagesLenngth(0)
   }, [location]);
 
   useEffect(() => {
@@ -110,15 +116,11 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   useEffect(() => {
     if (numOfMsg > 0) {
-      if (isBulkMsg) {
+      if (isBulkMsg && messages.length > 0) {
         if (isFirstBulk) {
           setTimeout(() => {
             listRef.current.scrollToItem(numOfMsg, "end");
           }, 400);
-          // setTimeout(() => {
-          //   listRef.current.scrollToItem(numOfMsg, "end");
-          //   firstRender = false;
-          // }, 400);
           setTimeout(() => {
             setInitialScrollDone(true);
           }, 800);
@@ -147,10 +149,10 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [inputHeight]);
 
   useEffect(() => {
-    if (bulkMessages?.length > 0 && listRef.current) {
+    if (bulkMessages?.length > 0) {
       setIsBulkMsg(true);
       setMessages(() => {
-        return [...bulkMessages, ...localMessages];
+        return [...bulkMessages, ...localGlobalMessages];
       });
     }
   }, [bulkMessages]);
@@ -176,40 +178,24 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         setIsBulkMsg(false);
 
         if (newMessage.username == localStorage.getItem("username")) {
+          setNewMessagesLenngth(messages.length + 1);
           setMessages((prev) => {
             const newMessages = [...prev, msg];
-
-            if (listRef.current) {
-              setTimeout(() => {
-                listRef.current.scrollToItem(newMessages.length, "end"); // It must be fixed.
-              }, 200);
-              // setTimeout(() => {
-              //   listRef.current.scrollToItem(newMessages.length, "end");
-              // }, 210);
-            }
             return newMessages;
           });
         } else {
+          setNewMessagesLenngth(messages.length + 1);
           setMessages((prev) => {
             const newMessages = [...prev, msg];
-
-            if (listRef.current) {
-              if (isAtBottom) {
-                setTimeout(() => {
-                  listRef.current.scrollToItem(newMessages.length, "end"); // It must be fixed.
-                }, 200);
-              }
-              // setTimeout(() => {
-              //   listRef.current.scrollToItem(newMessages.length, "end");
-              // }, 210);
-            }
             return newMessages;
           });
         }
 
-        setLocalMessages((prev) => {
-          return [...prev, msg];
-        });
+        if (validMessage) {
+          setLocalGlobalMessages((prev) => {
+            return [...prev, msg];
+          });
+        }
       } else {
         const username = localStorage.getItem("username");
         if (newMessage.channel == "global" || newMessage.channel == username)
@@ -222,6 +208,20 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
       }
     }
   }, [newMessage]);
+
+  useEffect(() => {
+    setNumOfMsg(messages.length);
+    setValidMessage(true);
+    if (newMessagesLength > 0) {
+      if (newMessage.username == localStorage.getItem("username")) {
+        listRef.current.scrollToItem(newMessagesLength, "end");
+      } else {
+        if (isAtBottom) {
+          listRef.current.scrollToItem(newMessagesLength, "end");
+        }
+      }
+    }
+  }, [messages]);
 
   // Height measurement function
   const getRowHeight = (index) => {
@@ -250,8 +250,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     const isSameUserAsPrevious =
       index > 0 && messages[index - 1].username === msg.username;
     const showAvatar = !isSameUserAsPrevious;
-
-    setNumOfMsg(messages.length);
 
     useEffect(() => {
       if (rowRef.current) {
@@ -412,7 +410,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                 ref={listRef}
                 height={listHeight}
                 itemCount={messages.length}
-                className="scrollbar-custom"
+                className="chat-scrollbar-custom"
                 onScroll={handleScroll}
                 itemSize={getRowHeight} // Using the dynamic measurement function
                 width={"100%"}

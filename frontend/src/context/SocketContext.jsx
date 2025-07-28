@@ -25,6 +25,8 @@ export const SocketProvider = ({ children }) => {
 
   const [initialScrollDone, setInitialScrollDone] = useState(false);
 
+  const [localPvMessages, setLocalPvMessages] = useState([]);
+  const [localGlobalMessages, setLocalGlobalMessages] = useState([]);
 
   const connectWebSocket = () => {
     const ws = new WebSocket(import.meta.env.VITE_SERVER_WEBSOCKET_URL);
@@ -62,7 +64,7 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type === "LoginToken") {
-        // console.log("login token::::::::::::::", data.token);
+        // console.log("login token: ", data.token);
         document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
       }
 
@@ -205,6 +207,7 @@ export const SocketProvider = ({ children }) => {
         bulkMessages,
         status,
         newMessage,
+        setNewMessage,
         sendStatus,
         setSendStatus,
         bulkLength,
@@ -219,6 +222,10 @@ export const SocketProvider = ({ children }) => {
         setIsFirstBulk,
         initialScrollDone,
         setInitialScrollDone,
+        localPvMessages,
+        setLocalPvMessages,
+        localGlobalMessages,
+        setLocalGlobalMessages,
       }}
     >
       {children}

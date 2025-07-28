@@ -8,7 +8,6 @@ import LoginForm from "./pages/authentication/LoginForm.jsx";
 import Chat from "./pages/Chat";
 import PrivetChat from "./pages/PrivetChat.jsx";
 
-
 const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -18,22 +17,20 @@ const App = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-      if (!isLoading) {
-        setTimeout(() => {
-          setFadeOut(true);
-        }, 1400);
-        const timeout = setTimeout(() => {
-          setIsLoading(true);
-        }, 1500);
+    if (!isLoading) {
+      setTimeout(() => {
+        setFadeOut(true);
+      }, 1400);
+      const timeout = setTimeout(() => {
+        setIsLoading(true);
+      }, 1500);
 
-        return () => clearTimeout(timeout);
-      }
+      return () => clearTimeout(timeout);
+    }
   }, [isLoading]);
-
 
   // Close popup when clicked outside of it
   useEffect(() => {
-
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
         setSelectedUser(null);
@@ -64,13 +61,77 @@ const App = () => {
     );
   };
 
+  const Popup = () => {
+    return (
+      <div
+        className="fixed inset-0 backdrop-blur-xs bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 ease-out"
+        style={{
+          opacity: selectedUser ? 1 : 0,
+          pointerEvents: selectedUser ? "auto" : "none",
+        }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setSelectedUser(null);
+          }
+        }}
+      >
+        <div
+          ref={popupRef}
+          className={` popup-animation
+      bg-neutral-900 rounded-lg p-5 sm:p-6 max-w-sm sm:max-w-md w-full mx-4 border border-neutral-800
+      transition-all duration-300 ease-out transform
+      ${selectedUser ? "scale-100 opacity-100" : "scale-95 opacity-0"}
+    `}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center">
+            <div className="mr-1 sm:mr-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1}
+                stroke="currentColor"
+                className="size-9 sm:size-11 text-white"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-lg text-white">
+                {selectedUser?.username}
+              </h3>
+            </div>
+          </div>
+
+          <div className="mt-3 sm:mt-4">
+            <button
+              onClick={() => {
+                setFadeOut(false);
+                setIsLoading(false);
+                navigate(`/chat/${selectedUser?.username}`);
+                setSelectedUser(null);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white py-1 sm:py-2 px-4 rounded-sm sm:rounded-lg w-full transition-colors duration-200"
+            >
+              Send private message
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
   return (
     <AuthGate>
       <Toaster
         position="top-right"
         toastOptions={{
           style: {
-            background: "#1a1a1a", 
+            background: "#1a1a1a",
             color: "#f0f0f0",
             border: "1px solid #333",
             padding: "10px 15px",
@@ -78,73 +139,20 @@ const App = () => {
           },
           success: {
             iconTheme: {
-              primary: "#4ade80", 
+              primary: "#4ade80",
               secondary: "#1a1a1a",
             },
           },
           error: {
             iconTheme: {
-              primary: "#f87171", 
+              primary: "#f87171",
               secondary: "#1f1f1f",
             },
           },
         }}
       />
 
-      {selectedUser ? (
-        <div
-          className="fixed inset-0 backdrop-blur-xs bg-opacity-50 flex items-center justify-center z-50"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setSelectedUser(null);
-            }
-          }}
-        >
-          <div
-            ref={popupRef}
-            className="bg-neutral-900 rounded-lg p-6 max-w-sm w-full mx-4 border border-neutral-800"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center mb-4">
-              <div className="mr-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1}
-                  stroke="currentColor"
-                  className="size-11 text-white"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">
-                  {selectedUser.username}
-                </h3>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <button
-                onClick={() => {
-                  setFadeOut(false);
-                    setIsLoading(false);
-                  navigate(`/chat/${selectedUser.username}`);
-                  setSelectedUser(null);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 cursor-pointer rounded-lg w-full"
-              >
-                Send private message
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {selectedUser ? <Popup /> : null}
 
       {!isLoading ? <LoadingScreen /> : null}
 

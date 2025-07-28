@@ -18,6 +18,7 @@ const AuthGate = ({ children }) => {
     const handleOpen = () => setWsReady(true);
     if (socket.readyState === WebSocket.OPEN) {
 
+
       function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
