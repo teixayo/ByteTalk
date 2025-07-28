@@ -150,7 +150,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [bulkMessages]);
 
   useEffect(() => {
-    console.log(newMessage);
     if (newMessage.date) {
       if (
         newMessage.channel == localStorage.getItem("username") ||
@@ -222,7 +221,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
       if (newMessage.username == localStorage.getItem("username")) {
         listRef.current.scrollToItem(newMessagesLength, "end");
       } else {
-        console.log("isAtBottom", isAtBottom);
         if (isAtBottom) {
           listRef.current.scrollToItem(newMessagesLength, "end");
         }

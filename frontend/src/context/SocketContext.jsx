@@ -38,7 +38,7 @@ export const SocketProvider = ({ children }) => {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      console.log("📨 WS received:", data);
+      // console.log("📨 WS received:", data);
 
       if (data.type == "Status") {
         if (data.code === "1000") {
@@ -63,10 +63,10 @@ export const SocketProvider = ({ children }) => {
         setStatus(data);
       }
 
-      // if (data.type === "LoginToken") {
-      //   // console.log("login token::::::::::::::", data.token);
-      //   document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
-      // }
+      if (data.type === "LoginToken") {
+        // console.log("login token: ", data.token);
+        document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
+      }
 
       if (data.type === "BulkMessages") {
         if (location.pathname == "/chat" && data.channel == "global") {
@@ -160,7 +160,6 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type == "SendMessage") {
-        console.log(data)
         setNewMessage(data);
       }
 

@@ -216,7 +216,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
       if (newMessage.username == localStorage.getItem("username")) {
         listRef.current.scrollToItem(newMessagesLength, "end");
       } else {
-        console.log("isAtBottom", isAtBottom);
         if (isAtBottom) {
           listRef.current.scrollToItem(newMessagesLength, "end");
         }

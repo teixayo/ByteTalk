@@ -42,7 +42,6 @@ const Sidebar = ({
         // const paddingBottom = 16; // Bottom padding
         const availableHeight = sidebarRef.current.clientHeight - headerHeight;
         setListHeight(Math.max(availableHeight, 100));
-        console.log(sidebarRef.current.clientHeight);
       }
     };
 
