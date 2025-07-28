@@ -146,7 +146,7 @@ const App = () => {
           navigate(`/chat/${selectedUser?.username}`);
           setSelectedUser(null);
         }}
-        className="bg-blue-600 hover:bg-blue-700 text-white py-1 sm:py-2 px-4 cursor-pointer rounded-sm sm:rounded-lg w-full transition-colors duration-200"
+        className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white py-1 sm:py-2 px-4 rounded-sm sm:rounded-lg w-full transition-colors duration-200"
       >
         Send private message
       </button>
