@@ -17,7 +17,6 @@ const App = () => {
   const popupRef = useRef(null);
   const navigate = useNavigate();
 
-
   useEffect(() => {
       if (!isLoading) {
         setTimeout(() => {

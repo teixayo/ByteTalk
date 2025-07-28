@@ -37,11 +37,11 @@ const Sidebar = ({
 
     const updateListHeight = () => {
       if (sidebarRef.current) {
-        // محاسبه ارتفاع قابل استفاده برای لیست
-        const headerHeight = 116; // ارتفاع هدر (عنوان + Global chat item)
-        // const paddingBottom = 16; // padding پایین
+        // Calculating usable height for a list
+        const headerHeight = 116; // High Waste (Title + Global chat item)
+        // const paddingBottom = 16; // Bottom padding
         const availableHeight = sidebarRef.current.clientHeight - headerHeight;
-        setListHeight(Math.max(availableHeight, 100)); // حداقل ارتفاع 100px
+        setListHeight(Math.max(availableHeight, 100));
         console.log(sidebarRef.current.clientHeight);
       }
     };

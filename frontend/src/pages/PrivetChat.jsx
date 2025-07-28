@@ -93,6 +93,8 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   const [validMessage, setValidMessage] = useState(false);
 
+  const [newMessagesLength, setNewMessagesLenngth] = useState(0);
+
   useEffect(() => {
     setInitialScrollDone(false);
     setLocalPvMessages([]);
@@ -173,33 +175,15 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         setIsBulkMsg(false);
 
         if (newMessage.username == localStorage.getItem("username")) {
+          setNewMessagesLenngth(messages.length + 1);
           setMessages((prev) => {
             const newMessages = [...prev, msg];
-
-            if (listRef.current) {
-              setTimeout(() => {
-                listRef.current.scrollToItem(newMessages.length, "end"); // It must be fixed.
-              }, 200);
-              // setTimeout(() => {
-              //   listRef.current.scrollToItem(newMessages.length, "end");
-              // }, 210);
-            }
             return newMessages;
           });
         } else {
+          setNewMessagesLenngth(messages.length + 1);
           setMessages((prev) => {
             const newMessages = [...prev, msg];
-
-            if (listRef.current) {
-              if (isAtBottom) {
-                setTimeout(() => {
-                  listRef.current.scrollToItem(newMessages.length, "end"); // It must be fixed.
-                }, 200);
-              }
-              // setTimeout(() => {
-              //   listRef.current.scrollToItem(newMessages.length, "end");
-              // }, 210);
-            }
             return newMessages;
           });
         }
@@ -210,7 +194,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           });
         }
 
-        setNewMessage([])
+        setNewMessage([]);
       } else {
         const username = localStorage.getItem("username");
         if (newMessage.channel == "global" || newMessage.channel == username)
@@ -231,10 +215,19 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [newMessage]);
 
   useEffect(() => {
-    console.log("localPvMessages", localPvMessages);
-    console.log("bulkMessages", bulkMessages);
-    console.log("messages", messages);
-    setValidMessage(true)
+    setNumOfMsg(messages.length);
+
+    setValidMessage(true);
+    if (newMessagesLength > 0) {
+      if (newMessage.username == localStorage.getItem("username")) {
+        listRef.current.scrollToItem(newMessagesLength, "end");
+      } else {
+        console.log("isAtBottom", isAtBottom);
+        if (isAtBottom) {
+          listRef.current.scrollToItem(newMessagesLength, "end");
+        }
+      }
+    }
   }, [messages]);
 
   // Height measurement function
@@ -271,8 +264,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         setRowHeight(index, height);
       }
     }, [index, msg.content]);
-
-    setNumOfMsg(messages.length);
 
     return (
       <div style={style}>
