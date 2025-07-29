@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { VariableSizeList as List } from "react-window";
 
+import EmojiPicker from 'emoji-picker-react';
 import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
 

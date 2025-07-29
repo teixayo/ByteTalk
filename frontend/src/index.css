@@ -8,8 +8,6 @@
   color: black;
   background-color: #1a1a1e;
 
-  
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -17,19 +15,19 @@
 }
 
 a {
-  color: #3b82f6; 
+  color: #3b82f6;
   text-decoration: underline;
-  word-break: break-word; 
+  word-break: break-word;
 }
 
 textarea {
   overflow-y: auto;
-  max-height: 8rem; 
-  scrollbar-width: none; 
+  max-height: 8rem;
+  scrollbar-width: none;
 }
 
 textarea::-webkit-scrollbar {
-  display: none; 
+  display: none;
 }
 
 .break-words {
@@ -57,7 +55,7 @@ textarea::-webkit-scrollbar {
   color: #81e6d9;
   border-left: 3px solid #4fd1c5;
   padding: 10px;
-  font-family: 'Consolas', 'Monaco', monospace;
+  font-family: "Consolas", "Monaco", monospace;
   white-space: pre-wrap;
   border-radius: 8px;
   margin: 5px 0;
@@ -125,14 +123,19 @@ textarea::-webkit-scrollbar {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-
 
 /* for chat */
 .chat-scrollbar-custom::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 .chat-scrollbar-custom::-webkit-scrollbar-track {
@@ -140,7 +143,7 @@ textarea::-webkit-scrollbar {
 }
 
 .chat-scrollbar-custom::-webkit-scrollbar-thumb {
-  background-color:#666771;
+  background-color: #666771;
   border-radius: 12px;
   transition: background-color 0.3s ease, opacity 0.5s ease;
   opacity: 1;
@@ -153,7 +156,6 @@ textarea::-webkit-scrollbar {
   background-color: #777;
 }
 
-
 /* for sidebar */
 .sidebar-scrollbar-custom::-webkit-scrollbar {
   width: 2px;
@@ -164,7 +166,7 @@ textarea::-webkit-scrollbar {
 }
 
 .sidebar-scrollbar-custom::-webkit-scrollbar-thumb {
-  background-color:#666771;
+  background-color: #666771;
   border-radius: 12px;
   transition: background-color 0.3s ease, opacity 0.5s ease;
   opacity: 1;
@@ -177,7 +179,6 @@ textarea::-webkit-scrollbar {
   background-color: #777;
 }
 
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -187,7 +188,6 @@ textarea::-webkit-scrollbar {
 .spinner {
   animation: spin 1s linear infinite;
 }
-
 
 @keyframes fadeInUp {
   0% {
@@ -232,4 +232,31 @@ textarea::-webkit-scrollbar {
 
 .popup-animation {
   animation: fadeInScale 0.3s ease-out forwards;
+}
+
+.custom-emoji-picker {
+  background-color: #222327 !important;
+}
+
+
+/* for emoji box */
+.epr-emoji-category-label {
+  background-color: #222327 !important;
+}
+
+.epr-main {
+  border-color: #303135 !important;
+}
+
+.epr_-99h9r1 {
+  margin-left: 14px !important;
+  margin-top: 4px !important;
+}
+
+.epr-skin-tone-select {
+  margin-bottom: 10px !important;
+}
+
+.epr-emoji-native {
+  margin-bottom: 4px !important;
 }
