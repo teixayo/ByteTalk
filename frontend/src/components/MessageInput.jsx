@@ -15,10 +15,13 @@ const MessageInput = ({
   messages,
   setListHeight,
   titleHeight,
+  listHeight
 }) => {
   const [emojiBox, setEmojiBox] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
   const [writing, setWriting] = useState(false);
+  const [isRTL, setIsRTL] = useState(false);
+  const [emojiPosition, setEmojiPosition] = useState({ top: 0 });
 
   const { socket, setPrivetChannels } = useSocket();
   const { userID } = useParams();
@@ -29,8 +32,17 @@ const MessageInput = ({
   const location = useLocation();
 
   useEffect(() => {
-    setEmojiBox(false)
-  }, [location])
+    setEmojiBox(false);
+  }, [location]);
+
+  useEffect(() => {
+    if (!emojiBox || !textareaRef.current) return;
+
+    const rect = textareaRef.current.getBoundingClientRect();
+    setEmojiPosition({
+      top: rect.top - (listHeight - 4), // چون emoji picker height=600px + margin
+    });
+  }, [emojiBox, inputHeight]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -64,12 +76,14 @@ const MessageInput = ({
   };
 
   const sendMessage = () => {
+    console.log("im is here");
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
         type: "SendMessage",
         channel: userID || "global",
         content: text,
       };
+      console.log("message", messagePayload);
       socket.send(JSON.stringify(messagePayload));
     }
     if (!messages[0]) {
@@ -79,29 +93,35 @@ const MessageInput = ({
 
   const selectedEmoji = (e) => {
     setText((prev) => {
-      console.log(e.emoji);
-      console.log(prev);
-
-      return [`${prev}${e.emoji}`];
+      return `${prev}${e.emoji}`;
     });
     console.log(e);
   };
-
   return (
     <div className="bg-[#1a1a1e] w-full pb-3 px-2">
-      <div className="fixed z-50 sm:bottom-21 right-0 mr-2">
+      <div
+        className={`fixed z-50 right-0 mr-2`}
+        style={{
+          top: emojiPosition.top,
+          opacity: emojiBox ? 1 : 0,
+          pointerEvents: emojiBox ? "auto" : "none",
+        }}
+      >
         <div
           className={`transform transition-all duration-300 ease-in-out 
     ${emojiBox ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}`}
         >
           <EmojiPicker
             theme="dark"
-            onEmojiClick={(e) => selectedEmoji(e)}
+            onEmojiClick={(e) => {
+              selectedEmoji(e);
+              setWriting(true);
+            }}
             autoFocusSearch={false}
             searchDisabled={true}
             open={true}
             emojiStyle="native"
-            height={600}
+            height={listHeight - 17}
           />
         </div>
       </div>
@@ -111,7 +131,7 @@ const MessageInput = ({
           isFocused ? "border border-[#303135]" : "border border-transparent"
         } rounded-lg`}
       >
-        <div className="hidden sm:hidden-none sm:flex items-center bg-[#222327] pl-4 rounded-l-lg">
+        <div className="hidden sm:hidden-none sm:flex items-end pb-0.5 bg-[#222327] pl-4 rounded-l-lg">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -122,7 +142,7 @@ const MessageInput = ({
               emojiBox
                 ? "text-blue-500 hover:text-white"
                 : "hover:text-blue-500"
-            } size-8 cursor-pointer transition-colors duration-200`}
+            } size-8 cursor-pointer transition-colors duration-200 mb-3`}
             onClick={() => setEmojiBox(!emojiBox)}
           >
             <path
@@ -136,12 +156,18 @@ const MessageInput = ({
         <TextareaAutosize
           ref={textareaRef}
           type="text"
+          dir={isRTL ? "rtl" : "ltr"}
           minRows={1}
           maxRows={4}
           value={text}
           onChange={(e) => {
-            setText(e.target.value);
-            setWriting(e.target.value.trim() !== "");
+            const value = e.target.value;
+            setText(value);
+            setWriting(value.trim() !== "");
+            const firstChar = value.trim().charAt(0);
+            setIsRTL(() => {
+              return /[\u0600-\u06FF]/.test(firstChar) || false;
+            }); // Persian or Arabic
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -152,6 +178,7 @@ const MessageInput = ({
               }
               if (text.trim() !== "") {
                 sendMessage();
+                setIsRTL(false);
                 setWriting(false);
                 setText("");
               }
@@ -172,8 +199,10 @@ const MessageInput = ({
                 toast.error("The message should not exceed 2000 characters.");
                 return;
               }
-              if (text.trim() !== "") {
+              console.log(text);
+              if (text.trim() != "") {
                 sendMessage();
+                setIsRTL(false);
                 setWriting(false);
                 setText("");
               }

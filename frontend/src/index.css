@@ -234,18 +234,15 @@ textarea::-webkit-scrollbar {
   animation: fadeInScale 0.3s ease-out forwards;
 }
 
-.custom-emoji-picker {
-  background-color: #222327 !important;
-}
-
-
 /* for emoji box */
+
 .epr-emoji-category-label {
   background-color: #222327 !important;
 }
 
 .epr-main {
   border-color: #303135 !important;
+  background-color: #222327 !important
 }
 
 .epr_-99h9r1 {

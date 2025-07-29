@@ -115,7 +115,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             setInitialScrollDone(true);
           }, 800);
         } else {
-          listRef.current.scrollToItem(bulkLength, "start");
+          listRef.current.scrollToItem(bulkLength - 1, "start");
         }
       }
     }
@@ -305,7 +305,8 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             {/* Message text and time on one line */}
             <div className="flex items-baseline group">
               <p
-                className="break-words whitespace-pre-wrap inline-block max-w-[85%]"
+              dir="auto"
+                className="select-text break-words whitespace-pre-wrap inline-block max-w-[85%]"
                 dangerouslySetInnerHTML={{
                   __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
                 }}
@@ -463,6 +464,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             messages={messages}
             setListHeight={setListHeight}
             titleHeight={titleHeight}
+            listHeight={listHeight}
           />
         </div>
       </div>
