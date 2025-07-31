@@ -5,6 +5,7 @@ import { VariableSizeList as List } from "react-window";
 
 import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
+import toast from "react-hot-toast";
 
 import Sidebar from "../components/Sidebar";
 import MessageInput from "../components/MessageInput";
@@ -196,8 +197,57 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         setNewMessage([]);
       } else {
         const username = localStorage.getItem("username");
-        if (newMessage.channel == "global" || newMessage.channel == username)
-          return;
+        
+        if (newMessage.channel == username) return;
+
+        toast.custom(
+          (t) => (
+            <div
+              className="flex items-center justify-between w-full max-w-sm p-4 rounded-lg border shadow-lg"
+              style={{
+                background: "#121214",
+                color: "#f0f0f0",
+                border: "1px solid #232323",
+              }}
+            >
+              <div className="flex items-center gap-3 overflow-hidden">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={0.75}
+                  stroke="currentColor"
+                  className="size-11 text-white shrink-0"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                  />
+                </svg>
+                <div className="overflow-hidden">
+                  <p className="font-bold text-sm">{newMessage.username}</p>
+                  <p className="text-sm text-gray-300 truncate max-w-[240px]">
+                    {newMessage.content}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="text-sm text-blue-400 hover:underline cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          ),
+          {
+            duration: 5000,
+            position: "top-center",
+          }
+        );
+
+        if (newMessage.channel == "global") return;
         // setPrivetChannels((prev) => {
         //   const prevChannels = prev;
         //   const isRepetitive = prevChannels.find((item) => {
@@ -313,7 +363,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             {/* Message text and time on one line */}
             <div className="flex items-baseline group">
               <p
-              dir="auto"
+                dir="auto"
                 className="select-text break-words whitespace-pre-wrap inline-block max-w-[85%]"
                 dangerouslySetInnerHTML={{
                   __html: convertMessage(msg.content).replace(/\n/g, "<br />"),

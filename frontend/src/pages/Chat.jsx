@@ -2,15 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { VariableSizeList as List } from "react-window";
 
-import EmojiPicker from "emoji-picker-react";
 import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
+import toast from "react-hot-toast";
 
 import { useSocket } from "../context/SocketContext";
 import Sidebar from "../components/Sidebar";
 import MessageInput from "../components/MessageInput";
 
-import toast from "react-hot-toast";
 
 const convertMessage = (text) => {
   // Detect messages containing HTML code or tags
