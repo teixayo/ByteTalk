@@ -61,6 +61,7 @@ const Sidebar = ({
 
   // Common item renderer for both mobile and desktop
   const renderItem = ({ index, style }) => {
+    if(!privetChannels[0]) return
     const channel = privetChannels[index];
     return (
       <div key={index} style={style}>

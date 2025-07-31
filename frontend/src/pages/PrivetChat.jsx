@@ -198,16 +198,24 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         const username = localStorage.getItem("username");
         if (newMessage.channel == "global" || newMessage.channel == username)
           return;
+        // setPrivetChannels((prev) => {
+        //   const prevChannels = prev;
+        //   const isRepetitive = prevChannels.find((item) => {
+        //     return item.name == newMessage.channel;
+        //   });
+        //   if (!isRepetitive) {
+        //     return [{ name: newMessage.channel }, ...prev];
+        //   } else {
+        //     return [...prev];
+        //   }
+        // });
+
         setPrivetChannels((prev) => {
-          const prevChannels = prev;
-          const isRepetitive = prevChannels.find((item) => {
-            return item.name == newMessage.channel;
-          });
-          if (!isRepetitive) {
-            return [{ name: newMessage.channel }, ...prev];
-          } else {
-            return [...prev];
-          }
+          const prevChannels = prev.filter(
+            (channel) => channel.name !== newMessage.channel
+          );
+
+          return [{ name: newMessage.channel }, ...prevChannels];
         });
       }
     }

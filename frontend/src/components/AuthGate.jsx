@@ -22,9 +22,9 @@ const AuthGate = ({ children }) => {
         username: "AdelNouri02310231",
         password: "ADEL1388",
       };
+      socket.send(JSON.stringify(loginPayload));
       localStorage.setItem("username", "AdelNouri02310231");
 
-      socket.send(JSON.stringify(loginPayload));
 
       function getCookie(name) {
         const value = `; ${document.cookie}`;
