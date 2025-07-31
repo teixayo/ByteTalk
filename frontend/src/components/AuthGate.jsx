@@ -22,6 +22,7 @@ const AuthGate = ({ children }) => {
         username: "AdelNouri02310231",
         password: "ADEL1388",
       };
+      console.log(loginPayload)
       socket.send(JSON.stringify(loginPayload));
       localStorage.setItem("username", "AdelNouri02310231");
 

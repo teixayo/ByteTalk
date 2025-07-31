@@ -23,6 +23,9 @@ const Sidebar = ({
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
   const [listHeight, setListHeight] = useState(0);
+  const [unreadChannels, setUnreadChannels] = useState([]);
+  const [isGlobalUnread, setIsGlobalUnread] = useState(false);
+  // const [isThisChannelUnread, setIsThisChannelUnread] = useState(false);
 
   useEffect(() => {
     const path = location.pathname.split("/")[2] || "chat";
@@ -48,26 +51,59 @@ const Sidebar = ({
     checkScreenSize();
     updateListHeight();
 
+    setUnreadChannels(JSON.parse(sessionStorage.getItem("unreadChannels")));
+    console.log(JSON.parse(sessionStorage.getItem("unreadChannels")));
+
     window.addEventListener("resize", () => {
       checkScreenSize();
       updateListHeight();
     });
 
+    const handleUnreadUpdate = () => {
+      const updated =
+        JSON.parse(sessionStorage.getItem("unreadChannels")) || [];
+      setUnreadChannels(updated);
+    };
+
+    window.addEventListener("unreadUpdated", handleUnreadUpdate);
+
     return () => {
       window.removeEventListener("resize", checkScreenSize);
       window.removeEventListener("resize", updateListHeight);
+      window.removeEventListener("unreadUpdated", handleUnreadUpdate);
     };
   }, []);
 
+  useEffect(() => {
+    console.log(unreadChannels);
+    if (!unreadChannels) {
+      setIsGlobalUnread(false);
+      return;
+    }
+    console.log(unreadChannels);
+    setIsGlobalUnread(() => {
+      const is = unreadChannels.find((channel) => {
+        return channel == "global";
+      });
+
+      return is;
+    });
+  }, [unreadChannels]);
+
   // Common item renderer for both mobile and desktop
   const renderItem = ({ index, style }) => {
-    if(!privetChannels[0]) return
-    const channel = privetChannels[index];
+    if (!privetChannels[0]) return;
+    const pv = privetChannels[index];
+
+    const thisChannelUnread = unreadChannels
+      ? unreadChannels.includes(pv.name)
+      : null;
+
     return (
       <div key={index} style={style}>
         <div
-          className={`pl-1.5 w-97/100 h-[44px] opacity-50 flex items-center ${
-            `/chat/${channel.name}` == location.pathname
+          className={`pl-1.5 w-97/100 h-[44px] opacity-50 flex items-center justify-between ${
+            `/chat/${pv.name}` == location.pathname
               ? "bg-[#2c2c30] opacity-100"
               : "hover:bg-[#1d1d1e] hover:opacity-100"
           } rounded cursor-pointer group`}
@@ -75,14 +111,26 @@ const Sidebar = ({
             setFadeOut(false);
             setIsLoading(false);
             setLocalPvMessages([]);
-            setActiveChat(channel.name);
-            navigate(`/chat/${channel.name}`);
+            setActiveChat(pv.name);
+            const stored = JSON.parse(sessionStorage.getItem("unreadChannels"));
+            if (stored) {
+              const updateUnreadChannels = stored.filter(
+                (channel) => channel !== pv.name
+              );
+              sessionStorage.setItem(
+                "unreadChannels",
+                JSON.stringify(updateUnreadChannels)
+              );
+              setUnreadChannels(updateUnreadChannels);
+            }
+            navigate(`/chat/${pv.name}`);
             if (isMobileSidebar) {
               setIsSidebarOpen(false);
               setHaveOpacity(false);
             }
           }}
         >
+          {/* آیکن */}
           <div className="flex-shrink-0">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -99,11 +147,18 @@ const Sidebar = ({
               />
             </svg>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-white pl-1.5 truncate">
-              {channel.name}
-            </p>
-          </div>          
+
+          {/* اسم کاربر */}
+          <div className="flex-1 pl-1.5 overflow-hidden">
+            <p className="text-white truncate">{pv.name}</p>
+          </div>
+
+          {/* نقطه‌ی آبی */}
+          <div className="w-8 flex justify-end pr-3">
+            {thisChannelUnread && (
+              <div className="w-4 h-4 bg-blue-500 rounded-full" />
+            )}
+          </div>
         </div>
       </div>
     );
@@ -123,27 +178,45 @@ const Sidebar = ({
         setLocalGlobalMessages([]);
         setActiveChat("chat");
         navigate(`/chat`);
+        if (JSON.parse(sessionStorage.getItem("unreadChannels"))) {
+          const updateUnreadChannels = JSON.parse(
+            sessionStorage.getItem("unreadChannels")
+          ).filter((channel) => {
+            return channel != "global";
+          });
+          sessionStorage.setItem(
+            "unreadChannels",
+            JSON.stringify(updateUnreadChannels)
+          );
+        }
         if (isMobileSidebar) {
           setIsSidebarOpen(false);
           setHaveOpacity(false);
         }
       }}
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1}
-        stroke="currentColor"
-        className="size-7 b-white"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
-        />
-      </svg>
+      <div className="flex-shrink-0">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1}
+          stroke="currentColor"
+          className="size-7 b-white"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
+          />
+        </svg>
+      </div>
       <p className="text-white pl-2">Global</p>
+      {isGlobalUnread ? (
+        <div className="w-full flex justify-end">
+          <div className="w-4 h-4 mr-3 bg-blue-500 rounded-full"></div>
+        </div>
+      ) : null}
     </div>
   );
 

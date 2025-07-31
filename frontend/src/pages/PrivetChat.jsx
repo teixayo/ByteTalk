@@ -124,13 +124,15 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   useEffect(() => {
     if (socket.readyState == WebSocket.OPEN) {
-      socket.send(
-        JSON.stringify({
-          type: "RequestBulkMessage",
-          date: -1,
-          channel: userID,
-        })
-      );
+      setTimeout(() => {
+        socket.send(
+          JSON.stringify({
+            type: "RequestBulkMessage",
+            date: -1,
+            channel: userID,
+          })
+        );
+      }, 1000);
     }
   }, [userID]);
 
@@ -151,6 +153,8 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [bulkMessages]);
 
   useEffect(() => {
+    console.log("newMessage Private", newMessage);
+
     if (newMessage.date) {
       if (
         newMessage.channel == localStorage.getItem("username") ||
@@ -174,6 +178,25 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
         setIsBulkMsg(false);
 
+        // const unreadChannels = JSON.parse(sessionStorage.getItem("unreadChannels")) || [];
+        //         if (unreadChannels) {
+        //           console.log(unreadChannels)
+
+        //           const prepareObj = unreadChannels.filter(
+        //             channel => channel != userID // newMessage.channel
+        //           );
+
+        //           sessionStorage.setItem(
+        //             "unreadChannels",
+        //             JSON.stringify([ userID , ...prepareObj])
+        //           );
+        //         } else {
+        //           sessionStorage.setItem(
+        //             "unreadChannels",
+        //             JSON.stringify([newMessage.channel ])
+        //           );
+        //         }
+
         if (newMessage.username == localStorage.getItem("username")) {
           setNewMessagesLenngth(messages.length + 1);
           setMessages((prev) => {
@@ -194,58 +217,155 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           });
         }
 
+        setPrivetChannels((prev) => {
+          const prevChannels = prev.filter(
+            (channel) => channel.name !== userID
+          );
+
+          return [{ name: userID }, ...prevChannels];
+        });
+
         setNewMessage([]);
       } else {
         const username = localStorage.getItem("username");
-        
+
+        console.log(!validMessage);
+        if (!validMessage) return;
         if (newMessage.channel == username) return;
 
-        toast.custom(
-          (t) => (
-            <div
-              className="flex items-center justify-between w-full max-w-sm p-4 rounded-lg border shadow-lg"
-              style={{
-                background: "#121214",
-                color: "#f0f0f0",
-                border: "1px solid #232323",
-              }}
-            >
-              <div className="flex items-center gap-3 overflow-hidden">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={0.75}
-                  stroke="currentColor"
-                  className="size-11 text-white shrink-0"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                  />
-                </svg>
-                <div className="overflow-hidden">
-                  <p className="font-bold text-sm">{newMessage.username}</p>
-                  <p className="text-sm text-gray-300 truncate max-w-[240px]">
-                    {newMessage.content}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => toast.dismiss(t.id)}
-                className="text-sm text-blue-400 hover:underline cursor-pointer"
+        if (newMessage.channel == "global") {
+          toast.custom(
+            (t) => (
+              <div
+                className={`flex items-center justify-between w-full max-w-sm p-4 rounded-lg border shadow-lg transition-all duration-300 ${
+                  t.visible ? "animate-fade-in-up" : "animate-fade-out"
+                }`}
+                style={{
+                  background: "#121214",
+                  color: "#f0f0f0",
+                  border: "1px solid #232323",
+                }}
               >
-                Close
-              </button>
-            </div>
-          ),
-          {
-            duration: 5000,
-            position: "top-center",
-          }
-        );
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1}
+                    stroke="currentColor"
+                    className="size-9 b-white"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
+                    />
+                  </svg>
+                  <div className="overflow-hidden">
+                    <p className="font-bold text-sm">Global</p>
+                    <div className="flex">
+                      <p className="text-sm text-gray-300">
+                        {`${newMessage.username}`}
+                      </p>
+                      <p className="text-sm text-gray-300 truncate max-w-[240px]">
+                        {`: ${newMessage.content}`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="text-sm text-blue-400 hover:underline cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            ),
+            {
+              duration: 3000,
+              position: "top-center",
+              transition: {
+                enter: "transform ease-out duration-300",
+                exit: "transform ease-in duration-200",
+              },
+            }
+          );
+        } else {
+          toast.custom(
+            (t) => (
+              <div
+                className={`flex items-center justify-between w-full max-w-sm p-4 rounded-lg border shadow-lg transition-all duration-300 ${
+                  t.visible ? "animate-fade-in-up" : "animate-fade-out"
+                }`}
+                style={{
+                  background: "#121214",
+                  color: "#f0f0f0",
+                  border: "1px solid #232323",
+                }}
+              >
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={0.75}
+                    stroke="currentColor"
+                    className="size-11 text-white shrink-0"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                    />
+                  </svg>
+                  <div className="overflow-hidden">
+                    <p className="font-bold text-sm">{newMessage.username}</p>
+                    <p className="text-sm text-gray-300 truncate max-w-[240px]">
+                      {newMessage.content}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="text-sm text-blue-400 hover:underline cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            ),
+            {
+              duration: 3000,
+              position: "top-center",
+              transition: {
+                enter: "transform ease-out duration-300",
+                exit: "transform ease-in duration-200",
+              },
+            }
+          );
+        }
+
+        const unreadChannels =
+          JSON.parse(sessionStorage.getItem("unreadChannels")) || [];
+
+        if (unreadChannels) {
+          const prepareObj = unreadChannels.filter((channel) => {
+            return channel !== newMessage.channel;
+          });
+          console.log("prepareObj", prepareObj);
+
+          sessionStorage.setItem(
+            "unreadChannels",
+            JSON.stringify([newMessage.channel, ...prepareObj])
+          );
+          window.dispatchEvent(new Event("unreadUpdated"));
+        } else {
+          sessionStorage.setItem(
+            "unreadChannels",
+            JSON.stringify([newMessage.channel])
+          );
+        }
 
         if (newMessage.channel == "global") return;
         // setPrivetChannels((prev) => {

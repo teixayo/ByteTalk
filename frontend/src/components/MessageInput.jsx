@@ -76,14 +76,12 @@ const MessageInput = ({
   };
 
   const sendMessage = () => {
-    console.log("im is here");
     if (socket && socket.readyState == WebSocket.OPEN) {
       const messagePayload = {
         type: "SendMessage",
         channel: userID || "global",
         content: text,
       };
-      console.log("message", messagePayload);
       socket.send(JSON.stringify(messagePayload));
     }
     if (!messages[0]) {
@@ -95,7 +93,6 @@ const MessageInput = ({
     setText((prev) => {
       return `${prev}${e.emoji}`;
     });
-    console.log(e);
   };
   return (
     <div className="bg-[#1a1a1e] w-full pb-3 px-2">
@@ -199,7 +196,6 @@ const MessageInput = ({
                 toast.error("The message should not exceed 2000 characters.");
                 return;
               }
-              console.log(text);
               if (text.trim() != "") {
                 sendMessage();
                 setIsRTL(false);

@@ -38,7 +38,7 @@ export const SocketProvider = ({ children }) => {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      console.log("📨 WS received:", data);
+      // console.log("📨 WS received:", data);
 
       if (data.type == "Status") {
         if (data.code === "1000") {
@@ -160,6 +160,7 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type == "SendMessage") {
+        
         setNewMessage(data);
       }
 
