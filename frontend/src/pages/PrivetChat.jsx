@@ -153,7 +153,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [bulkMessages]);
 
   useEffect(() => {
-    console.log("newMessage Private", newMessage);
 
     if (newMessage.date) {
       if (
@@ -177,25 +176,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         };
 
         setIsBulkMsg(false);
-
-        // const unreadChannels = JSON.parse(sessionStorage.getItem("unreadChannels")) || [];
-        //         if (unreadChannels) {
-        //           console.log(unreadChannels)
-
-        //           const prepareObj = unreadChannels.filter(
-        //             channel => channel != userID // newMessage.channel
-        //           );
-
-        //           sessionStorage.setItem(
-        //             "unreadChannels",
-        //             JSON.stringify([ userID , ...prepareObj])
-        //           );
-        //         } else {
-        //           sessionStorage.setItem(
-        //             "unreadChannels",
-        //             JSON.stringify([newMessage.channel ])
-        //           );
-        //         }
 
         if (newMessage.username == localStorage.getItem("username")) {
           setNewMessagesLenngth(messages.length + 1);
@@ -229,7 +209,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
       } else {
         const username = localStorage.getItem("username");
 
-        console.log(!validMessage);
         if (!validMessage) return;
         if (newMessage.channel == username) return;
 
@@ -353,7 +332,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           const prepareObj = unreadChannels.filter((channel) => {
             return channel !== newMessage.channel;
           });
-          console.log("prepareObj", prepareObj);
 
           sessionStorage.setItem(
             "unreadChannels",
@@ -368,17 +346,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         }
 
         if (newMessage.channel == "global") return;
-        // setPrivetChannels((prev) => {
-        //   const prevChannels = prev;
-        //   const isRepetitive = prevChannels.find((item) => {
-        //     return item.name == newMessage.channel;
-        //   });
-        //   if (!isRepetitive) {
-        //     return [{ name: newMessage.channel }, ...prev];
-        //   } else {
-        //     return [...prev];
-        //   }
-        // });
 
         setPrivetChannels((prev) => {
           const prevChannels = prev.filter(

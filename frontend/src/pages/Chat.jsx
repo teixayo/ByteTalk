@@ -58,7 +58,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     setSendStatus,
     bulkLength,
     setPrivetChannels,
-    privetChannels,
     canMessage,
     isFirstBulk,
     initialScrollDone,
@@ -161,7 +160,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [bulkMessages]);
 
   useEffect(() => {
-    console.log("newMessage CHAT" ,newMessage);
     if (newMessage.date) {
       if (newMessage.channel == "global") {
         const timestamp = Date.now();
@@ -180,25 +178,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           timecode: timestamp,
         };
         setIsBulkMsg(false);
-
-        // const unreadChannels = sessionStorage.getItem("unreadChannels") || [];
-        // if (unreadChannels[0]) {
-        //   console.log(unreadChannels)
-
-        //   const prepareObj = JSON.parse(unreadChannels).filter(
-        //     channel => channel != newMessage.channel
-        //   );
-
-        //   sessionStorage.setItem(
-        //     "unreadChannels",
-        //     JSON.stringify([ newMessage.channel , ...prepareObj])
-        //   );
-        // } else {
-        //   sessionStorage.setItem(
-        //     "unreadChannels",
-        //     JSON.stringify([newMessage.channel ])
-        //   );
-        // }
 
         if (newMessage.username == localStorage.getItem("username")) {
           setNewMessagesLenngth(messages.length + 1);
@@ -235,7 +214,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                 border: "1px solid #232323",
               }}
             >
-              {/* سمت چپ: آواتار و متن */}
               <div className="flex items-center gap-3 overflow-hidden">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -259,7 +237,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                 </div>
               </div>
 
-              {/* سمت راست: دکمه Close */}
               <button
                 onClick={() => toast.dismiss(t.id)}
                 className="text-sm text-blue-400 hover:underline cursor-pointer"
@@ -281,7 +258,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           const prepareObj = unreadChannels.filter((channel) => {
             return channel !== newMessage.channel;
           });
-          console.log("prepareObj", prepareObj);
 
           sessionStorage.setItem(
             "unreadChannels",
@@ -394,7 +370,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
               </svg>
             </div>
           ) : (
-            <div className="flex-shrink-0 w-12 mr-1"></div> // فضای خالی همتراز با آواتار
+            <div className="flex-shrink-0 w-12 mr-1"></div>
           )}
 
           <div className="flex-1 min-w-0">

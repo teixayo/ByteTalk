@@ -258,8 +258,7 @@ textarea::-webkit-scrollbar {
   margin-bottom: 4px !important;
 }
 
-
-
+/* for custom toast */
 
 @keyframes fade-in-up {
   0% {

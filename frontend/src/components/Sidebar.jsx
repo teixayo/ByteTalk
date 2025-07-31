@@ -52,7 +52,6 @@ const Sidebar = ({
     updateListHeight();
 
     setUnreadChannels(JSON.parse(sessionStorage.getItem("unreadChannels")));
-    console.log(JSON.parse(sessionStorage.getItem("unreadChannels")));
 
     window.addEventListener("resize", () => {
       checkScreenSize();
@@ -75,12 +74,10 @@ const Sidebar = ({
   }, []);
 
   useEffect(() => {
-    console.log(unreadChannels);
     if (!unreadChannels) {
       setIsGlobalUnread(false);
       return;
     }
-    console.log(unreadChannels);
     setIsGlobalUnread(() => {
       const is = unreadChannels.find((channel) => {
         return channel == "global";
@@ -130,7 +127,6 @@ const Sidebar = ({
             }
           }}
         >
-          {/* آیکن */}
           <div className="flex-shrink-0">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -148,12 +144,10 @@ const Sidebar = ({
             </svg>
           </div>
 
-          {/* اسم کاربر */}
           <div className="flex-1 pl-1.5 overflow-hidden">
             <p className="text-white truncate">{pv.name}</p>
           </div>
 
-          {/* نقطه‌ی آبی */}
           <div className="w-8 flex justify-end pr-3">
             {thisChannelUnread && (
               <div className="w-4 h-4 bg-blue-500 rounded-full" />
