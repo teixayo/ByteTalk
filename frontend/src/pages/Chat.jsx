@@ -4,6 +4,7 @@ import { VariableSizeList as List } from "react-window";
 
 import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
+import toast from "react-hot-toast";
 
 import { useSocket } from "../context/SocketContext";
 import Sidebar from "../components/Sidebar";
@@ -57,7 +58,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
     setSendStatus,
     bulkLength,
     setPrivetChannels,
-    privetChannels,
     canMessage,
     isFirstBulk,
     initialScrollDone,
@@ -73,7 +73,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   const [messages, setMessages] = useState([]);
 
   const [inputHeight, setInputHeight] = useState(58);
-  const [titleHeight, setTitleHight] = useState(68); // Default height
+  const [titleHeight, setTitleHight] = useState(69); // Default height
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -98,19 +98,21 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   useEffect(() => {
     setInitialScrollDone(false);
     setLocalGlobalMessages([]);
-    setNewMessagesLenngth(0)
+    setNewMessagesLenngth(0);
   }, [location]);
 
   useEffect(() => {
     setSelectedUser(null);
     if (socket.readyState == WebSocket.OPEN) {
-      socket.send(
-        JSON.stringify({
-          type: "RequestBulkMessage",
-          date: -1,
-          channel: "global",
-        })
-      );
+      setTimeout(() => {
+        socket.send(
+          JSON.stringify({
+            type: "RequestBulkMessage",
+            date: -1,
+            channel: "global",
+          })
+        );
+      }, 1000);
     }
   }, []);
 
@@ -125,7 +127,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             setInitialScrollDone(true);
           }, 800);
         } else {
-          listRef.current.scrollToItem(bulkLength, "start");
+          listRef.current.scrollToItem(bulkLength - 1, "start");
         }
       }
     }
@@ -198,13 +200,86 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         }
       } else {
         const username = localStorage.getItem("username");
-        if (newMessage.channel == "global" || newMessage.channel == username)
-          return;
-        const isRepetitive = privetChannels.find((item) => {
-          return item.name == newMessage.channel;
+        if(!validMessage) return
+
+        if (newMessage.channel == username) return;
+
+        toast.custom(
+          (t) => (
+            <div
+              className="flex items-center justify-between w-full max-w-sm p-4 rounded-lg border shadow-lg"
+              style={{
+                background: "#121214",
+                color: "#f0f0f0",
+                border: "1px solid #232323",
+              }}
+            >
+              <div className="flex items-center gap-3 overflow-hidden">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={0.75}
+                  stroke="currentColor"
+                  className="size-11 text-white shrink-0"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                  />
+                </svg>
+                <div className="overflow-hidden">
+                  <p className="font-bold text-sm">{newMessage.username}</p>
+                  <p className="text-sm text-gray-300 truncate max-w-[240px]">
+                    {newMessage.content}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="text-sm text-blue-400 hover:underline cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          ),
+          {
+            duration: 5000,
+            position: "top-center",
+          }
+        );
+
+        const unreadChannels =
+          JSON.parse(sessionStorage.getItem("unreadChannels")) || [];
+
+        if (unreadChannels) {
+          const prepareObj = unreadChannels.filter((channel) => {
+            return channel !== newMessage.channel;
+          });
+
+          sessionStorage.setItem(
+            "unreadChannels",
+            JSON.stringify([newMessage.channel, ...prepareObj])
+          );
+          window.dispatchEvent(new Event("unreadUpdated"));
+        } else {
+          sessionStorage.setItem(
+            "unreadChannels",
+            JSON.stringify([newMessage.channel])
+          );
+        }
+
+        if (newMessage.channel == "global") return;
+
+        setPrivetChannels((prev) => {
+          const prevChannels = prev.filter(
+            (channel) => channel.name !== newMessage.channel
+          );
+
+          return [{ name: newMessage.channel }, ...prevChannels];
         });
-        if (!isRepetitive)
-          setPrivetChannels((prev) => [{ name: newMessage.channel }, ...prev]);
       }
     }
   }, [newMessage]);
@@ -295,7 +370,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
               </svg>
             </div>
           ) : (
-            <div className="flex-shrink-0 w-12 mr-1"></div> // فضای خالی همتراز با آواتار
+            <div className="flex-shrink-0 w-12 mr-1"></div>
           )}
 
           <div className="flex-1 min-w-0">
@@ -313,7 +388,8 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             {/* Message text and time on one line */}
             <div className="flex items-baseline group">
               <p
-                className="break-words whitespace-pre-wrap inline-block max-w-[85%]"
+                dir="auto"
+                className="select-text break-words whitespace-pre-wrap inline-block max-w-[85%]"
                 dangerouslySetInnerHTML={{
                   __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
                 }}
@@ -456,6 +532,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
               messages={messages}
               setListHeight={setListHeight}
               titleHeight={titleHeight}
+              listHeight={listHeight}
             />
           </div>
         </div>

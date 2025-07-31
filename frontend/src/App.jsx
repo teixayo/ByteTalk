@@ -20,10 +20,10 @@ const App = () => {
     if (!isLoading) {
       setTimeout(() => {
         setFadeOut(true);
-      }, 1400);
+      }, 1900);
       const timeout = setTimeout(() => {
         setIsLoading(true);
-      }, 1500);
+      }, 2000);
 
       return () => clearTimeout(timeout);
     }

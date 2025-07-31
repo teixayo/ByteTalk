@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.8",
     "dompurify": "^3.2.6",
+    "emoji-picker-react": "^4.13.2",
     "formik": "^2.4.6",
     "jotai": "^2.12.5",
     "linkify-html": "^4.3.1",

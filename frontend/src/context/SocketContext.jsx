@@ -160,6 +160,7 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type == "SendMessage") {
+        
         setNewMessage(data);
       }
 
