@@ -25,7 +25,6 @@ const Sidebar = ({
   const [listHeight, setListHeight] = useState(0);
   const [unreadChannels, setUnreadChannels] = useState([]);
   const [isGlobalUnread, setIsGlobalUnread] = useState(false);
-  // const [isThisChannelUnread, setIsThisChannelUnread] = useState(false);
 
   useEffect(() => {
     const path = location.pathname.split("/")[2] || "chat";
