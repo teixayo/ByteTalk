@@ -32,7 +32,8 @@
 - React-Hot-Toast (for user notifications)
 - React-Textarea-Autosize (chat input)
 - React-Window (virtualized message list)
-
+- 😃 emoji-picker-react (for emoji selection)
+  
 ---
 
 ## Features
