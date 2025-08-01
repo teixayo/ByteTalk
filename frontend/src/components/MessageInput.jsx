@@ -7,6 +7,7 @@ import EmojiPicker from "emoji-picker-react";
 import toast from "react-hot-toast";
 import TextareaAutosize from "react-textarea-autosize";
 
+
 const MessageInput = ({
   setInputHeight,
   inputHeight,
@@ -22,7 +23,8 @@ const MessageInput = ({
   const [writing, setWriting] = useState(false);
   const [isRTL, setIsRTL] = useState(false);
   const [emojiPosition, setEmojiPosition] = useState({ top: 0 });
-
+  const [firstTime, setFristTime] = useState(true)
+ 
   const { socket, setPrivetChannels } = useSocket();
   const { userID } = useParams();
 
@@ -33,6 +35,7 @@ const MessageInput = ({
 
   useEffect(() => {
     setEmojiBox(false);
+    setFristTime(true)
   }, [location]);
 
   useEffect(() => {
@@ -40,17 +43,18 @@ const MessageInput = ({
 
     const rect = textareaRef.current.getBoundingClientRect();
     setEmojiPosition({
-      top: rect.top - (listHeight - 4), // چون emoji picker height=600px + margin
+      top: rect.top - (listHeight - 4),
     });
   }, [emojiBox, inputHeight]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setListHeight(window.innerHeight - inputHeight - titleHeight);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [inputHeight]);
+ useEffect(() => {
+  if (textareaRef.current) {
+    const rect = textareaRef.current.getBoundingClientRect();
+    setEmojiPosition({
+      top: rect.top - (listHeight - 8),
+    });
+  }
+}, [inputHeight, listHeight]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -72,6 +76,7 @@ const MessageInput = ({
       const newHeight = inputRef.current.offsetHeight;
       setInputHeight(newHeight);
       setListHeight(window.innerHeight - newHeight - titleHeight);
+      setFristTime(false)
     }
   };
 
@@ -88,6 +93,7 @@ const MessageInput = ({
       setPrivetChannels((prev) => [{ name: userID }, ...prev]);
     }
   };
+
 
   const selectedEmoji = (e) => {
     setText((prev) => {
@@ -118,7 +124,7 @@ const MessageInput = ({
             searchDisabled={true}
             open={true}
             emojiStyle="native"
-            height={listHeight - 17}
+            height={listHeight - (firstTime ? 14 : 19)}
           />
         </div>
       </div>
@@ -149,6 +155,7 @@ const MessageInput = ({
             />
           </svg>
         </div>
+
 
         <TextareaAutosize
           ref={textareaRef}

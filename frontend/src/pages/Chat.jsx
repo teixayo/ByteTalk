@@ -73,7 +73,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   const [messages, setMessages] = useState([]);
 
   const [inputHeight, setInputHeight] = useState(58);
-  const [titleHeight, setTitleHight] = useState(69); // Default height
+  const [titleHeight, setTitleHight] = useState(68); // Default height
   const [listHeight, setListHeight] = useState(
     window.innerHeight - titleHeight - titleHeight
   );
@@ -437,7 +437,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             haveOpacity ? "opacity-50" : null
           } grid col-span-7 sm:col-span-5 xl:col-span-4`}
         >
-          <div className="flex-1 flex flex-col">
             <div className="h-14 flex justify-center sm:justify-start items-center bg-[#1a1a1e] border-b border-[#29292d]">
               <button
                 className="absolute left-3.5 cursor-pointer sm:hidden"
@@ -535,7 +534,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
               listHeight={listHeight}
             />
           </div>
-        </div>
       </div>
     </>
   );
