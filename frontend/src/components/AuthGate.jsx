@@ -17,7 +17,14 @@ const AuthGate = ({ children }) => {
 
     const handleOpen = () => setWsReady(true);
     if (socket.readyState === WebSocket.OPEN) {
-
+// const loginPayload = {
+//         type: "Login",
+//         username: "AdelNouri",
+//         password: "ADEL1388",
+//       };
+//       console.log(loginPayload)
+//       socket.send(JSON.stringify(loginPayload));
+//       localStorage.setItem("username", "AdelNouri");
       function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -37,7 +44,7 @@ const AuthGate = ({ children }) => {
             setLoginAgain(true);
             setChecked(true);
             if (firstTime) {
-              navigate("/");
+              // navigate("/");
               firstTime = false;
             }
           }
@@ -45,7 +52,7 @@ const AuthGate = ({ children }) => {
       } else {
         setChecked(true);
         if (firstTime) {
-          navigate("/");
+          // navigate("/");
           firstTime = false;
         }
       }

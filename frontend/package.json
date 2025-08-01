@@ -19,6 +19,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.5.2",
+    "react-portal": "^4.3.0",
     "react-router-dom": "^7.6.2",
     "react-textarea-autosize": "^8.5.9",
     "react-window": "^1.8.11",

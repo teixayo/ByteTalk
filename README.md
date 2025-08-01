@@ -9,7 +9,7 @@
 
 ---
 
-## ⚙️ Tech Stack
+## Tech Stack
 
 **Backend**
 - Java 

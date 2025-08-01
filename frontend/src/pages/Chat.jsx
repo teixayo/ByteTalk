@@ -246,7 +246,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             </div>
           ),
           {
-            duration: 5000,
+            duration: 3000,
             position: "top-center",
           }
         );

@@ -1,6 +1,7 @@
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { Toaster } from "react-hot-toast";
+import { Portal } from "react-portal";
 
 import AuthGate from "./components/AuthGate.jsx";
 import SignUpForm from "./pages/authentication/SignUpForm.jsx";
@@ -63,6 +64,7 @@ const App = () => {
 
   const Popup = () => {
     return (
+      <Portal>
       <div
         className="fixed inset-0 backdrop-blur-xs bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 ease-out"
         style={{
@@ -123,8 +125,10 @@ const App = () => {
           </div>
         </div>
       </div>
+      </Portal>
     );
   };
+
   return (
     <AuthGate>
       <Toaster
@@ -152,7 +156,7 @@ const App = () => {
         }}
       />
 
-      {selectedUser ? <Popup /> : null}
+      {selectedUser && <Popup />}
 
       {!isLoading ? <LoadingScreen /> : null}
 
