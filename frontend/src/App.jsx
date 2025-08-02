@@ -17,6 +17,10 @@ const App = () => {
   const popupRef = useRef(null);
   const navigate = useNavigate();
 
+  if (!isLoading) {
+    throw new Error("Test render eشیببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببrror");
+  }
+
   useEffect(() => {
     if (!isLoading) {
       setTimeout(() => {
