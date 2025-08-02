@@ -2,12 +2,14 @@ import { Route, Routes, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { Toaster } from "react-hot-toast";
 import { Portal } from "react-portal";
+import { Suspense, lazy } from "react";
 
 import AuthGate from "./components/AuthGate.jsx";
-import SignUpForm from "./pages/authentication/SignUpForm.jsx";
-import LoginForm from "./pages/authentication/LoginForm.jsx";
-import Chat from "./pages/Chat";
-import PrivetChat from "./pages/PrivetChat.jsx";
+
+const SignUpForm = lazy(() => import("./pages/authentication/SignUpForm.jsx"));
+const LoginForm = lazy(() => import("./pages/authentication/LoginForm.jsx"));
+const Chat = lazy(() => import("./pages/Chat"));
+const PrivetChat = lazy(() => import("./pages/PrivetChat.jsx"));
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,10 +18,6 @@ const App = () => {
 
   const popupRef = useRef(null);
   const navigate = useNavigate();
-
-  if (!isLoading) {
-    throw new Error("Test render eشیببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببببrror");
-  }
 
   useEffect(() => {
     if (!isLoading) {
@@ -166,32 +164,36 @@ const App = () => {
 
       {!isLoading && <LoadingScreen />}
 
-      <Routes>
-        <Route path="/" element={<SignUpForm />} />
-        <Route
-          path="/chat"
-          element={
-            <Chat
-              setIsLoading={setIsLoading}
-              setFadeOut={setFadeOut}
-              selectedUser={selectedUser}
-              setSelectedUser={setSelectedUser}
-            />
-          }
-        />
-        <Route
-          path="/chat/:userID"
-          element={
-            <PrivetChat
-              setIsLoading={setIsLoading}
-              setFadeOut={setFadeOut}
-              selectedUser={selectedUser}
-              setSelectedUser={setSelectedUser}
-            />
-          }
-        />
-        <Route path="/login" element={<LoginForm />} />
-      </Routes>
+      <Suspense
+        fallback={<div className="text-white p-4">Loading page...</div>}
+      >
+        <Routes>
+          <Route path="/" element={<SignUpForm />} />
+          <Route
+            path="/chat"
+            element={
+              <Chat
+                setIsLoading={setIsLoading}
+                setFadeOut={setFadeOut}
+                selectedUser={selectedUser}
+                setSelectedUser={setSelectedUser}
+              />
+            }
+          />
+          <Route
+            path="/chat/:userID"
+            element={
+              <PrivetChat
+                setIsLoading={setIsLoading}
+                setFadeOut={setFadeOut}
+                selectedUser={selectedUser}
+                setSelectedUser={setSelectedUser}
+              />
+            }
+          />
+          <Route path="/login" element={<LoginForm />} />
+        </Routes>
+      </Suspense>
     </AuthGate>
   );
 };
