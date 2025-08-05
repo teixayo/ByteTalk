@@ -153,7 +153,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [bulkMessages]);
 
   useEffect(() => {
-
     if (newMessage.date) {
       if (
         newMessage.channel == localStorage.getItem("username") ||
@@ -262,7 +261,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
               </div>
             ),
             {
-              duration: 3000,
+              duration: 2000,
               position: "top-center",
               transition: {
                 enter: "transform ease-out duration-300",
@@ -315,7 +314,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
               </div>
             ),
             {
-              duration: 3000,
+              duration: 2000,
               position: "top-center",
               transition: {
                 enter: "transform ease-out duration-300",
@@ -603,7 +602,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           <MessageInput
             setInputHeight={setInputHeight}
             inputHeight={inputHeight}
-            setPrivetChannels={setPrivetChannels}
             setText={setText}
             text={text}
             messages={messages}

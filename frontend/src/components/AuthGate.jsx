@@ -37,7 +37,7 @@ const AuthGate = ({ children }) => {
             setLoginAgain(true);
             setChecked(true);
             if (firstTime) {
-              // navigate("/");
+              navigate("/");
               firstTime = false;
             }
           }
@@ -45,7 +45,7 @@ const AuthGate = ({ children }) => {
       } else {
         setChecked(true);
         if (firstTime) {
-          // navigate("/");
+          navigate("/");
           firstTime = false;
         }
       }

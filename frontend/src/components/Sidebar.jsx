@@ -27,6 +27,7 @@ const Sidebar = ({
   const [isGlobalUnread, setIsGlobalUnread] = useState(false);
 
   useEffect(() => {
+    console.log(privetChannels)
     const path = location.pathname.split("/")[2] || "chat";
     setActiveChat(path);
 
@@ -88,7 +89,8 @@ const Sidebar = ({
 
   // Common item renderer for both mobile and desktop
   const renderItem = ({ index, style }) => {
-    if (!privetChannels[0]) return;
+    console.log(privetChannels)
+    if (!privetChannels[0] || privetChannels[0].name == undefined) return;
     const pv = privetChannels[index];
 
     const thisChannelUnread = unreadChannels
