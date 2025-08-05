@@ -290,7 +290,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [newMessage]);
 
   useEffect(() => {
-    console.log("messages: ", messages);
     setNumOfMsg(messages.length);
     setValidMessage(true);
     if (newMessagesLength > 0) {

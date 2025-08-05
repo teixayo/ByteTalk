@@ -24,18 +24,11 @@ const Sidebar = ({
   } = useSocket();
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
-const [listHeight, setListHeight] = useState(window.innerHeight - 122);
+  const [listHeight, setListHeight] = useState(window.innerHeight - 122);
   const [unreadChannels, setUnreadChannels] = useState([]);
   const [isGlobalUnread, setIsGlobalUnread] = useState(false);
 
-
-  
-useEffect(() => {
-  console.log("Sidebar re-rendered", activeChat);
-});
-
   useEffect(() => {
-    console.log(privetChannels);
     const path = location.pathname.split("/")[2] || "chat";
     setActiveChat(path);
 
@@ -46,16 +39,12 @@ useEffect(() => {
       }
     };
 
-    
-
     checkScreenSize();
-
 
     setUnreadChannels(JSON.parse(sessionStorage.getItem("unreadChannels")));
 
     window.addEventListener("resize", () => {
       checkScreenSize();
-
     });
 
     const handleUnreadUpdate = () => {

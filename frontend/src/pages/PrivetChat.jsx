@@ -83,7 +83,8 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   const location = useLocation();
 
-  const [isMobileSidebar, setIsMobileSidebar] = useState(true);
+  const [isMobileSidebar, setIsMobileSidebar] = useState(false);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [haveOpacity, setHaveOpacity] = useState(false);
 

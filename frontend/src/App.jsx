@@ -54,10 +54,11 @@ const App = () => {
             className={`fixed inset-0 z-50 flex flex-col items-center backdrop-blur-xl justify-center transition-all duration-500 `}
           >
             <div
-              className={`bg-white/10 rounded-2xl p-8 shadow-xl border border-white/30 backdrop-blur-lg text-white flex flex-col items-center ${
-                fadeOut ? "fade-out-down" : "fade-in-up"
-              }`}
+              className={`bg-white/10 rounded-2xl p-8 shadow-xl border border-white/30 backdrop-blur-lg text-white flex flex-col items-center `}
             >
+              {/* ${
+                fadeOut ? "fade-out-down" : "fade-in-up"
+              } */}
               <div className="spinner rounded-full h-16 w-16 border-t-4 border-white border-solid mb-6" />
               <p className="text-lg font-semibold">Preparing...</p>
             </div>
