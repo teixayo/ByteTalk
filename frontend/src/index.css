@@ -153,7 +153,7 @@ textarea::-webkit-scrollbar {
   opacity: 0;
 }
 .chat-scrollbar-custom::-webkit-scrollbar-thumb:hover {
-  background-color: #777;
+  background-color: #8b8b8b;
 }
 
 /* for sidebar */
@@ -176,8 +176,11 @@ textarea::-webkit-scrollbar {
   opacity: 0;
 }
 .sidebar-scrollbar-custom::-webkit-scrollbar-thumb:hover {
-  background-color: #777;
+  background-color: #8b8b8b;
 }
+
+
+
 
 @keyframes spin {
   to {
@@ -242,7 +245,7 @@ textarea::-webkit-scrollbar {
 
 .epr-main {
   border-color: #303135 !important;
-  background-color: #222327 !important
+  background-color: #222327 !important;
 }
 
 .epr_-99h9r1 {

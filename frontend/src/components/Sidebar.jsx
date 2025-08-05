@@ -14,6 +14,7 @@ const Sidebar = ({
   setFadeOut,
 }) => {
   const {
+    setBulkMessages,
     privetChannels,
     setActiveChat,
     activeChat,
@@ -27,7 +28,7 @@ const Sidebar = ({
   const [isGlobalUnread, setIsGlobalUnread] = useState(false);
 
   useEffect(() => {
-    console.log(privetChannels)
+    console.log(privetChannels);
     const path = location.pathname.split("/")[2] || "chat";
     setActiveChat(path);
 
@@ -87,9 +88,7 @@ const Sidebar = ({
     });
   }, [unreadChannels]);
 
-  // Common item renderer for both mobile and desktop
   const renderItem = ({ index, style }) => {
-    console.log(privetChannels)
     if (!privetChannels[0] || privetChannels[0].name == undefined) return;
     const pv = privetChannels[index];
 
@@ -108,6 +107,7 @@ const Sidebar = ({
           onClick={() => {
             setFadeOut(false);
             setIsLoading(false);
+            setLocalPvMessages([]);
             setLocalPvMessages([]);
             setActiveChat(pv.name);
             const stored = JSON.parse(sessionStorage.getItem("unreadChannels"));
@@ -170,6 +170,7 @@ const Sidebar = ({
         setSelectedUser(null);
         setFadeOut(false);
         setIsLoading(false);
+        setBulkMessages([]);
         setLocalGlobalMessages([]);
         setActiveChat("chat");
         navigate(`/chat`);

@@ -249,9 +249,9 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             duration: 2000,
             position: "top-center",
             transition: {
-                enter: "transform ease-out duration-300",
-                exit: "transform ease-in duration-200",
-              },
+              enter: "transform ease-out duration-300",
+              exit: "transform ease-in duration-200",
+            },
           }
         );
 
@@ -288,7 +288,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [newMessage]);
 
   useEffect(() => {
-    
+    console.log("messages: ", messages);
     setNumOfMsg(messages.length);
     setValidMessage(true);
     if (newMessagesLength > 0) {
