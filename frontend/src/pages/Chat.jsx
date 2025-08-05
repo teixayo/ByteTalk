@@ -82,7 +82,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   const location = useLocation();
 
-  const [isMobileSidebar, setIsMobileSidebar] = useState(true);
+  const [isMobileSidebar, setIsMobileSidebar] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [haveOpacity, setHaveOpacity] = useState(false);
 
@@ -200,56 +200,62 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         }
       } else {
         const username = localStorage.getItem("username");
-        if(!validMessage) return
+        if (!validMessage) return;
 
         if (newMessage.channel == username) return;
 
         toast.custom(
-          (t) => (
-            <div
-              className="flex items-center justify-between w-full max-w-sm p-4 rounded-lg border shadow-lg"
-              style={{
-                background: "#121214",
-                color: "#f0f0f0",
-                border: "1px solid #232323",
-              }}
-            >
-              <div className="flex items-center gap-3 overflow-hidden">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={0.75}
-                  stroke="currentColor"
-                  className="size-11 text-white shrink-0"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                  />
-                </svg>
-                <div className="overflow-hidden">
-                  <p className="font-bold text-sm">{newMessage.username}</p>
-                  <p className="text-sm text-gray-300 truncate max-w-[240px]">
-                    {newMessage.content}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => toast.dismiss(t.id)}
-                className="text-sm text-blue-400 hover:underline cursor-pointer"
+            (t) => (
+              <div
+                className={`flex items-center justify-between w-full max-w-sm p-4 rounded-lg border shadow-lg transition-all duration-300 ${
+                  t.visible ? "animate-fade-in-up" : "animate-fade-out"
+                }`}
+                style={{
+                  background: "#121214",
+                  color: "#f0f0f0",
+                  border: "1px solid #232323",
+                }}
               >
-                Close
-              </button>
-            </div>
-          ),
-          {
-            duration: 5000,
-            position: "top-center",
-          }
-        );
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={0.75}
+                    stroke="currentColor"
+                    className="size-11 text-white shrink-0"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                    />
+                  </svg>
+                  <div className="overflow-hidden">
+                    <p className="font-bold text-sm">{newMessage.username}</p>
+                    <p className="text-sm text-gray-300 truncate max-w-[240px]">
+                      {newMessage.content}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="text-sm text-blue-400 hover:underline cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            ),
+            {
+              duration: 2000,
+              position: "top-center",
+              transition: {
+                enter: "transform ease-out duration-300",
+                exit: "transform ease-in duration-200",
+              },
+            }
+          );
 
         const unreadChannels =
           JSON.parse(sessionStorage.getItem("unreadChannels")) || [];
@@ -272,7 +278,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         }
 
         if (newMessage.channel == "global") return;
-
         setPrivetChannels((prev) => {
           const prevChannels = prev.filter(
             (channel) => channel.name !== newMessage.channel
@@ -437,103 +442,102 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             haveOpacity ? "opacity-50" : null
           } grid col-span-7 sm:col-span-5 xl:col-span-4`}
         >
-            <div className="h-14 flex justify-center sm:justify-start items-center bg-[#1a1a1e] border-b border-[#29292d]">
-              <button
-                className="absolute left-3.5 cursor-pointer sm:hidden"
-                onClick={() => {
-                  setIsMobileSidebar(true);
-                  setIsSidebarOpen(true);
-                  setHaveOpacity(true);
-                }}
+          <div className="h-14 flex justify-center sm:justify-start items-center bg-[#1a1a1e] border-b border-[#29292d]">
+            <button
+              className="absolute left-3.5 cursor-pointer sm:hidden"
+              onClick={() => {
+                setIsMobileSidebar(true);
+                setIsSidebarOpen(true);
+                setHaveOpacity(true);
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.25}
+                stroke="currentColor"
+                className="size-8"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.25}
-                  stroke="currentColor"
-                  className="size-8"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                  />
-                </svg>
-              </button>
-              <div className="flex items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.25}
-                  stroke="currentColor"
-                  className="size-8 sm:ml-3.5 mr-3.5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
-                  />
-                </svg>
-                <p>Global</p>
-              </div>
-            </div>
-
-            <div className="flex-1">
-              <List
-                ref={listRef}
-                height={listHeight}
-                itemCount={messages.length}
-                className="chat-scrollbar-custom"
-                onScroll={handleScroll}
-                itemSize={getRowHeight} // Using the dynamic measurement function
-                width={"100%"}
-                estimatedItemSize={120} // Estimated height for initial calculation
-                onItemsRendered={({ visibleStartIndex }) => {
-                  if (
-                    visibleStartIndex === 0 &&
-                    sendStatus &&
-                    !debounceTimeout.current &&
-                    initialScrollDone
-                  ) {
-                    setSendStatus(false);
-                    // console.log("🟡The user has reached the top of the list.");
-
-                    debounceTimeout.current = setTimeout(() => {
-                      debounceTimeout.current = null;
-                      setSendStatus(true);
-                    }, 1000);
-
-                    const firstMessageTimecode =
-                      messages[0]?.timecode || Date.now();
-                    if (firstMessageTimecode) {
-                      socket.send(
-                        JSON.stringify({
-                          type: "RequestBulkMessage",
-                          date: firstMessageTimecode - 1,
-                          channel: "global",
-                        })
-                      );
-                    }
-                  }
-                }}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                />
+              </svg>
+            </button>
+            <div className="flex items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.25}
+                stroke="currentColor"
+                className="size-8 sm:ml-3.5 mr-3.5"
               >
-                {Row}
-              </List>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
+                />
+              </svg>
+              <p>Global</p>
             </div>
-            <MessageInput
-              setInputHeight={setInputHeight}
-              inputHeight={inputHeight}
-              setPrivetChannels={setPrivetChannels}
-              setText={setText}
-              text={text}
-              messages={messages}
-              setListHeight={setListHeight}
-              titleHeight={titleHeight}
-              listHeight={listHeight}
-            />
           </div>
+
+          <div className="flex-1">
+            <List
+              ref={listRef}
+              height={listHeight}
+              itemCount={messages.length}
+              className="chat-scrollbar-custom"
+              onScroll={handleScroll}
+              itemSize={getRowHeight} // Using the dynamic measurement function
+              width={"100%"}
+              estimatedItemSize={120} // Estimated height for initial calculation
+              onItemsRendered={({ visibleStartIndex }) => {
+                if (
+                  visibleStartIndex === 0 &&
+                  sendStatus &&
+                  !debounceTimeout.current &&
+                  initialScrollDone
+                ) {
+                  setSendStatus(false);
+                  // console.log("🟡The user has reached the top of the list.");
+
+                  debounceTimeout.current = setTimeout(() => {
+                    debounceTimeout.current = null;
+                    setSendStatus(true);
+                  }, 1000);
+
+                  const firstMessageTimecode =
+                    messages[0]?.timecode || Date.now();
+                  if (firstMessageTimecode) {
+                    socket.send(
+                      JSON.stringify({
+                        type: "RequestBulkMessage",
+                        date: firstMessageTimecode - 1,
+                        channel: "global",
+                      })
+                    );
+                  }
+                }
+              }}
+            >
+              {Row}
+            </List>
+          </div>
+          <MessageInput
+            setInputHeight={setInputHeight}
+            inputHeight={inputHeight}
+            setText={setText}
+            text={text}
+            messages={messages}
+            setListHeight={setListHeight}
+            titleHeight={titleHeight}
+            listHeight={listHeight}
+          />
+        </div>
       </div>
     </>
   );
