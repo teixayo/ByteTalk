@@ -156,9 +156,6 @@ public class NettyWebSocketExample {
                 System.out.println("Client received closing");
                 ch.close();
             } else {
-                int readableBytes = frame.content().readableBytes();
-                System.out.println("Received binary frame of length: " + readableBytes + " bytes");
-
                 System.out.println("Client received: " + ((TextWebSocketFrame) frame).text());
                 JSONObject jsonObject = new JSONObject(((TextWebSocketFrame) frame).text());
                 String type = jsonObject.getString("type");
