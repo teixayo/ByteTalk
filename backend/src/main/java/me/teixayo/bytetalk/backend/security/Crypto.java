@@ -29,7 +29,6 @@ public class Crypto {
             hexChars[i * 2] = HEX_ARRAY[v >>> 4];
             hexChars[i * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
-
         return new String(hexChars);
     }
 
