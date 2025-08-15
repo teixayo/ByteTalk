@@ -85,7 +85,6 @@ public class UserConnection {
     public void keepAlive() {
         lastPongTime = System.currentTimeMillis();
     }
-
     public void checkTimeOut() {
         if (System.currentTimeMillis() - lastPongTime >= Server.getInstance().getConfig().getMaxTimeOut() * 1000L) {
             disconnect();
