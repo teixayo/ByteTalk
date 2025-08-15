@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useSocket } from "../context/SocketContext";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ const Sidebar = ({
   setFadeOut,
 }) => {
   const {
+    setBulkMessages,
     privetChannels,
     setActiveChat,
     activeChat,
@@ -22,7 +24,7 @@ const Sidebar = ({
   } = useSocket();
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
-  const [listHeight, setListHeight] = useState(0);
+  const [listHeight, setListHeight] = useState(window.innerHeight - 122);
   const [unreadChannels, setUnreadChannels] = useState([]);
   const [isGlobalUnread, setIsGlobalUnread] = useState(false);
 
@@ -37,24 +39,12 @@ const Sidebar = ({
       }
     };
 
-    const updateListHeight = () => {
-      if (sidebarRef.current) {
-        // Calculating usable height for a list
-        const headerHeight = 116; // High Waste (Title + Global chat item)
-        // const paddingBottom = 16; // Bottom padding
-        const availableHeight = sidebarRef.current.clientHeight - headerHeight;
-        setListHeight(Math.max(availableHeight, 100));
-      }
-    };
-
     checkScreenSize();
-    updateListHeight();
 
     setUnreadChannels(JSON.parse(sessionStorage.getItem("unreadChannels")));
 
     window.addEventListener("resize", () => {
       checkScreenSize();
-      updateListHeight();
     });
 
     const handleUnreadUpdate = () => {
@@ -67,7 +57,7 @@ const Sidebar = ({
 
     return () => {
       window.removeEventListener("resize", checkScreenSize);
-      window.removeEventListener("resize", updateListHeight);
+      // window.removeEventListener("resize", updateListHeight);
       window.removeEventListener("unreadUpdated", handleUnreadUpdate);
     };
   }, []);
@@ -86,9 +76,8 @@ const Sidebar = ({
     });
   }, [unreadChannels]);
 
-  // Common item renderer for both mobile and desktop
-  const renderItem = ({ index, style }) => {
-    if (!privetChannels[0]) return;
+  const renderItem = memo(({ index, style }) => {
+    if (!privetChannels[0] || privetChannels[0].name == undefined) return;
     const pv = privetChannels[index];
 
     const thisChannelUnread = unreadChannels
@@ -106,6 +95,7 @@ const Sidebar = ({
           onClick={() => {
             setFadeOut(false);
             setIsLoading(false);
+            setLocalPvMessages([]);
             setLocalPvMessages([]);
             setActiveChat(pv.name);
             const stored = JSON.parse(sessionStorage.getItem("unreadChannels"));
@@ -155,9 +145,9 @@ const Sidebar = ({
         </div>
       </div>
     );
-  };
+  });
 
-  const GlobalChatItem = () => (
+  const GlobalChatItem = memo(() => (
     <div
       className={`pl-2 h-[44px] opacity-50 flex items-center  ${
         activeChat == "chat"
@@ -168,6 +158,7 @@ const Sidebar = ({
         setSelectedUser(null);
         setFadeOut(false);
         setIsLoading(false);
+        setBulkMessages([]);
         setLocalGlobalMessages([]);
         setActiveChat("chat");
         navigate(`/chat`);
@@ -211,7 +202,7 @@ const Sidebar = ({
         </div>
       ) : null}
     </div>
-  );
+  ));
 
   const mobileSidebar = () => (
     <>

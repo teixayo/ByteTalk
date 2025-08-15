@@ -82,4 +82,6 @@ hs_err_pid*
 
 # Other
 /frontend/node_modules/
+/backend/config.yml
+
 /backend/secret.txt

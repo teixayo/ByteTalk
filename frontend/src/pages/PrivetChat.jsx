@@ -83,7 +83,8 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   const location = useLocation();
 
-  const [isMobileSidebar, setIsMobileSidebar] = useState(true);
+  const [isMobileSidebar, setIsMobileSidebar] = useState(false);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [haveOpacity, setHaveOpacity] = useState(false);
 
@@ -153,7 +154,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   }, [bulkMessages]);
 
   useEffect(() => {
-
     if (newMessage.date) {
       if (
         newMessage.channel == localStorage.getItem("username") ||
@@ -262,7 +262,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
               </div>
             ),
             {
-              duration: 3000,
+              duration: 2000,
               position: "top-center",
               transition: {
                 enter: "transform ease-out duration-300",
@@ -315,7 +315,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
               </div>
             ),
             {
-              duration: 3000,
+              duration: 2000,
               position: "top-center",
               transition: {
                 enter: "transform ease-out duration-300",
@@ -603,7 +603,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           <MessageInput
             setInputHeight={setInputHeight}
             inputHeight={inputHeight}
-            setPrivetChannels={setPrivetChannels}
             setText={setText}
             text={text}
             messages={messages}
