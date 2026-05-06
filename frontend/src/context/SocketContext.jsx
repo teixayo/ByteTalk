@@ -31,26 +31,19 @@ export const SocketProvider = ({ children }) => {
   const connectWebSocket = () => {
     const ws = new WebSocket(import.meta.env.VITE_SERVER_WEBSOCKET_URL);
     ws.onopen = () => {
-      // console.log("✅ WebSocket connected");
       setSocket(ws);
     };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      // console.log("📨 WS received:", data);
-
       if (data.type == "Status") {
         if (data.code === "1000") {
-          // setTimeout(() => {
-          //   toast.success("Login was successful");
-          // }, 1000);
+          toast.success("Login was successful");
         } else if (data.code === "1001") {
           toast.error("Incorrect username or password");
         } else if (data.code === "1004") {
-          setTimeout(() => {
-            toast.success("Sign up was successful");
-          }, 1000);
+          toast.success("Sign up was successful");
         } else if (data.code === "1005") {
           toast.error("This username is already taken");
         } else if (data.code === "1006") {
@@ -64,7 +57,6 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type === "LoginToken") {
-        // console.log("login token: ", data.token);
         document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
       }
 
@@ -160,7 +152,6 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.type == "SendMessage") {
-        
         setNewMessage(data);
       }
 
@@ -173,20 +164,15 @@ export const SocketProvider = ({ children }) => {
       }
     };
 
-    ws.onerror = (err) => {
-      // console.error("❌ WebSocket error:", err);
+    ws.onerror = () => {
       document.cookie =
         "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
     };
 
-    ws.onclose = (event) => {
-      // console.warn("❌ WebSocket disconnected", event);
-
+    ws.onclose = () => {
       setSocket(null);
 
       reconnectTimeoutRef.current = setTimeout(() => {
-        // console.log("🔁 Trying to reconnect...");
-
         connectWebSocket();
       }, 600);
     };

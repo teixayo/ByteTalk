@@ -3,10 +3,8 @@ import { useSocket } from "../context/SocketContext";
 import { useParams, useLocation } from "react-router-dom";
 
 import EmojiPicker from "emoji-picker-react";
-
 import toast from "react-hot-toast";
 import TextareaAutosize from "react-textarea-autosize";
-
 
 const MessageInput = ({
   setInputHeight,
@@ -16,15 +14,15 @@ const MessageInput = ({
   messages,
   setListHeight,
   titleHeight,
-  listHeight
+  listHeight,
 }) => {
   const [emojiBox, setEmojiBox] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
   const [writing, setWriting] = useState(false);
   const [isRTL, setIsRTL] = useState(false);
   const [emojiPosition, setEmojiPosition] = useState({ top: 0 });
-  const [firstTime, setFristTime] = useState(true)
- 
+  const [firstTime, setFristTime] = useState(true);
+
   const { socket, setPrivetChannels } = useSocket();
   const { userID } = useParams();
 
@@ -35,7 +33,7 @@ const MessageInput = ({
 
   useEffect(() => {
     setEmojiBox(false);
-    setFristTime(true)
+    setFristTime(true);
   }, [location]);
 
   useEffect(() => {
@@ -47,14 +45,14 @@ const MessageInput = ({
     });
   }, [emojiBox, inputHeight]);
 
- useEffect(() => {
-  if (textareaRef.current) {
-    const rect = textareaRef.current.getBoundingClientRect();
-    setEmojiPosition({
-      top: rect.top - (listHeight - 8),
-    });
-  }
-}, [inputHeight, listHeight]);
+  useEffect(() => {
+    if (textareaRef.current) {
+      const rect = textareaRef.current.getBoundingClientRect();
+      setEmojiPosition({
+        top: rect.top - (listHeight - 8),
+      });
+    }
+  }, [inputHeight, listHeight]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -76,7 +74,7 @@ const MessageInput = ({
       const newHeight = inputRef.current.offsetHeight;
       setInputHeight(newHeight);
       setListHeight(window.innerHeight - newHeight - titleHeight);
-      setFristTime(false)
+      setFristTime(false);
     }
   };
 
@@ -93,7 +91,6 @@ const MessageInput = ({
       setPrivetChannels((prev) => [{ name: userID }, ...prev]);
     }
   };
-
 
   const selectedEmoji = (e) => {
     setText((prev) => {
@@ -155,7 +152,6 @@ const MessageInput = ({
             />
           </svg>
         </div>
-
 
         <TextareaAutosize
           ref={textareaRef}

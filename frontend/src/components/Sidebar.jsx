@@ -57,7 +57,6 @@ const Sidebar = ({
 
     return () => {
       window.removeEventListener("resize", checkScreenSize);
-      // window.removeEventListener("resize", updateListHeight);
       window.removeEventListener("unreadUpdated", handleUnreadUpdate);
     };
   }, []);
@@ -101,11 +100,11 @@ const Sidebar = ({
             const stored = JSON.parse(sessionStorage.getItem("unreadChannels"));
             if (stored) {
               const updateUnreadChannels = stored.filter(
-                (channel) => channel !== pv.name
+                (channel) => channel !== pv.name,
               );
               sessionStorage.setItem(
                 "unreadChannels",
-                JSON.stringify(updateUnreadChannels)
+                JSON.stringify(updateUnreadChannels),
               );
               setUnreadChannels(updateUnreadChannels);
             }
@@ -164,13 +163,13 @@ const Sidebar = ({
         navigate(`/chat`);
         if (JSON.parse(sessionStorage.getItem("unreadChannels"))) {
           const updateUnreadChannels = JSON.parse(
-            sessionStorage.getItem("unreadChannels")
+            sessionStorage.getItem("unreadChannels"),
           ).filter((channel) => {
             return channel != "global";
           });
           sessionStorage.setItem(
             "unreadChannels",
-            JSON.stringify(updateUnreadChannels)
+            JSON.stringify(updateUnreadChannels),
           );
         }
         if (isMobileSidebar) {

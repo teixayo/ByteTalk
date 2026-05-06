@@ -3,51 +3,12 @@ import { useSocket } from "../context/SocketContext";
 import { useParams, useLocation } from "react-router-dom";
 import { VariableSizeList as List } from "react-window";
 
-import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
 import toast from "react-hot-toast";
 
 import Sidebar from "../components/Sidebar";
 import MessageInput from "../components/MessageInput";
-
-const convertMessage = (text) => {
-  // Detect messages containing HTML code or tags
-  const isCode =
-    /[<>]/.test(text) ||
-    text.includes("function") ||
-    text.includes("script") ||
-    text.includes("svg") ||
-    text.includes("href=");
-
-  if (isCode) {
-    // Complete cleanup and display as code
-    const sanitized = text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/\n/g, "<br />");
-
-    return `<div class="message-code">${DOMPurify.sanitize(sanitized, {
-      ALLOWED_TAGS: ["br"],
-      ALLOWED_ATTR: [],
-    })}</div>`;
-  }
-
-  // Normal processing for normal messages
-  const linkified = linkifyHtml(text, {
-    target: "_blank",
-    rel: "noopener noreferrer",
-    validate: {
-      url: (value) =>
-        value.startsWith("http://") || value.startsWith("https://"),
-    },
-  });
-
-  return DOMPurify.sanitize(linkified.replace(/\n/g, "<br />"), {
-    ALLOWED_TAGS: ["a", "br"],
-    ALLOWED_ATTR: ["href", "target", "rel"],
-  });
-};
+import { formatMessageToSafeHtml } from "../utils/messageFormatter";
 
 const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   const [text, setText] = useState("");
@@ -74,7 +35,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   const [inputHeight, setInputHeight] = useState(58);
   const [titleHeight, setTitleHight] = useState(68); // Default height
   const [listHeight, setListHeight] = useState(
-    window.innerHeight - titleHeight - titleHeight
+    window.innerHeight - titleHeight - titleHeight,
   );
   const rowHeights = useRef({});
   const listRef = useRef();
@@ -97,6 +58,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
   const [newMessagesLength, setNewMessagesLenngth] = useState(0);
 
+
   useEffect(() => {
     setInitialScrollDone(false);
     setLocalPvMessages([]);
@@ -109,10 +71,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           setTimeout(() => {
             listRef.current.scrollToItem(bulkMessages.length, "end");
           }, 400);
-          // setTimeout(() => {
-          //   listRef.current.scrollToItem(bulkMessages.length, "end");
-          //   firstRender = false;
-          // }, 130);
           setTimeout(() => {
             setInitialScrollDone(true);
           }, 800);
@@ -131,7 +89,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             type: "RequestBulkMessage",
             date: -1,
             channel: userID,
-          })
+          }),
         );
       }, 1000);
     }
@@ -199,7 +157,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
         setPrivetChannels((prev) => {
           const prevChannels = prev.filter(
-            (channel) => channel.name !== userID
+            (channel) => channel.name !== userID,
           );
 
           return [{ name: userID }, ...prevChannels];
@@ -268,7 +226,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                 enter: "transform ease-out duration-300",
                 exit: "transform ease-in duration-200",
               },
-            }
+            },
           );
         } else {
           toast.custom(
@@ -321,7 +279,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                 enter: "transform ease-out duration-300",
                 exit: "transform ease-in duration-200",
               },
-            }
+            },
           );
         }
 
@@ -335,13 +293,13 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
           sessionStorage.setItem(
             "unreadChannels",
-            JSON.stringify([newMessage.channel, ...prepareObj])
+            JSON.stringify([newMessage.channel, ...prepareObj]),
           );
           window.dispatchEvent(new Event("unreadUpdated"));
         } else {
           sessionStorage.setItem(
             "unreadChannels",
-            JSON.stringify([newMessage.channel])
+            JSON.stringify([newMessage.channel]),
           );
         }
 
@@ -349,7 +307,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
         setPrivetChannels((prev) => {
           const prevChannels = prev.filter(
-            (channel) => channel.name !== newMessage.channel
+            (channel) => channel.name !== newMessage.channel,
           );
 
           return [{ name: newMessage.channel }, ...prevChannels];
@@ -453,7 +411,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                 dir="auto"
                 className="select-text break-words whitespace-pre-wrap inline-block max-w-[85%]"
                 dangerouslySetInnerHTML={{
-                  __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
+                  __html: formatMessageToSafeHtml(msg.content).replace(/\n/g, "<br />"),
                 }}
               ></p>
               <span className="text-xs text-gray-400 ml-2  group-hover:opacity-100 transition-opacity">
@@ -473,7 +431,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
       const list = listRef.current;
       const totalHeight = messages.reduce(
         (sum, _, i) => sum + getRowHeight(i),
-        0
+        0,
       );
       const distanceFromBottom =
         totalHeight - (scrollOffset + list.props.height);
@@ -576,8 +534,6 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                   initialScrollDone
                 ) {
                   setSendStatus(false);
-                  // console.log("🟡The user has reached the top of the list.");
-
                   debounceTimeout.current = setTimeout(() => {
                     debounceTimeout.current = null;
                     setSendStatus(true);
@@ -591,7 +547,7 @@ const PrivetChat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                         type: "RequestBulkMessage",
                         date: firstMessageTimecode - 1,
                         channel: userID,
-                      })
+                      }),
                     );
                   }
                 }

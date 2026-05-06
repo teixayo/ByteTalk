@@ -4,6 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
 import { useSocket } from "../../context/SocketContext.jsx";
+import toast from "react-hot-toast";
 
 let localUserName;
 let localUserPassword;
@@ -13,10 +14,8 @@ const LoginForm = () => {
   const { socket, status } = useSocket();
 
   useEffect(() => {
-    // console.log("✅ useEffect in login form is running");
-
     if (status.type == "Status" && status.code == "1000") {
-      localStorage.setItem("username", localUserName)
+      localStorage.setItem("username", localUserName);
       navigate("/chat");
     }
   }, [status]);
@@ -32,10 +31,9 @@ const LoginForm = () => {
         password: localUserPassword,
       };
 
-      // console.log("📨 Sending login:", loginPayload);
       socket.send(JSON.stringify(loginPayload));
     } else {
-      // console.log("⚠️ WebSocket is not connected yet. Wait for connection.");
+      toast.error("WebSocket is not connected yet. Wait for connection.");
     }
   };
 
@@ -43,8 +41,8 @@ const LoginForm = () => {
     fildname: Yup.string()
       .min(4, "Username must be at least 4 characters")
       .matches(
-         /^[a-zA-Z][a-zA-Z0-9]*$/,
-        "Username must start with a letter and contain only English letters and numbers."
+        /^[a-zA-Z][a-zA-Z0-9]*$/,
+        "Username must start with a letter and contain only English letters and numbers.",
       )
       .max(19, "Username must be a maximum of 19 characters")
       .required("Username is required"),
@@ -53,7 +51,7 @@ const LoginForm = () => {
       .max(19, "Password must be at most 19 characters")
       .matches(
         /^[\x20-\x7E]+$/,
-        "Password can only include English letters, numbers, and symbols"
+        "Password can only include English letters, numbers, and symbols",
       )
       .required("Password is required"),
   });
@@ -67,7 +65,7 @@ const LoginForm = () => {
       >
         <Form className="bg-neutral-900 rounded-2xl w-11/12 sm:10/12 md:w-7/12 xl:w-4/12 md:h-70 flex justify-center items-center mt-10 pb-2">
           <div className="w-full">
-             <div className="flex justify-center mt-4 pt-2">
+            <div className="flex justify-center mt-4 pt-2">
               <div className="w-10/12 my-2">
                 <Field
                   name="fildname"

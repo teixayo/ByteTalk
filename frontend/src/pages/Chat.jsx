@@ -2,52 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { VariableSizeList as List } from "react-window";
 
-import linkifyHtml from "linkify-html";
 import DOMPurify from "dompurify";
 import toast from "react-hot-toast";
 
 import { useSocket } from "../context/SocketContext";
 import Sidebar from "../components/Sidebar";
 import MessageInput from "../components/MessageInput";
-
-const convertMessage = (text) => {
-  // Detect messages containing HTML code or tags
-  const isCode =
-    /[<>]/.test(text) ||
-    text.includes("function") ||
-    text.includes("script") ||
-    text.includes("svg") ||
-    text.includes("href=");
-
-  if (isCode) {
-    // Complete cleanup and display as code
-    const sanitized = text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/\n/g, "<br />");
-
-    return `<div class="message-code">${DOMPurify.sanitize(sanitized, {
-      ALLOWED_TAGS: ["br"],
-      ALLOWED_ATTR: [],
-    })}</div>`;
-  }
-
-  // Normal processing for normal messages
-  const linkified = linkifyHtml(text, {
-    target: "_blank",
-    rel: "noopener noreferrer",
-    validate: {
-      url: (value) =>
-        value.startsWith("http://") || value.startsWith("https://"),
-    },
-  });
-
-  return DOMPurify.sanitize(linkified.replace(/\n/g, "<br />"), {
-    ALLOWED_TAGS: ["a", "br"],
-    ALLOWED_ATTR: ["href", "target", "rel"],
-  });
-};
+import { formatMessageToSafeHtml } from "../utils/messageFormatter";
 
 const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   const {
@@ -75,7 +36,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
   const [inputHeight, setInputHeight] = useState(58);
   const [titleHeight, setTitleHight] = useState(68); // Default height
   const [listHeight, setListHeight] = useState(
-    window.innerHeight - titleHeight - titleHeight
+    window.innerHeight - titleHeight - titleHeight,
   );
   const rowHeights = useRef({});
   const listRef = useRef();
@@ -110,7 +71,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
             type: "RequestBulkMessage",
             date: -1,
             channel: "global",
-          })
+          }),
         );
       }, 1000);
     }
@@ -205,57 +166,57 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         if (newMessage.channel == username) return;
 
         toast.custom(
-            (t) => (
-              <div
-                className={`flex items-center justify-between w-full max-w-sm p-4 rounded-lg border shadow-lg transition-all duration-300 ${
-                  t.visible ? "animate-fade-in-up" : "animate-fade-out"
-                }`}
-                style={{
-                  background: "#121214",
-                  color: "#f0f0f0",
-                  border: "1px solid #232323",
-                }}
-              >
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={0.75}
-                    stroke="currentColor"
-                    className="size-11 text-white shrink-0"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                    />
-                  </svg>
-                  <div className="overflow-hidden">
-                    <p className="font-bold text-sm">{newMessage.username}</p>
-                    <p className="text-sm text-gray-300 truncate max-w-[240px]">
-                      {newMessage.content}
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => toast.dismiss(t.id)}
-                  className="text-sm text-blue-400 hover:underline cursor-pointer"
+          (t) => (
+            <div
+              className={`flex items-center justify-between w-full max-w-sm p-4 rounded-lg border shadow-lg transition-all duration-300 ${
+                t.visible ? "animate-fade-in-up" : "animate-fade-out"
+              }`}
+              style={{
+                background: "#121214",
+                color: "#f0f0f0",
+                border: "1px solid #232323",
+              }}
+            >
+              <div className="flex items-center gap-3 overflow-hidden">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={0.75}
+                  stroke="currentColor"
+                  className="size-11 text-white shrink-0"
                 >
-                  Close
-                </button>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                  />
+                </svg>
+                <div className="overflow-hidden">
+                  <p className="font-bold text-sm">{newMessage.username}</p>
+                  <p className="text-sm text-gray-300 truncate max-w-[240px]">
+                    {newMessage.content}
+                  </p>
+                </div>
               </div>
-            ),
-            {
-              duration: 2000,
-              position: "top-center",
-              transition: {
-                enter: "transform ease-out duration-300",
-                exit: "transform ease-in duration-200",
-              },
-            }
-          );
+
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="text-sm text-blue-400 hover:underline cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          ),
+          {
+            duration: 2000,
+            position: "top-center",
+            transition: {
+              enter: "transform ease-out duration-300",
+              exit: "transform ease-in duration-200",
+            },
+          },
+        );
 
         const unreadChannels =
           JSON.parse(sessionStorage.getItem("unreadChannels")) || [];
@@ -267,20 +228,20 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
 
           sessionStorage.setItem(
             "unreadChannels",
-            JSON.stringify([newMessage.channel, ...prepareObj])
+            JSON.stringify([newMessage.channel, ...prepareObj]),
           );
           window.dispatchEvent(new Event("unreadUpdated"));
         } else {
           sessionStorage.setItem(
             "unreadChannels",
-            JSON.stringify([newMessage.channel])
+            JSON.stringify([newMessage.channel]),
           );
         }
 
         if (newMessage.channel == "global") return;
         setPrivetChannels((prev) => {
           const prevChannels = prev.filter(
-            (channel) => channel.name !== newMessage.channel
+            (channel) => channel.name !== newMessage.channel,
           );
 
           return [{ name: newMessage.channel }, ...prevChannels];
@@ -344,7 +305,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
         JSON.stringify({
           type: "CanSendMessage",
           channel: msg.username,
-        })
+        }),
       );
       setWhoClicked(msg.username);
     };
@@ -356,7 +317,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           className={`flex p-2 ${isSameUserAsPrevious ? "pt-1" : ""}`}
           style={{ minHeight: showAvatar ? "70px" : "45px" }}
         >
-          {/* Avatar (only for the first message) */}
           {showAvatar ? (
             <div className="flex-shrink-0 mr-2">
               <svg
@@ -379,7 +339,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
           )}
 
           <div className="flex-1 min-w-0">
-            {/* Username (for first message only) */}
             {showAvatar && (
               <div className="flex items-center mb-1">
                 <span
@@ -396,7 +355,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                 dir="auto"
                 className="select-text break-words whitespace-pre-wrap inline-block max-w-[85%]"
                 dangerouslySetInnerHTML={{
-                  __html: convertMessage(msg.content).replace(/\n/g, "<br />"),
+                  __html: formatMessageToSafeHtml(msg.content).replace(/\n/g, "<br />"),
                 }}
               ></p>
               <span className="text-xs text-gray-400 ml-2  group-hover:opacity-100 transition-opacity">
@@ -416,7 +375,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
       const list = listRef.current;
       const totalHeight = messages.reduce(
         (sum, _, i) => sum + getRowHeight(i),
-        0
+        0,
       );
       const distanceFromBottom =
         totalHeight - (scrollOffset + list.props.height);
@@ -503,8 +462,6 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                   initialScrollDone
                 ) {
                   setSendStatus(false);
-                  // console.log("🟡The user has reached the top of the list.");
-
                   debounceTimeout.current = setTimeout(() => {
                     debounceTimeout.current = null;
                     setSendStatus(true);
@@ -518,7 +475,7 @@ const Chat = ({ setIsLoading, setFadeOut, setSelectedUser }) => {
                         type: "RequestBulkMessage",
                         date: firstMessageTimecode - 1,
                         channel: "global",
-                      })
+                      }),
                     );
                   }
                 }

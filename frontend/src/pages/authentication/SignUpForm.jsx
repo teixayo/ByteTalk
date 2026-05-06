@@ -12,7 +12,6 @@ const SignUpForm = () => {
   const navigate = useNavigate();
   const { socket, status } = useSocket();
 
-
   useEffect(() => {
     if (status.type == "Status" && status.code == "1004") {
       setTimeout(() => {
@@ -22,12 +21,10 @@ const SignUpForm = () => {
           username: localUserName,
           password: localUserPassword,
         };
-        // console.log("📨 Sending login:", loginPayload);
-        // console.log("WS readyState:", socket.readyState);
+
         socket.send(JSON.stringify(loginPayload));
       }, 100);
       setTimeout(() => {
-
         navigate("/chat");
       }, 1800);
     }
@@ -38,7 +35,6 @@ const SignUpForm = () => {
     localUserPassword = values.password;
 
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-      console.warn("❌ WebSocket not ready");
       return;
     }
 
@@ -56,7 +52,7 @@ const SignUpForm = () => {
       .min(4, "Username must be at least 4 characters")
       .matches(
         /^[a-zA-Z][a-zA-Z0-9]*$/,
-        "Username must start with a letter and contain only English letters and numbers."
+        "Username must start with a letter and contain only English letters and numbers.",
       )
       .max(19, "Username must be a maximum of 19 characters")
       .required("Username is required"),
@@ -65,7 +61,7 @@ const SignUpForm = () => {
       .max(19, "Password must be at most 19 characters")
       .matches(
         /^[\x20-\x7E]+$/,
-        "Password can only include English letters, numbers, and symbols"
+        "Password can only include English letters, numbers, and symbols",
       )
       .required("Password is required"),
   });
